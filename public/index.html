@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VISARD Visa Slots Monitor - Admin Panel</title>
+    <meta name="description" content="Real-time visa slot availability monitoring dashboard">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">🎫</span>
+                    <span class="logo-text">VISARD Monitor</span>
+                </div>
+                <div class="connection-badge" id="connectionStatus">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Connecting...</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-view="all-messages">
+                    <span class="nav-icon">📬</span>
+                    <span class="nav-text">All Messages</span>
+                    <span class="nav-badge" id="allMessagesBadge">0</span>
+                </button>
+                <button class="nav-item" data-view="filtered">
+                    <span class="nav-icon">🔍</span>
+                    <span class="nav-text">Filtered Alerts</span>
+                    <span class="nav-badge" id="filteredBadge">0</span>
+                </button>
+                <button class="nav-item" data-view="settings">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-text">Settings</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-stats">
+                <div class="stat-item">
+                    <div class="stat-label">Total Today</div>
+                    <div class="stat-value" id="todayCount">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Last Update</div>
+                    <div class="stat-value" id="lastUpdate">Never</div>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <button class="btn-icon" id="clearAllBtn" title="Clear all messages">
+                    <span>🗑️</span>
+                </button>
+                <button class="btn-icon" id="exportBtn" title="Export data">
+                    <span>📥</span>
+                </button>
+                <button class="btn-icon" id="soundToggle" title="Toggle sound">
+                    <span id="soundIcon">🔔</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- All Messages View -->
+            <div class="view-container active" id="allMessagesView">
+                <div class="view-header">
+                    <div>
+                        <h1 class="view-title">All Messages from VISARD</h1>
+                        <p class="view-subtitle">Real-time visa slot availability updates</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" id="refreshBtn">
+                            <span>🔄</span> Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <div class="messages-grid" id="allMessagesList">
+                    <div class="empty-state">
+                        <div class="empty-icon">�</div>
+                        <h3>Waiting for messages...</h3>
+                        <p>All messages from VISARD bot will appear here</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtered View -->
+            <div class="view-container" id="filteredView">
+                <div class="view-header">
+                    <div>
+                        <h1 class="view-title">Filtered Alerts</h1>
+                        <p class="view-subtitle">Search and filter visa slots by keywords</p>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <div class="filter-input-group">
+                        <input type="text" id="filterInput" class="filter-input"
+                            placeholder="Enter keywords (e.g., France, Edinburgh, Prime Time, Germany)">
+                        <button class="btn btn-primary" id="applyFilterBtn">
+                            <span>�</span> Filter
+                        </button>
+                        <button class="btn btn-secondary" id="clearFilterBtn">
+                            <span>✕</span> Clear
+                        </button>
+                    </div>
+                    <div class="active-filters" id="activeFilters"></div>
+                </div>
+
+                <div class="messages-grid" id="filteredMessagesList">
+                    <div class="empty-state">
+                        <div class="empty-icon">🔍</div>
+                        <h3>No filter applied</h3>
+                        <p>Enter keywords above to filter visa slot messages</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings View -->
+            <div class="view-container" id="settingsView">
+                <div class="view-header">
+                    <div>
+                        <h1 class="view-title">Settings</h1>
+                        <p class="view-subtitle">Configure your monitoring preferences</p>
+                    </div>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="setting-card">
+                        <h3>🔔 Notifications</h3>
+                        <div class="setting-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="soundEnabledToggle" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div>
+                                <div class="setting-label">Sound Alerts</div>
+                                <div class="setting-description">Play sound when new messages arrive</div>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="desktopNotifications">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div>
+                                <div class="setting-label">Desktop Notifications</div>
+                                <div class="setting-description">Show browser notifications</div>
+                            </div>
+                        </div>
+                        <div class="setting-item" style="flex-direction: column; align-items: stretch;">
+                            <div>
+                                <div class="setting-label">Alert Volume</div>
+                                <div class="setting-description">Adjust bell sound loudness</div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.75rem;">
+                                <span style="font-size: 1.25rem;">🔉</span>
+                                <input type="range" id="volumeSlider" min="0" max="100" value="80" style="flex: 1; height: 6px; border-radius: 999px; background: var(--bg-tertiary); 
+                                              outline: none; -webkit-appearance: none; appearance: none;">
+                                <span style="font-size: 1.25rem;">🔊</span>
+                                <span id="volumeValue"
+                                    style="min-width: 3rem; text-align: right; font-weight: 600;">80%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-card">
+                        <h3>📊 Display</h3>
+                        <div class="setting-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="autoRefresh" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div>
+                                <div class="setting-label">Auto Refresh</div>
+                                <div class="setting-description">Automatically update message list</div>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="compactMode">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div>
+                                <div class="setting-label">Compact Mode</div>
+                                <div class="setting-description">Show more messages in less space</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-card">
+                        <h3>💾 Data Management</h3>
+                        <button class="btn btn-secondary btn-block" id="exportDataBtn">
+                            <span>📥</span> Export All Data
+                        </button>
+                        <button class="btn btn-danger btn-block" id="clearDataBtn">
+                            <span>🗑️</span> Clear All Messages
+                        </button>
+                    </div>
+
+                    <div class="setting-card">
+                        <h3>ℹ️ Information</h3>
+                        <div class="info-item">
+                            <span class="info-label">Bot Name:</span>
+                            <span class="info-value">VISARD</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Connection:</span>
+                            <span class="info-value">MTProto</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Total Messages:</span>
+                            <span class="info-value" id="totalMessagesInfo">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
