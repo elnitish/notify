@@ -1,0 +1,1942 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisaD Notify - Admin Panel</title>
+    <meta name="description" content="Real-time visa slot availability monitoring dashboard">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* Light Mode (Default) */
+            --bg-primary: #f8f9fc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f3f8;
+            --bg-elevated: #e8ebf2;
+            --bg-hover: #dde1eb;
+
+            --border-subtle: rgba(0, 0, 0, 0.06);
+            --border-default: rgba(0, 0, 0, 0.1);
+            --border-strong: rgba(0, 0, 0, 0.15);
+
+            --text-primary: #1a1d26;
+            --text-secondary: #4a5068;
+            --text-tertiary: #6b7280;
+            --text-muted: #9ca3af;
+
+            --accent-primary: #6366f1;
+            --accent-primary-hover: #4f46e5;
+            --accent-primary-subtle: rgba(99, 102, 241, 0.1);
+            --accent-primary-glow: rgba(99, 102, 241, 0.2);
+
+            --accent-success: #16a34a;
+            --accent-success-subtle: rgba(22, 163, 74, 0.1);
+            --accent-warning: #d97706;
+            --accent-warning-subtle: rgba(217, 119, 6, 0.1);
+            --accent-danger: #dc2626;
+            --accent-danger-subtle: rgba(220, 38, 38, 0.1);
+
+            --sidebar-width: 280px;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --radius-xl: 20px;
+
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+            --shadow-glow: 0 0 40px var(--accent-primary-glow);
+
+            --transition-fast: 0.15s ease;
+            --transition-base: 0.2s ease;
+            --transition-slow: 0.3s ease;
+        }
+
+        /* Dark Mode */
+        [data-theme="dark"] {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a24;
+            --bg-elevated: #22222e;
+            --bg-hover: #2a2a38;
+
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-default: rgba(255, 255, 255, 0.1);
+            --border-strong: rgba(255, 255, 255, 0.15);
+
+            --text-primary: #f4f4f6;
+            --text-secondary: #a0a0b0;
+            --text-tertiary: #6a6a7a;
+            --text-muted: #4a4a5a;
+
+            --accent-primary: #818cf8;
+            --accent-primary-hover: #a5b4fc;
+            --accent-primary-subtle: rgba(129, 140, 248, 0.15);
+            --accent-primary-glow: rgba(129, 140, 248, 0.25);
+
+            --accent-success: #22c55e;
+            --accent-success-subtle: rgba(34, 197, 94, 0.15);
+            --accent-warning: #f59e0b;
+            --accent-warning-subtle: rgba(245, 158, 11, 0.15);
+            --accent-danger: #ef4444;
+            --accent-danger-subtle: rgba(239, 68, 68, 0.15);
+
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 40px var(--accent-primary-glow);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-subtle);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-primary), #8b5cf6);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .logo-icon svg {
+            width: 22px;
+            height: 22px;
+            color: white;
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .connection-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-default);
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-warning);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .connection-badge.connected .status-dot {
+            background: var(--accent-success);
+        }
+
+        .connection-badge.disconnected .status-dot {
+            background: var(--accent-danger);
+            animation: none;
+        }
+
+        .connection-badge.offline .status-dot {
+            background: var(--text-muted);
+            animation: none;
+        }
+
+        .connection-badge.waiting .status-dot {
+            background: var(--accent-warning);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.6;
+                transform: scale(0.9);
+            }
+        }
+
+        /* Navigation */
+        .sidebar-nav {
+            padding: 16px 12px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: transparent;
+            border: none;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            text-align: left;
+            width: 100%;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-primary-subtle);
+            color: var(--accent-primary-hover);
+        }
+
+        .nav-item.active .nav-icon svg {
+            color: var(--accent-primary-hover);
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .nav-icon svg {
+            width: 20px;
+            height: 20px;
+            color: currentColor;
+        }
+
+        .nav-text {
+            flex: 1;
+        }
+
+        .nav-badge {
+            min-width: 24px;
+            height: 22px;
+            padding: 0 8px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-tertiary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .nav-item.active .nav-badge {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        /* Sidebar Stats */
+        .sidebar-stats {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-subtle);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stat-item {
+            background: var(--bg-tertiary);
+            padding: 14px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+        }
+
+        /* Sidebar Footer */
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-base);
+        }
+
+        .btn-icon:hover {
+            background: var(--bg-elevated);
+            border-color: var(--border-default);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+
+        .btn-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 32px 40px;
+            background: var(--bg-primary);
+            min-height: 100vh;
+        }
+
+        .view-container {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .view-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .view-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 32px;
+        }
+
+        .view-title {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .view-subtitle {
+            font-size: 14px;
+            color: var(--text-tertiary);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-default);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            border-color: var(--border-strong);
+        }
+
+        .btn-danger {
+            background: var(--accent-danger-subtle);
+            color: var(--accent-danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: var(--accent-danger);
+            color: white;
+        }
+
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+            margin-top: 12px;
+        }
+
+        /* Sound Toggle Button */
+        .btn-sound {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-default);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        .btn-sound svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .btn-sound svg.sound-on {
+            display: none;
+        }
+
+        .btn-sound svg.sound-off {
+            display: inline-block;
+        }
+
+        .btn-sound.active {
+            background: var(--accent-success-subtle);
+            border-color: rgba(34, 197, 94, 0.3);
+            color: var(--accent-success);
+        }
+
+        .btn-sound.active svg.sound-on {
+            display: inline-block;
+        }
+
+        .btn-sound.active svg.sound-off {
+            display: none;
+        }
+
+        .btn-sound.muted {
+            background: var(--bg-elevated);
+            border-color: var(--border-default);
+            color: var(--text-tertiary);
+        }
+
+        .btn-sound.muted svg.sound-off {
+            display: inline-block;
+        }
+
+        .btn-sound.muted svg.sound-on {
+            display: none;
+        }
+
+        .btn-sound:hover {
+            transform: translateY(-1px);
+            border-color: var(--border-strong);
+        }
+
+        .btn-sound.active:hover {
+            background: rgba(34, 197, 94, 0.2);
+        }
+
+        .btn-sound.muted:hover {
+            background: var(--bg-hover);
+            color: var(--text-secondary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .sound-label {
+            white-space: nowrap;
+        }
+
+        @media (max-width: 480px) {
+            .sound-label {
+                display: none;
+            }
+
+            .btn-sound {
+                padding: 8px 10px;
+            }
+        }
+
+        /* Messages Grid */
+        .messages-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 20px 24px;
+            transition: all var(--transition-base);
+            animation: slideIn 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .message-card:hover {
+            border-color: var(--border-default);
+            background: var(--bg-tertiary);
+        }
+
+        .message-card.highlight {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 1px var(--accent-primary-subtle);
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .message-time {
+            font-size: 12px;
+            font-weight: 500;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-tertiary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .message-time svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .message-badge {
+            padding: 4px 10px;
+            background: var(--accent-success-subtle);
+            color: var(--accent-success);
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .message-content {
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            background: var(--bg-secondary);
+            border: 2px dashed var(--border-default);
+            border-radius: var(--radius-xl);
+        }
+
+        .empty-icon {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 20px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .empty-icon svg {
+            width: 32px;
+            height: 32px;
+            color: var(--text-tertiary);
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            color: var(--text-tertiary);
+        }
+
+        /* Filter Section */
+        .filter-section {
+            margin-bottom: 24px;
+        }
+
+        .filter-input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .filter-input {
+            flex: 1;
+            padding: 12px 18px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: all var(--transition-base);
+        }
+
+        .filter-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-primary-subtle);
+        }
+
+        .active-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .filter-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--accent-primary-subtle);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--accent-primary-hover);
+        }
+
+        .filter-tag button {
+            background: none;
+            border: none;
+            color: currentColor;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            opacity: 0.7;
+        }
+
+        .filter-tag button:hover {
+            opacity: 1;
+        }
+
+        .filter-tag svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Settings Grid */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+
+        .setting-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .setting-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .setting-card h3 svg {
+            width: 20px;
+            height: 20px;
+            color: var(--accent-primary);
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .setting-item:last-of-type {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .setting-description {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-default);
+            border-radius: 100px;
+            transition: all var(--transition-base);
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 2px;
+            bottom: 2px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            transition: all var(--transition-base);
+        }
+
+        .toggle-switch input:checked+.toggle-slider {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+
+        .toggle-switch input:checked+.toggle-slider:before {
+            transform: translateX(22px);
+            background: white;
+        }
+
+        /* Volume Slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 100px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+            transition: all var(--transition-base);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        /* Info Items */
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-size: 13px;
+            color: var(--text-tertiary);
+        }
+
+        .info-value {
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 80px;
+            }
+
+            .sidebar-header {
+                padding: 16px 12px;
+            }
+
+            .logo-text,
+            .nav-text,
+            .status-text {
+                display: none;
+            }
+
+            .logo {
+                justify-content: center;
+                margin-bottom: 12px;
+            }
+
+            .logo-icon {
+                width: 44px;
+                height: 44px;
+            }
+
+            .connection-badge {
+                width: 100%;
+                justify-content: center;
+                padding: 8px;
+            }
+
+            .nav-badge {
+                position: absolute;
+                top: 4px;
+                right: 4px;
+                min-width: 18px;
+                height: 18px;
+                font-size: 10px;
+                padding: 0 5px;
+            }
+
+            .nav-item {
+                justify-content: center;
+                position: relative;
+                padding: 14px;
+            }
+
+            .nav-icon {
+                width: 22px;
+                height: 22px;
+            }
+
+            .nav-icon svg {
+                width: 22px;
+                height: 22px;
+            }
+
+            .sidebar-stats {
+                padding: 12px 8px;
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .stat-item {
+                padding: 10px;
+                text-align: center;
+            }
+
+            .stat-label {
+                display: none;
+            }
+
+            .stat-value {
+                font-size: 14px;
+            }
+
+            .sidebar-footer {
+                padding: 12px;
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .btn-icon {
+                width: 100%;
+                height: 36px;
+            }
+
+            .main-content {
+                margin-left: 80px;
+                padding: 20px 24px;
+            }
+
+            .view-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .view-title {
+                font-size: 24px;
+            }
+
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-input-group {
+                flex-direction: column;
+            }
+
+            .filter-input-group .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .sidebar {
+                width: 64px;
+            }
+
+            .main-content {
+                margin-left: 64px;
+                padding: 16px;
+            }
+
+            .sidebar-stats {
+                display: none;
+            }
+
+            .empty-state {
+                padding: 40px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
+                            <path d="M13 5v2" />
+                            <path d="M13 17v2" />
+                            <path d="M13 11v2" />
+                        </svg>
+                    </div>
+                    <span class="logo-text">VisaD Notify</span>
+                </div>
+                <div class="connection-badge" id="connectionStatus">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Connecting...</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-view="filtered">
+                    <span class="nav-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                        </svg>
+                    </span>
+                    <span class="nav-text">VisaD Notify</span>
+                    <span class="nav-badge" id="filteredBadge">0</span>
+                </button>
+                <button class="nav-item" data-view="all-messages">
+                    <span class="nav-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                        </svg>
+                    </span>
+                    <span class="nav-text">All Messages</span>
+                    <span class="nav-badge" id="allMessagesBadge">0</span>
+                </button>
+                <button class="nav-item" data-view="settings">
+                    <span class="nav-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                    </span>
+                    <span class="nav-text">Settings</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-stats">
+                <div class="stat-item">
+                    <div class="stat-label">Total Today</div>
+                    <div class="stat-value" id="todayCount">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Last Update</div>
+                    <div class="stat-value" id="lastUpdate">--:--</div>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <button class="btn-icon" id="exportBtn" title="Export data">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" x2="12" y1="15" y2="3" />
+                    </svg>
+                </button>
+                <button class="btn-icon" id="themeToggleBtn" title="Toggle theme">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="themeIcon">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                    </svg>
+                </button>
+                <button class="btn-icon" id="soundToggle" title="Toggle sound">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="soundIcon">
+                        <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                    </svg>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- All Messages View -->
+            <div class="view-container" id="allMessagesView">
+                <div class="view-header">
+                    <div>
+                        <h1 class="view-title">All Messages</h1>
+                        <p class="view-subtitle">Real-time visa slot availability updates</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-sound muted" id="allMessagesSoundBtn" title="Sound is muted">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="sound-off">
+                                <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+                                <line x1="22" x2="16" y1="9" y2="15" />
+                                <line x1="16" x2="22" y1="9" y2="15" />
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="sound-on">
+                                <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+                                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                            </svg>
+                            <span class="sound-label">Muted</span>
+                        </button>
+                        <button class="btn btn-secondary" id="refreshBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                                <path d="M21 3v5h-5" />
+                            </svg>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <div class="messages-grid" id="allMessagesList">
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                                <path d="M8 10h.01" />
+                                <path d="M12 10h.01" />
+                                <path d="M16 10h.01" />
+                            </svg>
+                        </div>
+                        <h3>Waiting for messages...</h3>
+                        <p>All messages will appear here</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VisaD Notify View -->
+            <div class="view-container active" id="filteredView">
+                <div class="view-header">
+                    <div>
+                        <h1 class="view-title">VisaD Notify</h1>
+                        <p class="view-subtitle">Search and filter visa slots by keywords</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-sound active" id="visadNotifySoundBtn" title="Sound is on">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="sound-off">
+                                <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+                                <line x1="22" x2="16" y1="9" y2="15" />
+                                <line x1="16" x2="22" y1="9" y2="15" />
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="sound-on">
+                                <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+                                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                            </svg>
+                            <span class="sound-label">Sound On</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <div class="filter-input-group">
+                        <input type="text" id="filterInput" class="filter-input"
+                            placeholder="Enter keywords (e.g., France, Edinburgh, Prime Time, Germany)">
+                        <button class="btn btn-primary" id="applyFilterBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="m21 21-4.3-4.3" />
+                            </svg>
+                            Filter
+                        </button>
+                        <button class="btn btn-secondary" id="clearFilterBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 6 6 18" />
+                                <path d="m6 6 12 12" />
+                            </svg>
+                            Clear
+                        </button>
+                    </div>
+                    <div class="active-filters" id="activeFilters"></div>
+                </div>
+
+                <div class="messages-grid" id="filteredMessagesList">
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                            </svg>
+                        </div>
+                        <h3>No filter applied</h3>
+                        <p>Enter keywords above to get notified for matching visa slots</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings View -->
+            <div class="view-container" id="settingsView">
+                <div class="view-header">
+                    <div>
+                        <h1 class="view-title">Settings</h1>
+                        <p class="view-subtitle">Configure your monitoring preferences</p>
+                    </div>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="setting-card">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                            </svg>
+                            Notifications
+                        </h3>
+                        <div class="setting-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="soundEnabledToggle" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div>
+                                <div class="setting-label">Sound Alerts</div>
+                                <div class="setting-description">Play sound when new messages arrive</div>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="desktopNotifications">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div>
+                                <div class="setting-label">Desktop Notifications</div>
+                                <div class="setting-description">Show browser notifications</div>
+                            </div>
+                        </div>
+                        <div class="setting-item" style="flex-direction: column; align-items: stretch;">
+                            <div>
+                                <div class="setting-label">Alert Volume</div>
+                                <div class="setting-description">Adjust bell sound loudness</div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.75rem;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" style="color: var(--text-tertiary);">
+                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                                </svg>
+                                <input type="range" id="volumeSlider" min="0" max="100" value="80" style="flex: 1;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" style="color: var(--text-tertiary);">
+                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                                </svg>
+                                <span id="volumeValue"
+                                    style="min-width: 3rem; text-align: right; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary);">80%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-card">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect width="18" height="18" x="3" y="3" rx="2" />
+                                <path d="M3 9h18" />
+                                <path d="M9 21V9" />
+                            </svg>
+                            Display
+                        </h3>
+                        <div class="setting-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="autoRefresh" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div>
+                                <div class="setting-label">Auto Refresh</div>
+                                <div class="setting-description">Automatically update message list</div>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="compactMode">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div>
+                                <div class="setting-label">Compact Mode</div>
+                                <div class="setting-description">Show more messages in less space</div>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="darkModeToggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div>
+                                <div class="setting-label">Dark Mode</div>
+                                <div class="setting-description">Switch to dark theme</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-card">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <ellipse cx="12" cy="5" rx="9" ry="3" />
+                                <path d="M3 5V19A9 3 0 0 0 21 19V5" />
+                                <path d="M3 12A9 3 0 0 0 21 12" />
+                            </svg>
+                            Data Management
+                        </h3>
+                        <button class="btn btn-secondary btn-block" id="exportDataBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="7 10 12 15 17 10" />
+                                <line x1="12" x2="12" y1="15" y2="3" />
+                            </svg>
+                            Export All Data
+                        </button>
+                    </div>
+
+                    <div class="setting-card">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M12 16v-4" />
+                                <path d="M12 8h.01" />
+                            </svg>
+                            Information
+                        </h3>
+                        <div class="info-item">
+                            <span class="info-label">Bot Name</span>
+                            <span class="info-value">visard</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Connection</span>
+                            <span class="info-value">MTProto</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Total Messages</span>
+                            <span class="info-value" id="totalMessagesInfo">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Socket.IO - Use CDN or local -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <!-- Or use your local: <script src="noti/socket.io/socket.io.js"></script> -->
+
+    <script>
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+
+                const viewId = item.dataset.view;
+                document.querySelectorAll('.view-container').forEach(view => view.classList.remove('active'));
+
+                if (viewId === 'all-messages') {
+                    document.getElementById('allMessagesView').classList.add('active');
+                } else if (viewId === 'filtered') {
+                    document.getElementById('filteredView').classList.add('active');
+                } else if (viewId === 'settings') {
+                    document.getElementById('settingsView').classList.add('active');
+                }
+            });
+        });
+
+        // Volume slider
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeValue = document.getElementById('volumeValue');
+        volumeSlider.addEventListener('input', () => {
+            volumeValue.textContent = volumeSlider.value + '%';
+        });
+
+        // ============================================
+        // THEME TOGGLE (Dark/Light Mode)
+        // ============================================
+
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const themeIcon = document.getElementById('themeIcon');
+
+        // Update theme icon
+        function updateThemeIcon(isDark) {
+            if (isDark) {
+                // Sun icon for dark mode (click to go light)
+                themeIcon.innerHTML = `
+                    <circle cx="12" cy="12" r="4"/>
+                    <path d="M12 2v2"/>
+                    <path d="M12 20v2"/>
+                    <path d="m4.93 4.93 1.41 1.41"/>
+                    <path d="m17.66 17.66 1.41 1.41"/>
+                    <path d="M2 12h2"/>
+                    <path d="M20 12h2"/>
+                    <path d="m6.34 17.66-1.41 1.41"/>
+                    <path d="m19.07 4.93-1.41 1.41"/>
+                `;
+                themeToggleBtn.title = 'Switch to light mode';
+            } else {
+                // Moon icon for light mode (click to go dark)
+                themeIcon.innerHTML = `
+                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                `;
+                themeToggleBtn.title = 'Switch to dark mode';
+            }
+        }
+
+        // Load saved theme preference
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('visad-theme');
+            if (savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                darkModeToggle.checked = true;
+                updateThemeIcon(true);
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                darkModeToggle.checked = false;
+                updateThemeIcon(false);
+            }
+        }
+
+        // Toggle theme
+        function setTheme(isDark) {
+            if (isDark) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('visad-theme', 'dark');
+                darkModeToggle.checked = true;
+                updateThemeIcon(true);
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('visad-theme', 'light');
+                darkModeToggle.checked = false;
+                updateThemeIcon(false);
+            }
+        }
+
+        // Settings toggle handler
+        darkModeToggle.addEventListener('change', () => {
+            setTheme(darkModeToggle.checked);
+        });
+
+        // Sidebar button handler
+        themeToggleBtn.addEventListener('click', () => {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            setTheme(!isDark);
+        });
+
+        // Load theme on page load
+        loadTheme();
+
+        // Sound settings state
+        let allMessagesSound = false; // Muted by default
+        let visadNotifySound = true;  // Sound on by default
+
+        // All Messages sound toggle
+        const allMessagesSoundBtn = document.getElementById('allMessagesSoundBtn');
+        allMessagesSoundBtn.addEventListener('click', () => {
+            allMessagesSound = !allMessagesSound;
+            if (allMessagesSound) {
+                allMessagesSoundBtn.classList.remove('muted');
+                allMessagesSoundBtn.classList.add('active');
+                allMessagesSoundBtn.querySelector('.sound-label').textContent = 'Sound On';
+                allMessagesSoundBtn.title = 'Sound is on';
+            } else {
+                allMessagesSoundBtn.classList.remove('active');
+                allMessagesSoundBtn.classList.add('muted');
+                allMessagesSoundBtn.querySelector('.sound-label').textContent = 'Muted';
+                allMessagesSoundBtn.title = 'Sound is muted';
+            }
+        });
+
+        // VisaD Notify sound toggle
+        const visadNotifySoundBtn = document.getElementById('visadNotifySoundBtn');
+        visadNotifySoundBtn.addEventListener('click', () => {
+            visadNotifySound = !visadNotifySound;
+            if (visadNotifySound) {
+                visadNotifySoundBtn.classList.remove('muted');
+                visadNotifySoundBtn.classList.add('active');
+                visadNotifySoundBtn.querySelector('.sound-label').textContent = 'Sound On';
+                visadNotifySoundBtn.title = 'Sound is on';
+            } else {
+                visadNotifySoundBtn.classList.remove('active');
+                visadNotifySoundBtn.classList.add('muted');
+                visadNotifySoundBtn.querySelector('.sound-label').textContent = 'Muted';
+                visadNotifySoundBtn.title = 'Sound is muted';
+            }
+        });
+
+        // Global sound toggle in sidebar footer (affects master volume)
+        let globalSoundEnabled = true;
+        document.getElementById('soundToggle').addEventListener('click', () => {
+            globalSoundEnabled = !globalSoundEnabled;
+            const icon = document.getElementById('soundIcon');
+            if (globalSoundEnabled) {
+                icon.innerHTML = `
+                    <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                `;
+            } else {
+                icon.innerHTML = `
+                    <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
+                    <line x1="22" x2="16" y1="9" y2="15"/>
+                    <line x1="16" x2="22" y1="9" y2="15"/>
+                `;
+            }
+        });
+
+        // Helper function to check if sound should play
+        function shouldPlaySound(type) {
+            if (!globalSoundEnabled) return false;
+            if (type === 'all-messages') return allMessagesSound;
+            if (type === 'visad-notify') return visadNotifySound;
+            return false;
+        }
+
+        // Message counters
+        let allMessagesCount = 0;
+        let filteredMessagesCount = 0;
+        let todayCount = 0;
+
+        // Create message HTML
+        function createMessageHTML(message, isHighlight = false) {
+            const time = message.time || new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            const date = message.date || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const badge = message.badge || 'New Slot';
+            const content = message.content || message.text || '';
+
+            return `
+                <div class="message-card ${isHighlight ? 'highlight' : ''}">
+                    <div class="message-header">
+                        <span class="message-time">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                            ${time} · ${date}
+                        </span>
+                        <span class="message-badge">${badge}</span>
+                    </div>
+                    <div class="message-content">${content}</div>
+                </div>
+            `;
+        }
+
+        // Add message to All Messages
+        function addToAllMessages(message) {
+            const container = document.getElementById('allMessagesList');
+            const emptyState = container.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+
+            container.insertAdjacentHTML('afterbegin', createMessageHTML(message));
+            allMessagesCount++;
+            document.getElementById('allMessagesBadge').textContent = allMessagesCount;
+            todayCount++;
+            document.getElementById('todayCount').textContent = todayCount;
+            document.getElementById('totalMessagesInfo').textContent = allMessagesCount;
+            updateTime();
+        }
+
+        // Add message to VisaD Notify (filtered)
+        function addToFilteredMessages(message, isHighlight = true) {
+            const container = document.getElementById('filteredMessagesList');
+            const emptyState = container.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+
+            container.insertAdjacentHTML('afterbegin', createMessageHTML(message, isHighlight));
+            filteredMessagesCount++;
+            document.getElementById('filteredBadge').textContent = filteredMessagesCount;
+            updateTime();
+
+            // Play sound if enabled
+            if (shouldPlaySound('visad-notify')) {
+                playNotificationSound();
+            }
+        }
+
+        // Add message to both views
+        function addMessage(message, matchesFilter = false) {
+            addToAllMessages(message);
+            if (matchesFilter) {
+                addToFilteredMessages(message, true);
+            }
+
+            // Play sound based on context
+            if (matchesFilter && shouldPlaySound('visad-notify')) {
+                playNotificationSound();
+            } else if (!matchesFilter && shouldPlaySound('all-messages')) {
+                playNotificationSound();
+            }
+        }
+
+        // Notification sound
+        function playNotificationSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+
+                const volume = (parseInt(volumeSlider.value) / 100) * 0.3;
+                gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (e) {
+                console.log('Audio not supported');
+            }
+        }
+
+        // Update time display
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent =
+                now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // ============================================
+        // FILTER FUNCTIONALITY
+        // ============================================
+
+        let activeFilters = [];
+        const filterInput = document.getElementById('filterInput');
+        const applyFilterBtn = document.getElementById('applyFilterBtn');
+        const clearFilterBtn = document.getElementById('clearFilterBtn');
+        const activeFiltersContainer = document.getElementById('activeFilters');
+
+        function renderFilters() {
+            activeFiltersContainer.innerHTML = activeFilters.map(filter => `
+                <span class="filter-tag">
+                    ${filter}
+                    <button onclick="removeFilter('${filter}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                        </svg>
+                    </button>
+                </span>
+            `).join('');
+        }
+
+        function addFilter(keyword) {
+            const trimmed = keyword.trim();
+            if (trimmed && !activeFilters.includes(trimmed)) {
+                activeFilters.push(trimmed);
+                renderFilters();
+                filterInput.value = '';
+            }
+        }
+
+        function removeFilter(keyword) {
+            activeFilters = activeFilters.filter(f => f !== keyword);
+            renderFilters();
+        }
+
+        function matchesFilter(messageText) {
+            if (activeFilters.length === 0) return true;
+            const text = (messageText || '').toLowerCase();
+            return activeFilters.some(filter => text.includes(filter.toLowerCase()));
+        }
+
+        applyFilterBtn.addEventListener('click', () => addFilter(filterInput.value));
+        filterInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addFilter(filterInput.value);
+        });
+        clearFilterBtn.addEventListener('click', () => {
+            activeFilters = [];
+            renderFilters();
+            filterInput.value = '';
+        });
+
+        // ============================================
+        // EXPORT FUNCTION
+        // ============================================
+
+        document.getElementById('exportBtn').addEventListener('click', exportData);
+        document.getElementById('exportDataBtn').addEventListener('click', exportData);
+
+        function exportData() {
+            const messages = document.querySelectorAll('.message-card .message-content');
+            let data = 'VisaD Notify Messages Export\n' + '='.repeat(50) + '\n\n';
+            messages.forEach((msg, i) => {
+                data += `Message ${i + 1}:\n${msg.textContent}\n\n`;
+            });
+            const blob = new Blob([data], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `visad-notify-export-${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+        }
+
+        // ============================================
+        // CONNECTION STATUS
+        // ============================================
+
+        function setConnectionStatus(status, text) {
+            const badge = document.getElementById('connectionStatus');
+            badge.classList.remove('connected', 'disconnected', 'offline', 'waiting');
+            if (status === 'connected') badge.classList.add('connected');
+            else if (status === 'disconnected') badge.classList.add('disconnected');
+            else if (status === 'offline') badge.classList.add('offline');
+            else if (status === 'waiting') badge.classList.add('waiting');
+            badge.querySelector('.status-text').textContent = text;
+        }
+
+        // ============================================
+        // MAIN MESSAGE HANDLER - Call this from socket
+        // ============================================
+
+        function addMessage(data) {
+            // Handle various message formats
+            let message = data;
+            if (typeof data === 'string') {
+                message = { content: data };
+            }
+
+            const content = message.content || message.text || message.message || message.msg || '';
+
+            // Add to All Messages
+            addToAllMessages(message);
+
+            // Check filters and add to VisaD Notify
+            if (matchesFilter(content)) {
+                addToFilteredMessages(message, true);
+                if (shouldPlaySound('visad-notify')) playNotificationSound();
+            } else {
+                if (shouldPlaySound('all-messages')) playNotificationSound();
+            }
+        }
+
+        // ============================================
+        // SOCKET.IO CONNECTION
+        // ============================================
+
+        // ⚠️ CONFIGURE YOUR SERVER URL HERE
+        const SOCKET_SERVER = window.location.origin;
+        // Or use: const SOCKET_SERVER = 'http://localhost:3000';
+        // Or use: const SOCKET_SERVER = 'http://your-server-ip:port';
+
+        let socket;
+
+        function initSocket() {
+            try {
+                socket = io(SOCKET_SERVER, {
+                    transports: ['websocket', 'polling'],
+                    reconnection: true,
+                    reconnectionAttempts: Infinity,
+                    reconnectionDelay: 1000,
+                    reconnectionDelayMax: 5000
+                });
+
+                socket.on('connect', () => {
+                    console.log('✅ Connected to VisaD server');
+                    setConnectionStatus('connected', 'Connected');
+                });
+
+                socket.on('disconnect', (reason) => {
+                    console.log('❌ Disconnected:', reason);
+                    setConnectionStatus('disconnected', 'Disconnected');
+                });
+
+                socket.on('connect_error', (error) => {
+                    console.log('⚠️ Connection error:', error.message);
+                    setConnectionStatus('offline', 'Offline');
+                });
+
+                socket.on('reconnect_attempt', (attemptNumber) => {
+                    console.log('🔄 Reconnecting...', attemptNumber);
+                    setConnectionStatus('waiting', 'Reconnecting...');
+                });
+
+                socket.on('reconnect', () => {
+                    console.log('✅ Reconnected');
+                    setConnectionStatus('connected', 'Connected');
+                });
+
+                // ============================================
+                // MESSAGE EVENT LISTENERS
+                // Add/modify based on your server's event names
+                // ============================================
+
+                socket.on('message', (data) => {
+                    console.log('📩 message:', data);
+                    addMessage(data);
+                });
+
+                socket.on('new_message', (data) => {
+                    console.log('📩 new_message:', data);
+                    addMessage(data);
+                });
+
+                socket.on('visa_slot', (data) => {
+                    console.log('📩 visa_slot:', data);
+                    addMessage(data);
+                });
+
+                socket.on('visard', (data) => {
+                    console.log('📩 visard:', data);
+                    addMessage(data);
+                });
+
+                socket.on('notification', (data) => {
+                    console.log('📩 notification:', data);
+                    addMessage(data);
+                });
+
+                socket.on('alert', (data) => {
+                    console.log('📩 alert:', data);
+                    addMessage(data);
+                });
+
+                // Make socket globally available
+                window.socket = socket;
+                window.addMessage = addMessage;
+
+                console.log('🎫 VisaD Notify initialized');
+                console.log('📡 Server:', SOCKET_SERVER);
+
+            } catch (error) {
+                console.error('❌ Socket initialization failed:', error);
+                setConnectionStatus('offline', 'Offline');
+            }
+        }
+
+        // Initialize
+        updateTime();
+        setInterval(updateTime, 60000);
+
+        // Start socket connection
+        if (typeof io !== 'undefined') {
+            initSocket();
+        } else {
+            console.error('❌ Socket.IO not loaded');
+            setConnectionStatus('offline', 'Offline');
+        }
+    </script>
+
+    <!-- Your custom app.js (optional - can override or extend functionality) -->
+    <script src="app.js"></script>
+</body>
+
+</html>

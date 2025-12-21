@@ -13,3 +13,11 @@ build/
 coverage/
 .npm/
 .pm2/
+
+# Database files
+notifications.db
+notifications.db-wal
+notifications.db-shm
+*.db
+*.db-wal
+*.db-shm

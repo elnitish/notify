@@ -5,6 +5,16 @@ import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import dotenv from "dotenv";
+import {
+    initDatabase,
+    saveNotification,
+    getNotifications,
+    getTotalCount,
+    getNotificationsSince,
+    getStats,
+    clearAllNotifications,
+    deleteOldNotifications
+} from './db.js';
 
 dotenv.config();
 
@@ -14,6 +24,77 @@ const server = http.createServer(app);
 const io = new Server(server, {
     cors: { origin: "*" },
     path: "/noti/socket.io"
+});
+
+// Express middleware
+app.use(express.json());
+
+// API Endpoints
+// Get all notifications with pagination
+app.get('/api/notifications', (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 100;
+        const offset = parseInt(req.query.offset) || 0;
+
+        const notifications = getNotifications(limit, offset);
+        const total = getTotalCount();
+
+        res.json({
+            notifications,
+            total,
+            hasMore: (offset + limit) < total
+        });
+    } catch (error) {
+        console.error('API error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get notifications since timestamp
+app.get('/api/notifications/since/:timestamp', (req, res) => {
+    try {
+        const timestamp = parseInt(req.params.timestamp);
+        const notifications = getNotificationsSince(timestamp);
+
+        res.json({ notifications });
+    } catch (error) {
+        console.error('API error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get statistics
+app.get('/api/stats', (req, res) => {
+    try {
+        const stats = getStats();
+        res.json(stats);
+    } catch (error) {
+        console.error('API error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Clear all notifications
+app.delete('/api/notifications', (req, res) => {
+    try {
+        const deletedCount = clearAllNotifications();
+        res.json({ success: true, deletedCount });
+    } catch (error) {
+        console.error('API error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Delete old notifications
+app.delete('/api/notifications/old', (req, res) => {
+    try {
+        const days = parseInt(req.query.days) || 30;
+        const deletedCount = deleteOldNotifications(days);
+        res.json({ success: true, deletedCount });
+    } catch (error) {
+        console.error('API error:', error);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 app.use(express.static("public"));
@@ -121,7 +202,16 @@ async function handleNewMessage(event) {
             console.log(`🔔 KEYWORD MATCH: ${matchedKeyword}\n`);
         }
 
-        // Broadcast ALL messages from monitored users to dashboard
+        // Save to database FIRST (sequential approach)
+        try {
+            const savedId = saveNotification(alertData);
+            console.log(`💾 Saved to DB (ID: ${savedId})`);
+        } catch (error) {
+            console.error('❌ Database save failed:', error);
+            // Continue anyway - real-time still works
+        }
+
+        // THEN broadcast ALL messages from monitored users to dashboard
         io.emit('telegram-alert', alertData);
 
     } catch (error) {
@@ -170,6 +260,9 @@ io.on('connection', (socket) => {
         console.log('🌐 Dashboard disconnected');
     });
 });
+
+// Initialize database
+initDatabase();
 
 // Start server
 server.listen(process.env.PORT, () => {

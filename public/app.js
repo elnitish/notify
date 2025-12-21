@@ -100,6 +100,69 @@ function addMessage(data) {
     }
 }
 
+// Load historical messages from database
+async function loadHistoricalMessages() {
+    try {
+        console.log('📚 Loading historical messages from database...');
+
+        const response = await fetch('/api/notifications?limit=100');
+        const data = await response.json();
+
+        allMessages = data.notifications;
+        updateStats();
+        renderAllMessages();
+
+        console.log(`✅ Loaded ${data.notifications.length} messages from database`);
+
+        if (data.hasMore) {
+            showLoadMoreButton();
+        }
+    } catch (error) {
+        console.error('❌ Failed to load historical messages:', error);
+        // Show error state
+        allMessagesList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">⚠️</div>
+                <h3>Failed to load messages</h3>
+                <p>${error.message}</p>
+                <button class="btn btn-primary" onclick="loadHistoricalMessages()">
+                    Retry
+                </button>
+            </div>
+        `;
+    }
+}
+
+// Load more messages (pagination)
+let currentOffset = 100;
+async function loadMoreMessages() {
+    try {
+        const response = await fetch(`/api/notifications?limit=50&offset=${currentOffset}`);
+        const data = await response.json();
+
+        allMessages.push(...data.notifications);
+        currentOffset += 50;
+        renderAllMessages();
+
+        if (!data.hasMore) {
+            hideLoadMoreButton();
+        }
+    } catch (error) {
+        console.error('Failed to load more messages:', error);
+    }
+}
+
+function showLoadMoreButton() {
+    const container = document.getElementById('loadMoreContainer');
+    if (container) container.style.display = 'block';
+}
+
+function hideLoadMoreButton() {
+    const container = document.getElementById('loadMoreContainer');
+    if (container) container.style.display = 'none';
+}
+
+
 // Parse visa slot message
 function parseVisaSlot(message) {
     const lines = message.split('\n');
@@ -624,23 +687,43 @@ compactModeToggle.addEventListener('change', (e) => {
 });
 
 // Clear all
-clearAllBtn.addEventListener('click', () => {
+clearAllBtn.addEventListener('click', async () => {
     if (confirm('Clear all messages? This cannot be undone.')) {
-        allMessages = [];
-        filteredMessages = [];
-        updateStats();
-        renderAllMessages();
-        renderFilteredMessages();
+        try {
+            const response = await fetch('/api/notifications', { method: 'DELETE' });
+            const data = await response.json();
+
+            allMessages = [];
+            filteredMessages = [];
+            currentOffset = 100;
+            updateStats();
+            renderAllMessages();
+            renderFilteredMessages();
+
+            console.log(`✅ Cleared ${data.deletedCount} messages from database`);
+        } catch (error) {
+            alert('Failed to clear messages: ' + error.message);
+        }
     }
 });
 
-clearDataBtn.addEventListener('click', () => {
+clearDataBtn.addEventListener('click', async () => {
     if (confirm('Clear all messages? This cannot be undone.')) {
-        allMessages = [];
-        filteredMessages = [];
-        updateStats();
-        renderAllMessages();
-        renderFilteredMessages();
+        try {
+            const response = await fetch('/api/notifications', { method: 'DELETE' });
+            const data = await response.json();
+
+            allMessages = [];
+            filteredMessages = [];
+            currentOffset = 100;
+            updateStats();
+            renderAllMessages();
+            renderFilteredMessages();
+
+            console.log(`✅ Cleared ${data.deletedCount} messages from database`);
+        } catch (error) {
+            alert('Failed to clear messages: ' + error.message);
+        }
     }
 });
 
@@ -661,12 +744,17 @@ function exportData() {
 
 // Refresh
 refreshBtn.addEventListener('click', () => {
-    renderAllMessages();
-    updateStats();
+    loadHistoricalMessages();
 });
 
-// Initialize
-renderAllMessages();
+// Load More button
+const loadMoreBtn = document.getElementById('loadMoreBtn');
+if (loadMoreBtn) {
+    loadMoreBtn.addEventListener('click', loadMoreMessages);
+}
+
+// Initialize - Load historical messages from database
+loadHistoricalMessages();
 updateStats();
 
 // Initialize audio context on first user interaction (required by browsers)

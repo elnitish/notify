@@ -88,10 +88,18 @@
 
                 <div class="messages-grid" id="allMessagesList">
                     <div class="empty-state">
-                        <div class="empty-icon">�</div>
-                        <h3>Waiting for messages...</h3>
-                        <p>All messages from VISARD bot will appear here</p>
+                        <div class="empty-icon">👀</div>
+                        <h3>Loading messages...</h3>
+                        <p>Please wait...</p>
                     </div>
+                </div>
+
+                <!-- Load More Button -->
+                <div class="load-more-container" id="loadMoreContainer"
+                    style="display: none; text-align: center; margin-top: 2rem;">
+                    <button class="btn btn-secondary" id="loadMoreBtn">
+                        <span>⬇️</span> Load More Messages
+                    </button>
                 </div>
             </div>
 
