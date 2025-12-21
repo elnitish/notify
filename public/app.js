@@ -1,4 +1,8 @@
-const socket = io();
+// Connect to the same origin that served this page (works with cPanel)
+const socket = io(window.location.origin, {
+    path: '/noti/socket.io',
+    transports: ['websocket', 'polling']
+});
 
 // State
 let allMessages = [];

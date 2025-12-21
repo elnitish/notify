@@ -12,7 +12,8 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-    cors: { origin: "*" }
+    cors: { origin: "*" },
+    path: "/noti/socket.io"
 });
 
 app.use(express.static("public"));
