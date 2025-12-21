@@ -1610,10 +1610,17 @@
 
         // Create message HTML
         function createMessageHTML(message, isHighlight = false) {
-            const time = message.time || new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-            const date = message.date || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            const badge = message.badge || 'New Slot';
-            const content = message.content || message.text || '';
+            // Handle timestamp from database (Unix timestamp in ms)
+            const timestamp = message.timestamp || Date.now();
+            const date = new Date(timestamp);
+            const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+            // Handle different field names (database vs real-time)
+            const badge = message.keyword || message.badge || 'New Slot';
+            const content = message.message || message.content || message.text || '';
+            const sender = message.sender || 'Unknown';
+            const group = message.group || message.group_name || '';
 
             return `
                 <div class="message-card ${isHighlight ? 'highlight' : ''}">
@@ -1623,11 +1630,14 @@
                                 <circle cx="12" cy="12" r="10"/>
                                 <polyline points="12 6 12 12 16 14"/>
                             </svg>
-                            ${time} · ${date}
+                            ${time} · ${dateStr}
                         </span>
                         <span class="message-badge">${badge}</span>
                     </div>
-                    <div class="message-content">${content}</div>
+                    <div class="message-content" style="white-space: pre-wrap;">${content}</div>
+                    ${sender || group ? `<div style="margin-top: 8px; font-size: 12px; color: var(--text-tertiary);">
+                        ${group ? `📍 ${group}` : ''} ${sender ? `👤 ${sender}` : ''}
+                    </div>` : ''}
                 </div>
             `;
         }
