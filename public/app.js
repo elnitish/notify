@@ -1,6 +1,12 @@
-// Connect to the same origin that served this page (works with cPanel)
+// Auto-detect base path from current URL
+// If accessed via /notify/, basePath will be '/notify'
+// If accessed via root, basePath will be ''
+const basePath = window.location.pathname.replace(/\/$/, '').replace(/\/[^\/]*$/, '');
+const socketPath = basePath ? `${basePath}/noti/socket.io` : '/noti/socket.io';
+
+// Connect to the same origin that served this page
 const socket = io(window.location.origin, {
-    path: '/noti/socket.io',
+    path: socketPath,
     transports: ['websocket', 'polling']
 });
 
