@@ -7,12 +7,15 @@
 const currentPath = window.location.pathname;
 const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
 const socketPath = basePath ? `${basePath}/noti/socket.io` : '/noti/socket.io';
+const apiBasePath = basePath || '';  // For API calls
 
 console.log('🔍 Path detection:', {
     currentPath,
     basePath,
     socketPath,
-    fullSocketURL: `${window.location.origin}${socketPath}`
+    apiBasePath,
+    fullSocketURL: `${window.location.origin}${socketPath}`,
+    fullAPIURL: `${window.location.origin}${apiBasePath}/api/`
 });
 
 // Connect to the same origin that served this page
@@ -105,7 +108,7 @@ async function loadHistoricalMessages() {
     try {
         console.log('📚 Loading historical messages from database...');
 
-        const response = await fetch('/api/notifications?limit=100');
+        const response = await fetch(`${apiBasePath}/api/notifications?limit=100`);
         const data = await response.json();
 
         allMessages = data.notifications;
@@ -137,7 +140,7 @@ async function loadHistoricalMessages() {
 let currentOffset = 100;
 async function loadMoreMessages() {
     try {
-        const response = await fetch(`/api/notifications?limit=50&offset=${currentOffset}`);
+        const response = await fetch(`${apiBasePath}/api/notifications?limit=50&offset=${currentOffset}`);
         const data = await response.json();
 
         allMessages.push(...data.notifications);
@@ -690,7 +693,7 @@ compactModeToggle.addEventListener('change', (e) => {
 clearAllBtn.addEventListener('click', async () => {
     if (confirm('Clear all messages? This cannot be undone.')) {
         try {
-            const response = await fetch('/api/notifications', { method: 'DELETE' });
+            const response = await fetch(`${apiBasePath}/api/notifications`, { method: 'DELETE' });
             const data = await response.json();
 
             allMessages = [];
@@ -710,7 +713,7 @@ clearAllBtn.addEventListener('click', async () => {
 clearDataBtn.addEventListener('click', async () => {
     if (confirm('Clear all messages? This cannot be undone.')) {
         try {
-            const response = await fetch('/api/notifications', { method: 'DELETE' });
+            const response = await fetch(`${apiBasePath}/api/notifications`, { method: 'DELETE' });
             const data = await response.json();
 
             allMessages = [];
