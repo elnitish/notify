@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Alert Monitor</title>
+    <meta name="description" content="Real-time Telegram keyword monitoring dashboard">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1>
+                    <span class="icon">📡</span>
+                    Telegram Monitor
+                </h1>
+                <div class="status-badge" id="connectionStatus">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Connecting...</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="totalAlerts">0</div>
+                    <div class="stat-label">Total Alerts</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="todayAlerts">0</div>
+                    <div class="stat-label">Today</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🔔</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="lastAlert">Never</div>
+                    <div class="stat-label">Last Alert</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" id="clearBtn">
+                <span>🗑️</span> Clear History
+            </button>
+            <button class="btn btn-secondary" id="exportBtn">
+                <span>📥</span> Export Data
+            </button>
+            <label class="toggle-container">
+                <input type="checkbox" id="soundToggle" checked>
+                <span class="toggle-label">Sound Alerts</span>
+            </label>
+        </div>
+
+        <div class="keywords-section">
+            <h2 class="section-title">🔍 Monitored Keywords</h2>
+            <div class="keywords-manager">
+                <div class="keyword-input-group">
+                    <input type="text" id="keywordInput" placeholder="Enter keyword (e.g., visa, appointment)"
+                        class="keyword-input">
+                    <button class="btn btn-add" id="addKeywordBtn">
+                        <span>➕</span> Add Keyword
+                    </button>
+                </div>
+                <div id="keywordsList" class="keywords-list">
+                    <!-- Keywords will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="alerts-container">
+            <h2 class="section-title">Live Alerts</h2>
+            <div id="alertsList" class="alerts-list">
+                <div class="empty-state">
+                    <div class="empty-icon">👀</div>
+                    <p>Monitoring for keyword: <strong>LONDON_GERMANY</strong></p>
+                    <p class="empty-subtitle">Alerts will appear here in real-time</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
