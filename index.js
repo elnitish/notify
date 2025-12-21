@@ -74,6 +74,29 @@ app.get('/api/stats', (req, res) => {
     }
 });
 
+// Save notification (POST)
+app.post('/api/notifications', (req, res) => {
+    try {
+        const { message, keyword, sender, group, timestamp } = req.body;
+
+        const notificationData = {
+            keyword: keyword || 'Manual',
+            message: message || '',
+            group: group || 'Unknown',
+            sender: sender || 'Unknown',
+            chatId: 'manual',
+            isKeywordMatch: false,
+            timestamp: timestamp || Date.now()
+        };
+
+        const savedId = saveNotification(notificationData);
+        res.json({ success: true, id: savedId });
+    } catch (error) {
+        console.error('API error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Clear all notifications
 app.delete('/api/notifications', (req, res) => {
     try {

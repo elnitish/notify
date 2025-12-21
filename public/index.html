@@ -669,6 +669,63 @@
             }
         }
 
+        /* Load More Button Container */
+        .load-more-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 24px;
+            padding: 20px 0;
+        }
+
+        .btn-load-more {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 2px solid var(--border-default);
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .btn-load-more:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-load-more:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-load-more svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .btn-load-more.loading svg {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         /* Empty State */
         .empty-state {
             text-align: center;
@@ -1630,6 +1687,18 @@
                         <h3>Waiting for messages...</h3>
                         <p>All messages will appear here</p>
                     </div>
+                </div>
+
+                <!-- Load More Button -->
+                <div class="load-more-container" id="loadMoreContainer" style="display: none;">
+                    <button class="btn-load-more" id="loadMoreBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 5v14" />
+                            <path d="m19 12-7 7-7-7" />
+                        </svg>
+                        <span id="loadMoreText">Load More Messages</span>
+                    </button>
                 </div>
             </div>
 
@@ -2891,16 +2960,28 @@
         });
 
         // ============================================
-        // DATABASE INTEGRATION
+        // DATABASE INTEGRATION WITH PAGINATION
         // ============================================
+
+        // Pagination state
+        let currentOffset = 0;
+        const messagesPerPage = 50;
+        let totalMessagesInDB = 0;
+        let isLoadingMore = false;
 
         // Load historical messages from database on page load
         async function loadHistoricalMessages() {
             try {
-                console.log('📥 Loading historical messages from database...');
+                console.log('📥 Loading initial messages from database...');
 
-                const response = await fetch(`${apiBasePath}/api/notifications`);
+                const response = await fetch(`${apiBasePath}/api/notifications?limit=${messagesPerPage}&offset=0`);
                 const data = await response.json();
+
+                totalMessagesInDB = data.total;
+                currentOffset = data.notifications.length;
+
+                console.log(`📊 Total messages in DB: ${totalMessagesInDB}`);
+                console.log(`📥 Loaded: ${data.notifications.length} messages`);
 
                 // Add all messages from database (to All Messages view)
                 data.notifications.forEach(msg => {
@@ -2910,12 +2991,83 @@
                 // Apply filter to show matching in VisaD Notify
                 refilterMessages();
 
-                console.log(`✅ Loaded ${data.notifications.length} messages from database`);
+                // Show/hide Load More button
+                updateLoadMoreButton(data.hasMore);
+
+                console.log(`✅ Loaded ${data.notifications.length} of ${totalMessagesInDB} messages`);
 
             } catch (error) {
                 console.error('❌ Failed to load historical messages:', error);
             }
         }
+
+        // Load more messages when button is clicked
+        async function loadMoreMessages() {
+            if (isLoadingMore) return;
+
+            try {
+                isLoadingMore = true;
+                const loadMoreBtn = document.getElementById('loadMoreBtn');
+                const loadMoreText = document.getElementById('loadMoreText');
+
+                // Update button state
+                loadMoreBtn.disabled = true;
+                loadMoreBtn.classList.add('loading');
+                loadMoreText.textContent = 'Loading...';
+
+                console.log(`📥 Loading more messages (offset: ${currentOffset})...`);
+
+                const response = await fetch(`${apiBasePath}/api/notifications?limit=${messagesPerPage}&offset=${currentOffset}`);
+                const data = await response.json();
+
+                console.log(`📥 Loaded ${data.notifications.length} more messages`);
+
+                // Add messages to the view
+                data.notifications.forEach(msg => {
+                    addToAllMessages(msg);
+                });
+
+                // Update offset
+                currentOffset += data.notifications.length;
+
+                // Apply filter to show matching in VisaD Notify
+                refilterMessages();
+
+                // Show/hide Load More button
+                updateLoadMoreButton(data.hasMore);
+
+                console.log(`✅ Now showing ${currentOffset} of ${totalMessagesInDB} messages`);
+
+            } catch (error) {
+                console.error('❌ Failed to load more messages:', error);
+            } finally {
+                isLoadingMore = false;
+                const loadMoreBtn = document.getElementById('loadMoreBtn');
+                const loadMoreText = document.getElementById('loadMoreText');
+
+                // Reset button state
+                loadMoreBtn.disabled = false;
+                loadMoreBtn.classList.remove('loading');
+                loadMoreText.textContent = 'Load More Messages';
+            }
+        }
+
+        // Update Load More button visibility and text
+        function updateLoadMoreButton(hasMore) {
+            const loadMoreContainer = document.getElementById('loadMoreContainer');
+            const loadMoreText = document.getElementById('loadMoreText');
+
+            if (hasMore && totalMessagesInDB > messagesPerPage) {
+                loadMoreContainer.style.display = 'flex';
+                const remaining = totalMessagesInDB - currentOffset;
+                loadMoreText.textContent = `Load More (${remaining} remaining)`;
+            } else {
+                loadMoreContainer.style.display = 'none';
+            }
+        }
+
+        // Load More button click handler
+        document.getElementById('loadMoreBtn').addEventListener('click', loadMoreMessages);
 
         // Save message to database
         async function saveToDatabase(message) {
