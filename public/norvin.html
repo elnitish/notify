@@ -1431,9 +1431,8 @@
         </main>
     </div>
 
-    <!-- Socket.IO - Use CDN or local -->
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <!-- Or use your local: <script src="noti/socket.io/socket.io.js"></script> -->
+    <!-- Socket.IO - Local version with path detection -->
+    <script src="noti/socket.io/socket.io.js"></script>
 
     <script>
         // Navigation
@@ -1829,114 +1828,115 @@
         }
 
         // ============================================
+        // PATH DETECTION FOR SUBDIRECTORY DEPLOYMENT
+        // ============================================
+        const currentPath = window.location.pathname;
+        const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+        const socketPath = basePath ? `${basePath}/noti/socket.io` : '/noti/socket.io';
+        const apiBasePath = basePath || '';  // For API calls
+
+        console.log('🔍 Path detection:', {
+            currentPath,
+            basePath,
+            socketPath,
+            apiBasePath,
+            fullSocketURL: `${window.location.origin}${socketPath}`,
+            fullAPIURL: `${window.location.origin}${apiBasePath}/api/`
+        });
+
+        // ============================================
         // SOCKET.IO CONNECTION
         // ============================================
+        const socket = io(window.location.origin, {
+            path: socketPath,
+            transports: ['polling', 'websocket'],  // Polling first for Apache/cPanel compatibility
+            reconnectionDelay: 1000,
+            reconnection: true,
+            reconnectionAttempts: 10,
+            timeout: 10000
+        });
 
-        // ⚠️ CONFIGURE YOUR SERVER URL HERE
-        const SOCKET_SERVER = window.location.origin;
-        // Or use: const SOCKET_SERVER = 'http://localhost:3000';
-        // Or use: const SOCKET_SERVER = 'http://your-server-ip:port';
+        socket.on('connect', () => {
+            console.log('✅ Connected to server');
+            setConnectionStatus('connected', 'Connected');
+        });
 
-        let socket;
+        socket.on('disconnect', (reason) => {
+            console.log('❌ Disconnected:', reason);
+            setConnectionStatus('disconnected', 'Disconnected');
+        });
 
-        function initSocket() {
+        socket.on('connect_error', (error) => {
+            console.log('⚠️ Connection error:', error.message);
+            setConnectionStatus('offline', 'Offline');
+        });
+
+        // ============================================
+        // DATABASE INTEGRATION
+        // ============================================
+
+        // Load historical messages from database on page load
+        async function loadHistoricalMessages() {
             try {
-                socket = io(SOCKET_SERVER, {
-                    transports: ['websocket', 'polling'],
-                    reconnection: true,
-                    reconnectionAttempts: Infinity,
-                    reconnectionDelay: 1000,
-                    reconnectionDelayMax: 5000
+                console.log('� Loading historical messages from database...');
+
+                const response = await fetch(`${apiBasePath}/api/notifications?limit=100`);
+                const data = await response.json();
+
+                // Add all messages from database
+                data.notifications.forEach(msg => {
+                    addToAllMessages(msg);
+                    if (matchesFilter(msg.message)) {
+                        addToFilteredMessages(msg, false); // Don't play sound for historical
+                    }
                 });
 
-                socket.on('connect', () => {
-                    console.log('✅ Connected to VisaD server');
-                    setConnectionStatus('connected', 'Connected');
-                });
-
-                socket.on('disconnect', (reason) => {
-                    console.log('❌ Disconnected:', reason);
-                    setConnectionStatus('disconnected', 'Disconnected');
-                });
-
-                socket.on('connect_error', (error) => {
-                    console.log('⚠️ Connection error:', error.message);
-                    setConnectionStatus('offline', 'Offline');
-                });
-
-                socket.on('reconnect_attempt', (attemptNumber) => {
-                    console.log('🔄 Reconnecting...', attemptNumber);
-                    setConnectionStatus('waiting', 'Reconnecting...');
-                });
-
-                socket.on('reconnect', () => {
-                    console.log('✅ Reconnected');
-                    setConnectionStatus('connected', 'Connected');
-                });
-
-                // ============================================
-                // MESSAGE EVENT LISTENERS
-                // Add/modify based on your server's event names
-                // ============================================
-
-                socket.on('message', (data) => {
-                    console.log('📩 message:', data);
-                    addMessage(data);
-                });
-
-                socket.on('new_message', (data) => {
-                    console.log('📩 new_message:', data);
-                    addMessage(data);
-                });
-
-                socket.on('visa_slot', (data) => {
-                    console.log('📩 visa_slot:', data);
-                    addMessage(data);
-                });
-
-                socket.on('visard', (data) => {
-                    console.log('📩 visard:', data);
-                    addMessage(data);
-                });
-
-                socket.on('notification', (data) => {
-                    console.log('📩 notification:', data);
-                    addMessage(data);
-                });
-
-                socket.on('alert', (data) => {
-                    console.log('📩 alert:', data);
-                    addMessage(data);
-                });
-
-                // Make socket globally available
-                window.socket = socket;
-                window.addMessage = addMessage;
-
-                console.log('🎫 VisaD Notify initialized');
-                console.log('📡 Server:', SOCKET_SERVER);
+                console.log(`✅ Loaded ${data.notifications.length} messages from database`);
 
             } catch (error) {
-                console.error('❌ Socket initialization failed:', error);
-                setConnectionStatus('offline', 'Offline');
+                console.error('❌ Failed to load historical messages:', error);
             }
         }
 
-        // Initialize
+        // ============================================
+        // TELEGRAM MESSAGE HANDLER
+        // ============================================
+
+        socket.on('telegram-alert', (data) => {
+            console.log('📩 telegram-alert:', data);
+
+            // Add to All Messages
+            addToAllMessages(data);
+
+            // Check filters and add to VisaD Notify
+            if (matchesFilter(data.message)) {
+                addToFilteredMessages(data, true);
+                if (shouldPlaySound('visad-notify')) playNotificationSound();
+            } else {
+                if (shouldPlaySound('all-messages')) playNotificationSound();
+            }
+        });
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+
+        // Update time
         updateTime();
         setInterval(updateTime, 60000);
 
-        // Start socket connection
-        if (typeof io !== 'undefined') {
-            initSocket();
-        } else {
-            console.error('❌ Socket.IO not loaded');
-            setConnectionStatus('offline', 'Offline');
-        }
+        // Load historical messages from database
+        loadHistoricalMessages();
+
+        // Make socket globally available
+        window.socket = socket;
+
+        console.log('🎫 VisaD Notify initialized with database integration');
+        console.log('📡 Server:', window.location.origin);
+        console.log('🔌 Socket path:', socketPath);
+        console.log('🗄️ API path:', `${apiBasePath}/api/`);
     </script>
 
-    <!-- Your custom app.js (optional - can override or extend functionality) -->
-    <script src="app.js"></script>
 </body>
 
 </html>
