@@ -1,8 +1,19 @@
 // Auto-detect base path from current URL
-// If accessed via /notify/, basePath will be '/notify'
-// If accessed via root, basePath will be ''
-const basePath = window.location.pathname.replace(/\/$/, '').replace(/\/[^\/]*$/, '');
+// Extract the directory path (everything before the last /)
+// Examples:
+//   https://vault.visad.co.uk/notify/ → basePath = '/notify'
+//   https://www.safebox.cfd/botm/ → basePath = '/botm'
+//   https://example.com/ → basePath = ''
+const currentPath = window.location.pathname;
+const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
 const socketPath = basePath ? `${basePath}/noti/socket.io` : '/noti/socket.io';
+
+console.log('🔍 Path detection:', {
+    currentPath,
+    basePath,
+    socketPath,
+    fullSocketURL: `${window.location.origin}${socketPath}`
+});
 
 // Connect to the same origin that served this page
 // Use polling first for better compatibility with reverse proxies (Apache/cPanel)
