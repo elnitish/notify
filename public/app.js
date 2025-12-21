@@ -5,9 +5,15 @@ const basePath = window.location.pathname.replace(/\/$/, '').replace(/\/[^\/]*$/
 const socketPath = basePath ? `${basePath}/noti/socket.io` : '/noti/socket.io';
 
 // Connect to the same origin that served this page
+// Use polling first for better compatibility with reverse proxies (Apache/cPanel)
+// WebSocket will be tried as fallback if polling works
 const socket = io(window.location.origin, {
     path: socketPath,
-    transports: ['websocket', 'polling']
+    transports: ['polling', 'websocket'],  // Polling first, then WebSocket
+    reconnectionDelay: 1000,
+    reconnection: true,
+    reconnectionAttempts: 10,
+    timeout: 10000
 });
 
 // State
