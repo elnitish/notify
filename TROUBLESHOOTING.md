@@ -55,3 +55,57 @@ You'll see the alert in the terminal and on the dashboard at http://localhost:30
 
 ### Note
 The monitor only captures NEW messages sent AFTER it starts. It doesn't read message history.
+
+---
+
+## 🌐 Web Dashboard Issues
+
+### Problem: 502 Bad Gateway & "io is not defined"
+
+If you see these errors in your browser console when accessing the dashboard:
+- `Failed to load resource: the server responded with a status of 502 (Bad Gateway)`
+- `Uncaught ReferenceError: io is not defined`
+
+This means the Socket.IO client library isn't loading.
+
+### Solution: Check Nginx Configuration
+
+1. **Verify the Node.js server is running:**
+   ```bash
+   ps aux | grep "node index.js"
+   netstat -tlnp | grep :3000
+   ```
+
+2. **Test locally (should return 200 OK):**
+   ```bash
+   curl -I http://localhost:3000/noti/socket.io/socket.io.js
+   ```
+
+3. **Test through Nginx:**
+   ```bash
+   curl -I https://www.safebox.cfd/noti/socket.io/socket.io.js
+   ```
+
+4. **If you get 502, check Nginx has the `/noti/socket.io/` location block:**
+   ```bash
+   sudo nano /etc/nginx/sites-available/safebox.cfd
+   ```
+
+   Make sure this block exists:
+   ```nginx
+   location /noti/socket.io/ {
+       proxy_pass http://127.0.0.1:3000/noti/socket.io/;
+       proxy_http_version 1.1;
+       proxy_set_header Upgrade $http_upgrade;
+       proxy_set_header Connection "upgrade";
+       # ... other headers
+   }
+   ```
+
+5. **Reload Nginx:**
+   ```bash
+   sudo nginx -t
+   sudo systemctl reload nginx
+   ```
+
+For detailed explanation, see: `502_FIX_SOCKET_IO.md`
