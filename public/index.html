@@ -1767,6 +1767,18 @@
                         <p>Enter keywords above to get notified for matching visa slots</p>
                     </div>
                 </div>
+
+                <!-- Load More Button for Filtered Messages -->
+                <div class="load-more-container" id="loadMoreFilteredContainer" style="display: none;">
+                    <button class="btn-load-more" id="loadMoreFilteredBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 5v14" />
+                            <path d="m19 12-7 7-7-7" />
+                        </svg>
+                        <span id="loadMoreFilteredText">Load More Filtered Messages</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Country View -->
@@ -2388,8 +2400,11 @@
             return activeFilters.some(filter => text.includes(filter.toLowerCase()));
         }
 
-        // Re-filter all stored messages
-        function refilterMessages() {
+        // Re-filter all stored messages with pagination
+        let displayedFilteredCount = 0;
+        const filteredMessagesPerPage = 50;
+
+        function refilterMessages(append = false) {
             const container = document.getElementById('filteredMessagesList');
 
             // Filter messages that match
@@ -2402,7 +2417,20 @@
             filteredMessagesCount = filteredMessages.length;
             document.getElementById('filteredBadge').textContent = filteredMessagesCount;
 
-            // Clear and re-render
+            if (!append) {
+                // Reset displayed count when not appending
+                displayedFilteredCount = 0;
+            }
+
+            // Determine how many to show
+            const startIndex = append ? displayedFilteredCount : 0;
+            const endIndex = Math.min(startIndex + filteredMessagesPerPage, filteredMessages.length);
+            const messagesToShow = filteredMessages.slice(startIndex, endIndex);
+
+            // Update displayed count
+            displayedFilteredCount = endIndex;
+
+            // Clear and re-render or append
             if (filteredMessages.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
@@ -2417,10 +2445,39 @@
                         <p>${activeFilters.length > 0 ? 'Try different keywords' : 'Enter keywords above to filter visa slots'}</p>
                     </div>
                 `;
+                updateLoadMoreFilteredButton(false);
             } else {
-                container.innerHTML = filteredMessages.map(msg => createMessageHTML(msg, true)).join('');
+                if (append) {
+                    // Append new messages
+                    container.insertAdjacentHTML('beforeend', messagesToShow.map(msg => createMessageHTML(msg, true)).join(''));
+                } else {
+                    // Replace all messages
+                    container.innerHTML = messagesToShow.map(msg => createMessageHTML(msg, true)).join('');
+                }
+
+                // Show/hide Load More button
+                const hasMore = displayedFilteredCount < filteredMessages.length;
+                updateLoadMoreFilteredButton(hasMore, filteredMessages.length - displayedFilteredCount);
             }
         }
+
+        // Update Load More button for filtered messages
+        function updateLoadMoreFilteredButton(hasMore, remaining = 0) {
+            const loadMoreContainer = document.getElementById('loadMoreFilteredContainer');
+            const loadMoreText = document.getElementById('loadMoreFilteredText');
+
+            if (hasMore) {
+                loadMoreContainer.style.display = 'flex';
+                loadMoreText.textContent = `Load More (${remaining} remaining)`;
+            } else {
+                loadMoreContainer.style.display = 'none';
+            }
+        }
+
+        // Load More filtered messages handler
+        document.getElementById('loadMoreFilteredBtn').addEventListener('click', () => {
+            refilterMessages(true); // Append mode
+        });
 
         applyFilterBtn.addEventListener('click', () => addFilter(filterInput.value));
         filterInput.addEventListener('keypress', (e) => {
