@@ -1,4 +1,7 @@
-const socket = io();
+// Initialize Socket.IO with path configuration for nginx proxy
+const socket = io({
+    path: '/botm/socket.io'
+});
 
 // State
 let allMessages = [];
