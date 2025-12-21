@@ -4,14 +4,1470 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VISARD Visa Slots Monitor - Admin Panel</title>
+    <title>VisaD Notify - Admin Panel</title>
     <meta name="description" content="Real-time visa slot availability monitoring dashboard">
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
+    <style>
+        :root {
+            /* Light Mode (Default) */
+            --bg-primary: #f8f9fc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f3f8;
+            --bg-elevated: #e8ebf2;
+            --bg-hover: #dde1eb;
+
+            --border-subtle: rgba(0, 0, 0, 0.06);
+            --border-default: rgba(0, 0, 0, 0.1);
+            --border-strong: rgba(0, 0, 0, 0.15);
+
+            --text-primary: #1a1d26;
+            --text-secondary: #4a5068;
+            --text-tertiary: #6b7280;
+            --text-muted: #9ca3af;
+
+            --accent-primary: #6366f1;
+            --accent-primary-hover: #4f46e5;
+            --accent-primary-subtle: rgba(99, 102, 241, 0.1);
+            --accent-primary-glow: rgba(99, 102, 241, 0.2);
+
+            --accent-success: #16a34a;
+            --accent-success-subtle: rgba(22, 163, 74, 0.1);
+            --accent-warning: #d97706;
+            --accent-warning-subtle: rgba(217, 119, 6, 0.1);
+            --accent-danger: #dc2626;
+            --accent-danger-subtle: rgba(220, 38, 38, 0.1);
+
+            --sidebar-width: 280px;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --radius-xl: 20px;
+
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+            --shadow-glow: 0 0 40px var(--accent-primary-glow);
+
+            --transition-fast: 0.15s ease;
+            --transition-base: 0.2s ease;
+            --transition-slow: 0.3s ease;
+        }
+
+        /* Dark Mode */
+        [data-theme="dark"] {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a24;
+            --bg-elevated: #22222e;
+            --bg-hover: #2a2a38;
+
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-default: rgba(255, 255, 255, 0.1);
+            --border-strong: rgba(255, 255, 255, 0.15);
+
+            --text-primary: #f4f4f6;
+            --text-secondary: #a0a0b0;
+            --text-tertiary: #6a6a7a;
+            --text-muted: #4a4a5a;
+
+            --accent-primary: #818cf8;
+            --accent-primary-hover: #a5b4fc;
+            --accent-primary-subtle: rgba(129, 140, 248, 0.15);
+            --accent-primary-glow: rgba(129, 140, 248, 0.25);
+
+            --accent-success: #22c55e;
+            --accent-success-subtle: rgba(34, 197, 94, 0.15);
+            --accent-warning: #f59e0b;
+            --accent-warning-subtle: rgba(245, 158, 11, 0.15);
+            --accent-danger: #ef4444;
+            --accent-danger-subtle: rgba(239, 68, 68, 0.15);
+
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 40px var(--accent-primary-glow);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-subtle);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-primary), #8b5cf6);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .logo-icon svg {
+            width: 22px;
+            height: 22px;
+            color: white;
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .connection-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-default);
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-warning);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .connection-badge.connected .status-dot {
+            background: var(--accent-success);
+        }
+
+        .connection-badge.disconnected .status-dot {
+            background: var(--accent-danger);
+            animation: none;
+        }
+
+        .connection-badge.offline .status-dot {
+            background: var(--text-muted);
+            animation: none;
+        }
+
+        .connection-badge.waiting .status-dot {
+            background: var(--accent-warning);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.6;
+                transform: scale(0.9);
+            }
+        }
+
+        /* Navigation */
+        .sidebar-nav {
+            padding: 16px 12px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: transparent;
+            border: none;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            text-align: left;
+            width: 100%;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-primary-subtle);
+            color: var(--accent-primary-hover);
+        }
+
+        .nav-item.active .nav-icon svg {
+            color: var(--accent-primary-hover);
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .nav-icon svg {
+            width: 20px;
+            height: 20px;
+            color: currentColor;
+        }
+
+        .nav-text {
+            flex: 1;
+        }
+
+        .nav-badge {
+            min-width: 24px;
+            height: 22px;
+            padding: 0 8px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-tertiary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .nav-item.active .nav-badge {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        /* Sidebar Stats */
+        .sidebar-stats {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-subtle);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stat-item {
+            background: var(--bg-tertiary);
+            padding: 14px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+        }
+
+        /* Sidebar Footer */
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-base);
+        }
+
+        .btn-icon:hover {
+            background: var(--bg-elevated);
+            border-color: var(--border-default);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+
+        .btn-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 32px 40px;
+            background: var(--bg-primary);
+            min-height: 100vh;
+        }
+
+        .view-container {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .view-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .view-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 32px;
+        }
+
+        .view-title {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .view-subtitle {
+            font-size: 14px;
+            color: var(--text-tertiary);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-default);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            border-color: var(--border-strong);
+        }
+
+        .btn-danger {
+            background: var(--accent-danger-subtle);
+            color: var(--accent-danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: var(--accent-danger);
+            color: white;
+        }
+
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+            margin-top: 12px;
+        }
+
+        /* Sound Toggle Button */
+        .btn-sound {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-default);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        .btn-sound svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .btn-sound svg.sound-on {
+            display: none;
+        }
+
+        .btn-sound svg.sound-off {
+            display: inline-block;
+        }
+
+        .btn-sound.active {
+            background: var(--accent-success-subtle);
+            border-color: rgba(34, 197, 94, 0.3);
+            color: var(--accent-success);
+        }
+
+        .btn-sound.active svg.sound-on {
+            display: inline-block;
+        }
+
+        .btn-sound.active svg.sound-off {
+            display: none;
+        }
+
+        .btn-sound.muted {
+            background: var(--bg-elevated);
+            border-color: var(--border-default);
+            color: var(--text-tertiary);
+        }
+
+        .btn-sound.muted svg.sound-off {
+            display: inline-block;
+        }
+
+        .btn-sound.muted svg.sound-on {
+            display: none;
+        }
+
+        .btn-sound:hover {
+            transform: translateY(-1px);
+            border-color: var(--border-strong);
+        }
+
+        .btn-sound.active:hover {
+            background: rgba(34, 197, 94, 0.2);
+        }
+
+        .btn-sound.muted:hover {
+            background: var(--bg-hover);
+            color: var(--text-secondary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .sound-label {
+            white-space: nowrap;
+        }
+
+        @media (max-width: 480px) {
+            .sound-label {
+                display: none;
+            }
+
+            .btn-sound {
+                padding: 8px 10px;
+            }
+        }
+
+        /* Messages Grid */
+        .messages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 10px;
+        }
+
+        .message-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            transition: all var(--transition-base);
+            animation: slideIn 0.2s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .message-card:hover {
+            border-color: var(--accent-primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .message-card.highlight {
+            border-left: 3px solid var(--accent-primary);
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .message-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            font-weight: 500;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-muted);
+        }
+
+        .message-center {
+            font-size: 10px;
+            color: var(--accent-primary);
+            font-weight: 600;
+            background: var(--accent-primary-subtle);
+            padding: 3px 8px;
+            border-radius: 100px;
+        }
+
+        .message-badge {
+            padding: 3px 8px;
+            background: var(--accent-success-subtle);
+            color: var(--accent-success);
+            border-radius: 100px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .message-badge.prime {
+            background: var(--accent-warning-subtle);
+            color: var(--accent-warning);
+        }
+
+        .message-content {
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        @media (max-width: 900px) {
+            .messages-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            background: var(--bg-secondary);
+            border: 2px dashed var(--border-default);
+            border-radius: var(--radius-xl);
+        }
+
+        .empty-icon {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 20px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .empty-icon svg {
+            width: 32px;
+            height: 32px;
+            color: var(--text-tertiary);
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            color: var(--text-tertiary);
+        }
+
+        /* Filter Section */
+        .filter-section {
+            margin-bottom: 24px;
+        }
+
+        .filter-input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .filter-input {
+            flex: 1;
+            padding: 12px 18px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: all var(--transition-base);
+        }
+
+        .filter-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-primary-subtle);
+        }
+
+        .active-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .filter-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--accent-primary-subtle);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--accent-primary-hover);
+        }
+
+        .filter-tag button {
+            background: none;
+            border: none;
+            color: currentColor;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            opacity: 0.7;
+        }
+
+        .filter-tag button:hover {
+            opacity: 1;
+        }
+
+        .filter-tag svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Settings Grid */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+
+        .setting-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .setting-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .setting-card h3 svg {
+            width: 20px;
+            height: 20px;
+            color: var(--accent-primary);
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .setting-item:last-of-type {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .setting-description {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-default);
+            border-radius: 100px;
+            transition: all var(--transition-base);
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 2px;
+            bottom: 2px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            transition: all var(--transition-base);
+        }
+
+        .toggle-switch input:checked+.toggle-slider {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+
+        .toggle-switch input:checked+.toggle-slider:before {
+            transform: translateX(22px);
+            background: white;
+        }
+
+        /* Volume Slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 100px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+            transition: all var(--transition-base);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        /* Info Items */
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-size: 13px;
+            color: var(--text-tertiary);
+        }
+
+        .info-value {
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 80px;
+            }
+
+            .sidebar-header {
+                padding: 16px 12px;
+            }
+
+            .logo-text,
+            .nav-text,
+            .status-text {
+                display: none;
+            }
+
+            .logo {
+                justify-content: center;
+                margin-bottom: 12px;
+            }
+
+            .logo-icon {
+                width: 44px;
+                height: 44px;
+            }
+
+            .connection-badge {
+                width: 100%;
+                justify-content: center;
+                padding: 8px;
+            }
+
+            .nav-badge {
+                position: absolute;
+                top: 4px;
+                right: 4px;
+                min-width: 18px;
+                height: 18px;
+                font-size: 10px;
+                padding: 0 5px;
+            }
+
+            .nav-item {
+                justify-content: center;
+                position: relative;
+                padding: 14px;
+            }
+
+            .nav-icon {
+                width: 22px;
+                height: 22px;
+            }
+
+            .nav-icon svg {
+                width: 22px;
+                height: 22px;
+            }
+
+            .sidebar-stats {
+                padding: 12px 8px;
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .stat-item {
+                padding: 10px;
+                text-align: center;
+            }
+
+            .stat-label {
+                display: none;
+            }
+
+            .stat-value {
+                font-size: 14px;
+            }
+
+            .sidebar-footer {
+                padding: 12px;
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .btn-icon {
+                width: 100%;
+                height: 36px;
+            }
+
+            .main-content {
+                margin-left: 80px;
+                padding: 20px 24px;
+            }
+
+            .view-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .view-title {
+                font-size: 24px;
+            }
+
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-input-group {
+                flex-direction: column;
+            }
+
+            .filter-input-group .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .sidebar {
+                width: 64px;
+            }
+
+            .main-content {
+                margin-left: 64px;
+                padding: 16px;
+            }
+
+            .sidebar-stats {
+                display: none;
+            }
+
+            .empty-state {
+                padding: 40px 20px;
+            }
+        }
+
+        /* Country View Styles */
+        .country-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .country-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-height: 80px;
+        }
+
+        .country-card:hover {
+            border-color: var(--accent-primary);
+            background: var(--bg-tertiary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .country-card-flag {
+            font-size: 32px;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .country-card-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .country-card-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .country-card-count {
+            font-size: 13px;
+            color: var(--text-tertiary);
+        }
+
+        .country-card-badge {
+            background: var(--accent-primary);
+            color: white;
+            min-width: 28px;
+            height: 28px;
+            padding: 0 8px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        /* Country Detail Panel */
+        .country-detail-header {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 20px 24px;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            font-family: inherit;
+            margin-bottom: 16px;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .back-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .selected-country-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .selected-country-flag {
+            font-size: 56px;
+            line-height: 1;
+        }
+
+        .selected-country-details {
+            flex: 1;
+        }
+
+        .selected-country-name {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            letter-spacing: -0.02em;
+        }
+
+        .selected-country-stats {
+            font-size: 15px;
+            color: var(--text-tertiary);
+        }
+
+        /* Center Filter Section */
+        .center-filter-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 20px 24px;
+            margin-bottom: 20px;
+        }
+
+        .center-filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .center-filter-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .center-filter-header h3 svg {
+            width: 20px;
+            height: 20px;
+            color: var(--accent-primary);
+        }
+
+        .center-filter-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .center-filter-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-default);
+            border-radius: 100px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            font-family: inherit;
+        }
+
+        .center-filter-chip:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent-primary);
+            color: var(--text-primary);
+        }
+
+        .center-filter-chip.active {
+            background: var(--accent-primary-subtle);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .center-filter-chip .chip-count {
+            background: var(--bg-secondary);
+            padding: 2px 8px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .center-filter-chip.active .chip-count {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .center-filter-chip.no-messages {
+            opacity: 0.5;
+        }
+
+        .center-filter-chip.no-messages:hover {
+            opacity: 0.8;
+        }
+
+        /* Country Messages Container */
+        .country-messages-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 10px;
+        }
+
+        .country-message-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            transition: all var(--transition-base);
+        }
+
+        .country-message-card:hover {
+            border-color: var(--accent-primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .country-message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .country-message-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .country-message-time {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .country-message-center {
+            font-size: 10px;
+            color: var(--accent-primary);
+            font-weight: 600;
+            background: var(--accent-primary-subtle);
+            padding: 3px 8px;
+            border-radius: 100px;
+        }
+
+        .country-message-type {
+            padding: 3px 8px;
+            border-radius: 100px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .country-message-type.prime {
+            background: var(--accent-warning-subtle);
+            color: var(--accent-warning);
+        }
+
+        .country-message-type.regular {
+            background: var(--accent-primary-subtle);
+            color: var(--accent-primary);
+        }
+
+        .country-message-content {
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        @media (max-width: 900px) {
+            .country-messages-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .no-messages-found {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-tertiary);
+        }
+
+        .no-messages-found h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .country-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .country-card {
+                padding: 14px;
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+
+            .country-card-flag {
+                font-size: 28px;
+            }
+
+            .country-card-info {
+                width: 100%;
+            }
+
+            .country-card-name {
+                font-size: 14px;
+            }
+
+            .country-card-count {
+                font-size: 12px;
+            }
+
+            .country-card-badge {
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                min-width: 24px;
+                height: 24px;
+                font-size: 11px;
+            }
+
+            .country-card {
+                position: relative;
+            }
+
+            .selected-country-flag {
+                font-size: 42px;
+            }
+
+            .selected-country-name {
+                font-size: 24px;
+            }
+
+            .center-filter-section {
+                padding: 16px;
+            }
+
+            .center-filter-options {
+                gap: 8px;
+            }
+
+            .center-filter-chip {
+                padding: 8px 14px;
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .country-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .country-card {
+                flex-direction: row;
+                text-align: left;
+            }
+
+            .country-card-badge {
+                position: static;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -20,8 +1476,17 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
-                    <span class="logo-icon">🎫</span>
-                    <span class="logo-text">VISARD Monitor</span>
+                    <div class="logo-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
+                            <path d="M13 5v2" />
+                            <path d="M13 17v2" />
+                            <path d="M13 11v2" />
+                        </svg>
+                    </div>
+                    <span class="logo-text">VisaD Notify</span>
                 </div>
                 <div class="connection-badge" id="connectionStatus">
                     <span class="status-dot"></span>
@@ -30,18 +1495,48 @@
             </div>
 
             <nav class="sidebar-nav">
-                <button class="nav-item active" data-view="all-messages">
-                    <span class="nav-icon">📬</span>
+                <button class="nav-item active" data-view="filtered">
+                    <span class="nav-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                        </svg>
+                    </span>
+                    <span class="nav-text">VisaD Notify</span>
+                    <span class="nav-badge" id="filteredBadge">0</span>
+                </button>
+                <button class="nav-item" data-view="all-messages">
+                    <span class="nav-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                        </svg>
+                    </span>
                     <span class="nav-text">All Messages</span>
                     <span class="nav-badge" id="allMessagesBadge">0</span>
                 </button>
-                <button class="nav-item" data-view="filtered">
-                    <span class="nav-icon">🔍</span>
-                    <span class="nav-text">Filtered Alerts</span>
-                    <span class="nav-badge" id="filteredBadge">0</span>
+                <button class="nav-item" data-view="country">
+                    <span class="nav-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+                            <path d="M2 12h20" />
+                        </svg>
+                    </span>
+                    <span class="nav-text">Country</span>
+                    <span class="nav-badge" id="countryBadge">0</span>
                 </button>
                 <button class="nav-item" data-view="settings">
-                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                    </span>
                     <span class="nav-text">Settings</span>
                 </button>
             </nav>
@@ -53,19 +1548,32 @@
                 </div>
                 <div class="stat-item">
                     <div class="stat-label">Last Update</div>
-                    <div class="stat-value" id="lastUpdate">Never</div>
+                    <div class="stat-value" id="lastUpdate">--:--</div>
                 </div>
             </div>
 
             <div class="sidebar-footer">
-                <button class="btn-icon" id="clearAllBtn" title="Clear all messages">
-                    <span>🗑️</span>
-                </button>
                 <button class="btn-icon" id="exportBtn" title="Export data">
-                    <span>📥</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" x2="12" y1="15" y2="3" />
+                    </svg>
+                </button>
+                <button class="btn-icon" id="themeToggleBtn" title="Toggle theme">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="themeIcon">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                    </svg>
                 </button>
                 <button class="btn-icon" id="soundToggle" title="Toggle sound">
-                    <span id="soundIcon">🔔</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="soundIcon">
+                        <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                    </svg>
                 </button>
             </div>
         </aside>
@@ -73,42 +1581,83 @@
         <!-- Main Content -->
         <main class="main-content">
             <!-- All Messages View -->
-            <div class="view-container active" id="allMessagesView">
+            <div class="view-container" id="allMessagesView">
                 <div class="view-header">
                     <div>
-                        <h1 class="view-title">All Messages from VISARD</h1>
+                        <h1 class="view-title">All Messages</h1>
                         <p class="view-subtitle">Real-time visa slot availability updates</p>
                     </div>
                     <div class="header-actions">
+                        <button class="btn btn-sound muted" id="allMessagesSoundBtn" title="Sound is muted">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="sound-off">
+                                <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+                                <line x1="22" x2="16" y1="9" y2="15" />
+                                <line x1="16" x2="22" y1="9" y2="15" />
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="sound-on">
+                                <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+                                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                            </svg>
+                            <span class="sound-label">Muted</span>
+                        </button>
                         <button class="btn btn-secondary" id="refreshBtn">
-                            <span>🔄</span> Refresh
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                                <path d="M21 3v5h-5" />
+                            </svg>
+                            Refresh
                         </button>
                     </div>
                 </div>
 
                 <div class="messages-grid" id="allMessagesList">
                     <div class="empty-state">
-                        <div class="empty-icon">👀</div>
-                        <h3>Loading messages...</h3>
-                        <p>Please wait...</p>
+                        <div class="empty-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                                <path d="M8 10h.01" />
+                                <path d="M12 10h.01" />
+                                <path d="M16 10h.01" />
+                            </svg>
+                        </div>
+                        <h3>Waiting for messages...</h3>
+                        <p>All messages will appear here</p>
                     </div>
-                </div>
-
-                <!-- Load More Button -->
-                <div class="load-more-container" id="loadMoreContainer"
-                    style="display: none; text-align: center; margin-top: 2rem;">
-                    <button class="btn btn-secondary" id="loadMoreBtn">
-                        <span>⬇️</span> Load More Messages
-                    </button>
                 </div>
             </div>
 
-            <!-- Filtered View -->
-            <div class="view-container" id="filteredView">
+            <!-- VisaD Notify View -->
+            <div class="view-container active" id="filteredView">
                 <div class="view-header">
                     <div>
-                        <h1 class="view-title">Filtered Alerts</h1>
+                        <h1 class="view-title">VisaD Notify</h1>
                         <p class="view-subtitle">Search and filter visa slots by keywords</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-sound active" id="visadNotifySoundBtn" title="Sound is on">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="sound-off">
+                                <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+                                <line x1="22" x2="16" y1="9" y2="15" />
+                                <line x1="16" x2="22" y1="9" y2="15" />
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="sound-on">
+                                <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+                                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                            </svg>
+                            <span class="sound-label">Sound On</span>
+                        </button>
                     </div>
                 </div>
 
@@ -117,10 +1666,20 @@
                         <input type="text" id="filterInput" class="filter-input"
                             placeholder="Enter keywords (e.g., France, Edinburgh, Prime Time, Germany)">
                         <button class="btn btn-primary" id="applyFilterBtn">
-                            <span>�</span> Filter
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="m21 21-4.3-4.3" />
+                            </svg>
+                            Filter
                         </button>
                         <button class="btn btn-secondary" id="clearFilterBtn">
-                            <span>✕</span> Clear
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 6 6 18" />
+                                <path d="m6 6 12 12" />
+                            </svg>
+                            Clear
                         </button>
                     </div>
                     <div class="active-filters" id="activeFilters"></div>
@@ -128,117 +1687,1305 @@
 
                 <div class="messages-grid" id="filteredMessagesList">
                     <div class="empty-state">
-                        <div class="empty-icon">🔍</div>
+                        <div class="empty-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                            </svg>
+                        </div>
                         <h3>No filter applied</h3>
-                        <p>Enter keywords above to filter visa slot messages</p>
+                        <p>Enter keywords above to get notified for matching visa slots</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Settings View -->
-            <div class="view-container" id="settingsView">
-                <div class="view-header">
-                    <div>
-                        <h1 class="view-title">Settings</h1>
-                        <p class="view-subtitle">Configure your monitoring preferences</p>
+            <!-- Country View -->
+            <div class="view-container" id="countryView">
+                <!-- Country Selection Panel (shown when no country selected) -->
+                <div id="countrySelectionPanel">
+                    <div class="view-header">
+                        <div>
+                            <h1 class="view-title">Country</h1>
+                            <p class="view-subtitle">Select a country to view messages</p>
+                        </div>
+                    </div>
+                    <div class="country-grid" id="countryGrid">
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+                                    <path d="M2 12h20" />
+                                </svg>
+                            </div>
+                            <h3>Waiting for messages...</h3>
+                            <p>Countries will appear here when messages arrive</p>
+                        </div>
                     </div>
                 </div>
 
-                <div class="settings-grid">
-                    <div class="setting-card">
-                        <h3>🔔 Notifications</h3>
-                        <div class="setting-item">
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="soundEnabledToggle" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <div>
-                                <div class="setting-label">Sound Alerts</div>
-                                <div class="setting-description">Play sound when new messages arrive</div>
-                            </div>
-                        </div>
-                        <div class="setting-item">
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="desktopNotifications">
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <div>
-                                <div class="setting-label">Desktop Notifications</div>
-                                <div class="setting-description">Show browser notifications</div>
-                            </div>
-                        </div>
-                        <div class="setting-item" style="flex-direction: column; align-items: stretch;">
-                            <div>
-                                <div class="setting-label">Alert Volume</div>
-                                <div class="setting-description">Adjust bell sound loudness</div>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.75rem;">
-                                <span style="font-size: 1.25rem;">🔉</span>
-                                <input type="range" id="volumeSlider" min="0" max="100" value="80" style="flex: 1; height: 6px; border-radius: 999px; background: var(--bg-tertiary); 
-                                              outline: none; -webkit-appearance: none; appearance: none;">
-                                <span style="font-size: 1.25rem;">🔊</span>
-                                <span id="volumeValue"
-                                    style="min-width: 3rem; text-align: right; font-weight: 600;">80%</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="setting-card">
-                        <h3>📊 Display</h3>
-                        <div class="setting-item">
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="autoRefresh" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <div>
-                                <div class="setting-label">Auto Refresh</div>
-                                <div class="setting-description">Automatically update message list</div>
-                            </div>
-                        </div>
-                        <div class="setting-item">
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="compactMode">
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <div>
-                                <div class="setting-label">Compact Mode</div>
-                                <div class="setting-description">Show more messages in less space</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="setting-card">
-                        <h3>💾 Data Management</h3>
-                        <button class="btn btn-secondary btn-block" id="exportDataBtn">
-                            <span>📥</span> Export All Data
+                <!-- Country Detail Panel (shown when a country is selected) -->
+                <div id="countryDetailPanel" style="display: none;">
+                    <div class="country-detail-header">
+                        <button class="back-btn" id="backToCountriesBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m15 18-6-6 6-6" />
+                            </svg>
+                            Back to Countries
                         </button>
-                        <button class="btn btn-danger btn-block" id="clearDataBtn">
-                            <span>🗑️</span> Clear All Messages
-                        </button>
+                        <div class="selected-country-info">
+                            <span class="selected-country-flag" id="selectedCountryFlag">🇬🇧</span>
+                            <div class="selected-country-details">
+                                <h1 class="selected-country-name" id="selectedCountryName">United Kingdom</h1>
+                                <p class="selected-country-stats" id="selectedCountryStats">0 messages</p>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="setting-card">
-                        <h3>ℹ️ Information</h3>
-                        <div class="info-item">
-                            <span class="info-label">Bot Name:</span>
-                            <span class="info-value">VISARD</span>
+                    <!-- Center Filter Section -->
+                    <div class="center-filter-section">
+                        <div class="center-filter-header">
+                            <h3>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                                </svg>
+                                Filter by Center
+                            </h3>
+                            <button class="btn btn-secondary btn-small" id="clearCenterFiltersBtn">
+                                Clear All
+                            </button>
                         </div>
-                        <div class="info-item">
-                            <span class="info-label">Connection:</span>
-                            <span class="info-value">MTProto</span>
+                        <div class="center-filter-options" id="centerFilterOptions">
+                            <!-- Center filter buttons will be dynamically added here -->
                         </div>
-                        <div class="info-item">
-                            <span class="info-label">Total Messages:</span>
-                            <span class="info-value" id="totalMessagesInfo">0</span>
+                    </div>
+
+                    <!-- Messages List -->
+                    <div class="country-messages-container" id="countryMessagesContainer">
+                        <div class="empty-state">
+                            <h3>No messages</h3>
+                            <p>No messages found for selected filters</p>
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
     </div>
 
+    <!-- Settings View -->
+    <div class="view-container" id="settingsView">
+        <div class="view-header">
+            <div>
+                <h1 class="view-title">Settings</h1>
+                <p class="view-subtitle">Configure your monitoring preferences</p>
+            </div>
+        </div>
+
+        <div class="settings-grid">
+            <div class="setting-card">
+                <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                    </svg>
+                    Notifications
+                </h3>
+                <div class="setting-item">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="soundEnabledToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <div>
+                        <div class="setting-label">Sound Alerts</div>
+                        <div class="setting-description">Play sound when new messages arrive</div>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="desktopNotifications">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <div>
+                        <div class="setting-label">Desktop Notifications</div>
+                        <div class="setting-description">Show browser notifications</div>
+                    </div>
+                </div>
+                <div class="setting-item" style="flex-direction: column; align-items: stretch;">
+                    <div>
+                        <div class="setting-label">Alert Volume</div>
+                        <div class="setting-description">Adjust bell sound loudness</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.75rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            style="color: var(--text-tertiary);">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                        </svg>
+                        <input type="range" id="volumeSlider" min="0" max="100" value="80" style="flex: 1;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            style="color: var(--text-tertiary);">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                        </svg>
+                        <span id="volumeValue"
+                            style="min-width: 3rem; text-align: right; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary);">80%</span>
+                        <button id="testSoundBtn"
+                            style="margin-left: 10px; padding: 6px 12px; background: var(--accent-primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">🐓
+                            Test</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-card">
+                <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="18" height="18" x="3" y="3" rx="2" />
+                        <path d="M3 9h18" />
+                        <path d="M9 21V9" />
+                    </svg>
+                    Display
+                </h3>
+                <div class="setting-item">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="autoRefresh" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <div>
+                        <div class="setting-label">Auto Refresh</div>
+                        <div class="setting-description">Automatically update message list</div>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="compactMode">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <div>
+                        <div class="setting-label">Compact Mode</div>
+                        <div class="setting-description">Show more messages in less space</div>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="darkModeToggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <div>
+                        <div class="setting-label">Dark Mode</div>
+                        <div class="setting-description">Switch to dark theme</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-card">
+                <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <ellipse cx="12" cy="5" rx="9" ry="3" />
+                        <path d="M3 5V19A9 3 0 0 0 21 19V5" />
+                        <path d="M3 12A9 3 0 0 0 21 12" />
+                    </svg>
+                    Data Management
+                </h3>
+                <button class="btn btn-secondary btn-block" id="exportDataBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" x2="12" y1="15" y2="3" />
+                    </svg>
+                    Export All Data
+                </button>
+            </div>
+
+            <div class="setting-card">
+                <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 16v-4" />
+                        <path d="M12 8h.01" />
+                    </svg>
+                    Information
+                </h3>
+                <div class="info-item">
+                    <span class="info-label">Bot Name</span>
+                    <span class="info-value">visard</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Connection</span>
+                    <span class="info-value">MTProto</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Total Messages</span>
+                    <span class="info-value" id="totalMessagesInfo">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    </main>
+    </div>
+
+    <!-- Socket.IO - Local version with path detection -->
     <script src="noti/socket.io/socket.io.js"></script>
-    <script src="app.js"></script>
+
+    <script>
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+
+                const viewId = item.dataset.view;
+                document.querySelectorAll('.view-container').forEach(view => view.classList.remove('active'));
+
+                if (viewId === 'all-messages') {
+                    document.getElementById('allMessagesView').classList.add('active');
+                } else if (viewId === 'filtered') {
+                    document.getElementById('filteredView').classList.add('active');
+                } else if (viewId === 'country') {
+                    document.getElementById('countryView').classList.add('active');
+                    renderCountryView();
+                } else if (viewId === 'settings') {
+                    document.getElementById('settingsView').classList.add('active');
+                }
+            });
+        });
+
+        // Volume slider
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeValue = document.getElementById('volumeValue');
+        volumeSlider.addEventListener('input', () => {
+            volumeValue.textContent = volumeSlider.value + '%';
+        });
+
+        // Test sound button
+        document.getElementById('testSoundBtn').addEventListener('click', () => {
+            console.log('🐓 Testing rooster sound...');
+            playNotificationSound();
+        });
+
+        // ============================================
+        // THEME TOGGLE (Dark/Light Mode)
+        // ============================================
+
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const themeIcon = document.getElementById('themeIcon');
+
+        // Update theme icon
+        function updateThemeIcon(isDark) {
+            if (isDark) {
+                // Sun icon for dark mode (click to go light)
+                themeIcon.innerHTML = `
+                    <circle cx="12" cy="12" r="4"/>
+                    <path d="M12 2v2"/>
+                    <path d="M12 20v2"/>
+                    <path d="m4.93 4.93 1.41 1.41"/>
+                    <path d="m17.66 17.66 1.41 1.41"/>
+                    <path d="M2 12h2"/>
+                    <path d="M20 12h2"/>
+                    <path d="m6.34 17.66-1.41 1.41"/>
+                    <path d="m19.07 4.93-1.41 1.41"/>
+                `;
+                themeToggleBtn.title = 'Switch to light mode';
+            } else {
+                // Moon icon for light mode (click to go dark)
+                themeIcon.innerHTML = `
+                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                `;
+                themeToggleBtn.title = 'Switch to dark mode';
+            }
+        }
+
+        // Load saved theme preference
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('visad-theme');
+            if (savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                darkModeToggle.checked = true;
+                updateThemeIcon(true);
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                darkModeToggle.checked = false;
+                updateThemeIcon(false);
+            }
+        }
+
+        // Toggle theme
+        function setTheme(isDark) {
+            if (isDark) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('visad-theme', 'dark');
+                darkModeToggle.checked = true;
+                updateThemeIcon(true);
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('visad-theme', 'light');
+                darkModeToggle.checked = false;
+                updateThemeIcon(false);
+            }
+        }
+
+        // Settings toggle handler
+        darkModeToggle.addEventListener('change', () => {
+            setTheme(darkModeToggle.checked);
+        });
+
+        // Sidebar button handler
+        themeToggleBtn.addEventListener('click', () => {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            setTheme(!isDark);
+        });
+
+        // Load theme on page load
+        loadTheme();
+
+        // Sound settings state
+        let allMessagesSound = false; // Muted by default
+        let visadNotifySound = true;  // Sound on by default
+
+        // All Messages sound toggle
+        const allMessagesSoundBtn = document.getElementById('allMessagesSoundBtn');
+        allMessagesSoundBtn.addEventListener('click', () => {
+            allMessagesSound = !allMessagesSound;
+            if (allMessagesSound) {
+                allMessagesSoundBtn.classList.remove('muted');
+                allMessagesSoundBtn.classList.add('active');
+                allMessagesSoundBtn.querySelector('.sound-label').textContent = 'Sound On';
+                allMessagesSoundBtn.title = 'Sound is on';
+            } else {
+                allMessagesSoundBtn.classList.remove('active');
+                allMessagesSoundBtn.classList.add('muted');
+                allMessagesSoundBtn.querySelector('.sound-label').textContent = 'Muted';
+                allMessagesSoundBtn.title = 'Sound is muted';
+            }
+        });
+
+        // VisaD Notify sound toggle
+        const visadNotifySoundBtn = document.getElementById('visadNotifySoundBtn');
+        visadNotifySoundBtn.addEventListener('click', () => {
+            visadNotifySound = !visadNotifySound;
+            if (visadNotifySound) {
+                visadNotifySoundBtn.classList.remove('muted');
+                visadNotifySoundBtn.classList.add('active');
+                visadNotifySoundBtn.querySelector('.sound-label').textContent = 'Sound On';
+                visadNotifySoundBtn.title = 'Sound is on';
+            } else {
+                visadNotifySoundBtn.classList.remove('active');
+                visadNotifySoundBtn.classList.add('muted');
+                visadNotifySoundBtn.querySelector('.sound-label').textContent = 'Muted';
+                visadNotifySoundBtn.title = 'Sound is muted';
+            }
+        });
+
+        // Global sound toggle in sidebar footer (affects master volume)
+        let globalSoundEnabled = true;
+        document.getElementById('soundToggle').addEventListener('click', () => {
+            globalSoundEnabled = !globalSoundEnabled;
+            const icon = document.getElementById('soundIcon');
+            if (globalSoundEnabled) {
+                icon.innerHTML = `
+                    <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                `;
+            } else {
+                icon.innerHTML = `
+                    <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
+                    <line x1="22" x2="16" y1="9" y2="15"/>
+                    <line x1="16" x2="22" y1="9" y2="15"/>
+                `;
+            }
+        });
+
+        // Helper function to check if sound should play
+        function shouldPlaySound(type) {
+            if (!globalSoundEnabled) return false;
+            if (type === 'all-messages') return allMessagesSound;
+            if (type === 'visad-notify') return visadNotifySound;
+            return false;
+        }
+
+        // Message counters
+        let allMessagesCount = 0;
+        let filteredMessagesCount = 0;
+        let todayCount = 0;
+
+        // Create message HTML
+        function createMessageHTML(message, isHighlight = false) {
+            const timestamp = message.timestamp || Date.now();
+            const date = new Date(timestamp);
+            const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+            let content = message.message || message.content || message.text || '';
+
+            // Clean up content - remove "Link to visa center site"
+            let cleanContent = content
+                .replace(/Link to visa center site/gi, '')
+                .replace(/link to visa center/gi, '')
+                .trim();
+
+            // Detect center
+            let center = 'Other';
+            const centersList = ['London', 'Manchester', 'Edinburgh', 'Birmingham', 'Belfast', 'Cardiff', 'Glasgow', 'Paris', 'Berlin', 'Munich', 'Rome', 'Milan', 'Madrid', 'Barcelona', 'Amsterdam', 'Brussels'];
+            for (const c of centersList) {
+                if (content.toLowerCase().includes(c.toLowerCase())) {
+                    center = c;
+                    break;
+                }
+            }
+
+            // Detect if Prime Time
+            const isPrimeTime = content.toLowerCase().includes('prime time') ||
+                content.toLowerCase().includes('primetime');
+
+            return `
+                <div class="message-card ${isHighlight ? 'highlight' : ''}">
+                    <div class="message-header">
+                        <div class="message-meta">
+                            <span class="message-time">${time}</span>
+                            <span class="message-center">📍${center}</span>
+                        </div>
+                        <span class="message-badge ${isPrimeTime ? 'prime' : ''}">${isPrimeTime ? '⭐PRIME' : '📅REG'}</span>
+                    </div>
+                    <div class="message-content">${cleanContent}</div>
+                </div>
+            `;
+        }
+
+        // Helper functions moved after main function
+        // Store all messages for re-filtering
+        let allStoredMessages = [];
+
+        // Add message to All Messages
+        function addToAllMessages(message) {
+            const container = document.getElementById('allMessagesList');
+            const emptyState = container.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+
+            // Store message for re-filtering
+            allStoredMessages.unshift(message);
+
+            container.insertAdjacentHTML('afterbegin', createMessageHTML(message));
+            allMessagesCount++;
+            document.getElementById('allMessagesBadge').textContent = allMessagesCount;
+            todayCount++;
+            document.getElementById('todayCount').textContent = todayCount;
+            document.getElementById('totalMessagesInfo').textContent = allMessagesCount;
+            updateTime();
+
+            // Also track by country
+            addToCountryMessages(message);
+        }
+
+        // Add message to VisaD Notify (filtered) - only called for new incoming messages
+        function addToFilteredMessages(message, isHighlight = true, playSound = true) {
+            const container = document.getElementById('filteredMessagesList');
+            const emptyState = container.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+
+            container.insertAdjacentHTML('afterbegin', createMessageHTML(message, isHighlight));
+            filteredMessagesCount++;
+            document.getElementById('filteredBadge').textContent = filteredMessagesCount;
+            updateTime();
+
+            // Play sound if enabled
+            if (playSound && shouldPlaySound('visad-notify')) {
+                playNotificationSound();
+            }
+        }
+
+        // Add message to both views
+        function addMessage(message, matchesFilter = false) {
+            addToAllMessages(message);
+            if (matchesFilter) {
+                addToFilteredMessages(message, true);
+            }
+
+            // Play sound based on context
+            if (matchesFilter && shouldPlaySound('visad-notify')) {
+                playNotificationSound();
+            } else if (!matchesFilter && shouldPlaySound('all-messages')) {
+                playNotificationSound();
+            }
+        }
+
+        // Notification sound
+        function playNotificationSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const vol = volumeSlider ? (parseInt(volumeSlider.value) / 100) * 0.5 : 0.3;
+
+                // Rooster crow sound
+                function playNote(startTime, freq, duration, freqEnd = null) {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(freq, startTime);
+                    if (freqEnd) {
+                        osc.frequency.linearRampToValueAtTime(freqEnd, startTime + duration * 0.8);
+                    }
+
+                    gain.gain.setValueAtTime(0, startTime);
+                    gain.gain.linearRampToValueAtTime(vol, startTime + 0.01);
+                    gain.gain.linearRampToValueAtTime(0, startTime + duration);
+
+                    osc.start(startTime);
+                    osc.stop(startTime + duration);
+                }
+
+                const now = audioContext.currentTime;
+
+                // "Cock-a-doodle-doo" pattern
+                playNote(now, 500, 0.12, 700);          // Cock
+                playNote(now + 0.15, 400, 0.06);        // a
+                playNote(now + 0.23, 550, 0.1, 650);    // doo
+                playNote(now + 0.35, 600, 0.08, 680);   // dle
+                playNote(now + 0.45, 450, 0.35, 800);   // dooo!
+
+                console.log('🐓 Rooster sound played!');
+            } catch (e) {
+                console.log('Audio error:', e);
+            }
+        }
+
+        // Update time display
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent =
+                now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // ============================================
+        // FILTER FUNCTIONALITY
+        // ============================================
+
+        let activeFilters = [];
+        const filterInput = document.getElementById('filterInput');
+        const applyFilterBtn = document.getElementById('applyFilterBtn');
+        const clearFilterBtn = document.getElementById('clearFilterBtn');
+        const activeFiltersContainer = document.getElementById('activeFilters');
+
+        function renderFilters() {
+            activeFiltersContainer.innerHTML = activeFilters.map(filter => `
+                <span class="filter-tag">
+                    ${filter}
+                    <button onclick="removeFilter('${filter}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                        </svg>
+                    </button>
+                </span>
+            `).join('');
+        }
+
+        function addFilter(keyword) {
+            const trimmed = keyword.trim();
+            if (trimmed && !activeFilters.includes(trimmed)) {
+                activeFilters.push(trimmed);
+                renderFilters();
+                filterInput.value = '';
+                refilterMessages(); // Re-filter when adding filter
+            }
+        }
+
+        function removeFilter(keyword) {
+            activeFilters = activeFilters.filter(f => f !== keyword);
+            renderFilters();
+            refilterMessages(); // Re-filter when removing filter
+        }
+
+        function matchesFilter(messageText) {
+            if (activeFilters.length === 0) return true;
+            const text = (messageText || '').toLowerCase();
+            return activeFilters.some(filter => text.includes(filter.toLowerCase()));
+        }
+
+        // Re-filter all stored messages
+        function refilterMessages() {
+            const container = document.getElementById('filteredMessagesList');
+
+            // Filter messages that match
+            const filteredMessages = allStoredMessages.filter(msg => {
+                const content = msg.message || msg.content || msg.text || '';
+                return matchesFilter(content);
+            });
+
+            // Update count
+            filteredMessagesCount = filteredMessages.length;
+            document.getElementById('filteredBadge').textContent = filteredMessagesCount;
+
+            // Clear and re-render
+            if (filteredMessages.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                            </svg>
+                        </div>
+                        <h3>${activeFilters.length > 0 ? 'No matching messages' : 'No filter applied'}</h3>
+                        <p>${activeFilters.length > 0 ? 'Try different keywords' : 'Enter keywords above to filter visa slots'}</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = filteredMessages.map(msg => createMessageHTML(msg, true)).join('');
+            }
+        }
+
+        applyFilterBtn.addEventListener('click', () => addFilter(filterInput.value));
+        filterInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addFilter(filterInput.value);
+        });
+        clearFilterBtn.addEventListener('click', () => {
+            activeFilters = [];
+            renderFilters();
+            filterInput.value = '';
+            refilterMessages(); // Re-filter when clearing
+        });
+
+        // ============================================
+        // COUNTRY VIEW FUNCTIONALITY
+        // ============================================
+
+        // Country data with flags and visa application centers
+        const countryData = {
+            'France': { flag: '🇫🇷', code: 'FR', centers: ['Paris', 'Lyon', 'Marseille', 'Toulouse', 'Bordeaux', 'Strasbourg'] },
+            'Germany': { flag: '🇩🇪', code: 'DE', centers: ['Berlin', 'Munich', 'Frankfurt', 'Hamburg', 'Dusseldorf', 'Stuttgart'] },
+            'UK': { flag: '🇬🇧', code: 'GB', centers: ['London', 'Manchester', 'Edinburgh', 'Birmingham', 'Belfast', 'Cardiff', 'Glasgow'] },
+            'United Kingdom': { flag: '🇬🇧', code: 'GB', centers: ['London', 'Manchester', 'Edinburgh', 'Birmingham', 'Belfast', 'Cardiff', 'Glasgow'] },
+            'USA': { flag: '🇺🇸', code: 'US', centers: ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Miami', 'San Francisco', 'Washington'] },
+            'United States': { flag: '🇺🇸', code: 'US', centers: ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Miami', 'San Francisco', 'Washington'] },
+            'Canada': { flag: '🇨🇦', code: 'CA', centers: ['Toronto', 'Vancouver', 'Montreal', 'Calgary', 'Ottawa'] },
+            'Australia': { flag: '🇦🇺', code: 'AU', centers: ['Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adelaide'] },
+            'Italy': { flag: '🇮🇹', code: 'IT', centers: ['Rome', 'Milan', 'Florence', 'Naples', 'Venice', 'Turin'] },
+            'Spain': { flag: '🇪🇸', code: 'ES', centers: ['Madrid', 'Barcelona', 'Valencia', 'Seville', 'Bilbao'] },
+            'Netherlands': { flag: '🇳🇱', code: 'NL', centers: ['Amsterdam', 'Rotterdam', 'The Hague', 'Utrecht'] },
+            'Belgium': { flag: '🇧🇪', code: 'BE', centers: ['Brussels', 'Antwerp', 'Ghent'] },
+            'Switzerland': { flag: '🇨🇭', code: 'CH', centers: ['Zurich', 'Geneva', 'Bern', 'Basel'] },
+            'Austria': { flag: '🇦🇹', code: 'AT', centers: ['Vienna', 'Salzburg', 'Innsbruck'] },
+            'Portugal': { flag: '🇵🇹', code: 'PT', centers: ['Lisbon', 'Porto'] },
+            'Ireland': { flag: '🇮🇪', code: 'IE', centers: ['Dublin', 'Cork'] },
+            'Poland': { flag: '🇵🇱', code: 'PL', centers: ['Warsaw', 'Krakow', 'Gdansk'] },
+            'Sweden': { flag: '🇸🇪', code: 'SE', centers: ['Stockholm', 'Gothenburg', 'Malmo'] },
+            'Norway': { flag: '🇳🇴', code: 'NO', centers: ['Oslo', 'Bergen'] },
+            'Denmark': { flag: '🇩🇰', code: 'DK', centers: ['Copenhagen'] },
+            'Finland': { flag: '🇫🇮', code: 'FI', centers: ['Helsinki'] },
+            'Greece': { flag: '🇬🇷', code: 'GR', centers: ['Athens', 'Thessaloniki'] },
+            'Czech Republic': { flag: '🇨🇿', code: 'CZ', centers: ['Prague', 'Brno'] },
+            'Czechia': { flag: '🇨🇿', code: 'CZ', centers: ['Prague', 'Brno'] },
+            'Hungary': { flag: '🇭🇺', code: 'HU', centers: ['Budapest'] },
+            'Romania': { flag: '🇷🇴', code: 'RO', centers: ['Bucharest'] },
+            'Bulgaria': { flag: '🇧🇬', code: 'BG', centers: ['Sofia'] },
+            'Croatia': { flag: '🇭🇷', code: 'HR', centers: ['Zagreb'] },
+            'Slovenia': { flag: '🇸🇮', code: 'SI', centers: ['Ljubljana'] },
+            'Slovakia': { flag: '🇸🇰', code: 'SK', centers: ['Bratislava'] },
+            'Luxembourg': { flag: '🇱🇺', code: 'LU', centers: ['Luxembourg City'] },
+            'Malta': { flag: '🇲🇹', code: 'MT', centers: ['Valletta'] },
+            'Cyprus': { flag: '🇨🇾', code: 'CY', centers: ['Nicosia'] },
+            'Estonia': { flag: '🇪🇪', code: 'EE', centers: ['Tallinn'] },
+            'Latvia': { flag: '🇱🇻', code: 'LV', centers: ['Riga'] },
+            'Lithuania': { flag: '🇱🇹', code: 'LT', centers: ['Vilnius'] },
+            'Iceland': { flag: '🇮🇸', code: 'IS', centers: ['Reykjavik'] },
+            'Japan': { flag: '🇯🇵', code: 'JP', centers: ['Tokyo', 'Osaka'] },
+            'South Korea': { flag: '🇰🇷', code: 'KR', centers: ['Seoul', 'Busan'] },
+            'Korea': { flag: '🇰🇷', code: 'KR', centers: ['Seoul', 'Busan'] },
+            'China': { flag: '🇨🇳', code: 'CN', centers: ['Beijing', 'Shanghai', 'Guangzhou'] },
+            'India': { flag: '🇮🇳', code: 'IN', centers: ['New Delhi', 'Mumbai', 'Bangalore', 'Chennai', 'Hyderabad', 'Kolkata', 'Ahmedabad', 'Pune', 'Chandigarh', 'Jaipur', 'Kochi', 'Jalandhar'] },
+            'Singapore': { flag: '🇸🇬', code: 'SG', centers: ['Singapore'] },
+            'New Zealand': { flag: '🇳🇿', code: 'NZ', centers: ['Auckland', 'Wellington'] },
+            'Brazil': { flag: '🇧🇷', code: 'BR', centers: ['Sao Paulo', 'Rio de Janeiro', 'Brasilia'] },
+            'Mexico': { flag: '🇲🇽', code: 'MX', centers: ['Mexico City', 'Guadalajara'] },
+            'Argentina': { flag: '🇦🇷', code: 'AR', centers: ['Buenos Aires'] },
+            'UAE': { flag: '🇦🇪', code: 'AE', centers: ['Dubai', 'Abu Dhabi'] },
+            'Turkey': { flag: '🇹🇷', code: 'TR', centers: ['Istanbul', 'Ankara'] },
+            'Russia': { flag: '🇷🇺', code: 'RU', centers: ['Moscow', 'Saint Petersburg'] },
+            'Ukraine': { flag: '🇺🇦', code: 'UA', centers: ['Kyiv'] },
+            'South Africa': { flag: '🇿🇦', code: 'ZA', centers: ['Johannesburg', 'Cape Town', 'Pretoria'] },
+            'Egypt': { flag: '🇪🇬', code: 'EG', centers: ['Cairo', 'Alexandria'] },
+            'Thailand': { flag: '🇹🇭', code: 'TH', centers: ['Bangkok', 'Chiang Mai'] },
+            'Malaysia': { flag: '🇲🇾', code: 'MY', centers: ['Kuala Lumpur'] },
+            'Indonesia': { flag: '🇮🇩', code: 'ID', centers: ['Jakarta', 'Bali'] },
+            'Philippines': { flag: '🇵🇭', code: 'PH', centers: ['Manila', 'Cebu'] },
+            'Vietnam': { flag: '🇻🇳', code: 'VN', centers: ['Hanoi', 'Ho Chi Minh City'] },
+            'Pakistan': { flag: '🇵🇰', code: 'PK', centers: ['Islamabad', 'Karachi', 'Lahore'] },
+            'Bangladesh': { flag: '🇧🇩', code: 'BD', centers: ['Dhaka'] },
+            'Sri Lanka': { flag: '🇱🇰', code: 'LK', centers: ['Colombo'] },
+            'Nepal': { flag: '🇳🇵', code: 'NP', centers: ['Kathmandu'] },
+            'Schengen': { flag: '🇪🇺', code: 'EU', centers: [] }
+        };
+
+        // Store messages by country and center
+        let messagesByCountry = {};
+        let selectedCountry = null;
+        let selectedCenterFilters = []; // Array of selected center filters
+
+        // Extract country from message content
+        function extractCountry(messageContent) {
+            const content = (messageContent || '').toLowerCase();
+
+            // Check each country name first
+            for (const [name, data] of Object.entries(countryData)) {
+                if (content.includes(name.toLowerCase())) {
+                    return name;
+                }
+            }
+            return 'Other';
+        }
+
+        // Global list of visa application centers to detect in messages
+        const visaCenters = [
+            'London', 'Manchester', 'Edinburgh', 'Birmingham', 'Belfast', 'Cardiff', 'Glasgow',
+            'Paris', 'Lyon', 'Marseille', 'Toulouse', 'Bordeaux', 'Strasbourg',
+            'Berlin', 'Munich', 'Frankfurt', 'Hamburg', 'Dusseldorf', 'Stuttgart',
+            'New York', 'Los Angeles', 'Chicago', 'Houston', 'Miami', 'San Francisco', 'Washington',
+            'Toronto', 'Vancouver', 'Montreal', 'Calgary', 'Ottawa',
+            'Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adelaide',
+            'Rome', 'Milan', 'Florence', 'Naples', 'Venice', 'Turin',
+            'Madrid', 'Barcelona', 'Valencia', 'Seville', 'Bilbao',
+            'Amsterdam', 'Rotterdam', 'The Hague', 'Utrecht',
+            'Brussels', 'Antwerp', 'Ghent',
+            'Zurich', 'Geneva', 'Bern', 'Basel',
+            'Vienna', 'Salzburg', 'Innsbruck',
+            'Dublin', 'Cork',
+            'New Delhi', 'Mumbai', 'Bangalore', 'Chennai', 'Hyderabad', 'Kolkata', 'Ahmedabad', 'Pune', 'Chandigarh', 'Jaipur', 'Kochi', 'Jalandhar'
+        ];
+
+        // Main UK visa centers (always show these as filter options)
+        const mainUKCenters = ['London', 'Manchester', 'Edinburgh', 'Birmingham'];
+
+        // Extract center from message content (searches globally, not per country)
+        function extractCenter(messageContent) {
+            const content = (messageContent || '').toLowerCase();
+
+            // Check for any known visa center in the message
+            for (const center of visaCenters) {
+                if (content.includes(center.toLowerCase())) {
+                    return center;
+                }
+            }
+            return 'Other';
+        }
+
+        // Get country display info
+        function getCountryInfo(countryName) {
+            if (countryData[countryName]) {
+                return countryData[countryName];
+            }
+            // Handle variations and aliases
+            for (const [name, data] of Object.entries(countryData)) {
+                if (name.toLowerCase() === countryName.toLowerCase()) {
+                    return data;
+                }
+            }
+            return { flag: '🌍', code: 'XX', centers: [] };
+        }
+
+        // Add message to country tracking
+        function addToCountryMessages(message) {
+            const content = message.message || message.content || message.text || '';
+            const country = extractCountry(content);
+            const center = extractCenter(content); // No longer passing country
+
+            if (!messagesByCountry[country]) {
+                messagesByCountry[country] = [];
+            }
+
+            // Add message with timestamp and center
+            messagesByCountry[country].unshift({
+                ...message,
+                extractedCountry: country,
+                extractedCenter: center,
+                addedAt: Date.now()
+            });
+
+            // Update country badge count
+            const uniqueCountries = Object.keys(messagesByCountry).length;
+            document.getElementById('countryBadge').textContent = uniqueCountries;
+        }
+
+        // Get available centers for a country based on messages
+        function getAvailableCenters(country) {
+            const messages = messagesByCountry[country] || [];
+            const centers = new Map();
+
+            // Count messages per center by checking content
+            messages.forEach(msg => {
+                const content = (msg.message || msg.content || msg.text || '').toLowerCase();
+                let foundCenter = null;
+
+                // Check for any known center in the message content
+                for (const center of visaCenters) {
+                    if (content.includes(center.toLowerCase())) {
+                        foundCenter = center;
+                        break;
+                    }
+                }
+
+                const centerKey = foundCenter || 'Other';
+                centers.set(centerKey, (centers.get(centerKey) || 0) + 1);
+            });
+
+            // Sort by count descending, but put "Other" at the end
+            return Array.from(centers.entries())
+                .sort((a, b) => {
+                    if (a[0] === 'Other') return 1;
+                    if (b[0] === 'Other') return -1;
+                    return b[1] - a[1];
+                })
+                .map(([center, count]) => ({ center, count }));
+        }
+
+        // Render country selection grid
+        function renderCountryView() {
+            const container = document.getElementById('countryGrid');
+
+            const countries = Object.keys(messagesByCountry).sort((a, b) => {
+                // Sort by message count (descending), then alphabetically
+                const countDiff = messagesByCountry[b].length - messagesByCountry[a].length;
+                if (countDiff !== 0) return countDiff;
+                return a.localeCompare(b);
+            });
+
+            if (countries.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
+                                <path d="M2 12h20"/>
+                            </svg>
+                        </div>
+                        <h3>Waiting for messages...</h3>
+                        <p>Countries will appear here when messages arrive</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = countries.map(country => {
+                const messages = messagesByCountry[country];
+                const countryInfo = getCountryInfo(country);
+
+                return `
+                    <div class="country-card" onclick="selectCountry('${country}')">
+                        <span class="country-card-flag">${countryInfo.flag}</span>
+                        <div class="country-card-info">
+                            <div class="country-card-name">${country}</div>
+                            <div class="country-card-count">${messages.length} message${messages.length !== 1 ? 's' : ''}</div>
+                        </div>
+                        <span class="country-card-badge">${messages.length}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Select a country and show detail view
+        function selectCountry(country) {
+            selectedCountry = country;
+            selectedCenterFilters = []; // Reset filters
+
+            const countryInfo = getCountryInfo(country);
+            const messages = messagesByCountry[country] || [];
+
+            // Update header
+            document.getElementById('selectedCountryFlag').textContent = countryInfo.flag;
+            document.getElementById('selectedCountryName').textContent = country;
+            document.getElementById('selectedCountryStats').textContent = `${messages.length} message${messages.length !== 1 ? 's' : ''}`;
+
+            // Render center filters
+            renderCenterFilters();
+
+            // Render messages
+            renderCountryMessages();
+
+            // Show detail panel, hide selection panel
+            document.getElementById('countrySelectionPanel').style.display = 'none';
+            document.getElementById('countryDetailPanel').style.display = 'block';
+        }
+
+        // Go back to country selection
+        function backToCountries() {
+            selectedCountry = null;
+            selectedCenterFilters = [];
+
+            document.getElementById('countrySelectionPanel').style.display = 'block';
+            document.getElementById('countryDetailPanel').style.display = 'none';
+
+            renderCountryView();
+        }
+
+        // Render center filter chips
+        function renderCenterFilters() {
+            const container = document.getElementById('centerFilterOptions');
+            const availableCenters = getAvailableCenters(selectedCountry);
+
+            // Always show main UK centers plus any detected centers
+            const allCenters = new Map();
+
+            // Add main UK centers first (always visible)
+            mainUKCenters.forEach(center => {
+                allCenters.set(center, 0);
+            });
+
+            // Add/update counts from detected centers
+            availableCenters.forEach(({ center, count }) => {
+                if (center !== 'Other') {
+                    allCenters.set(center, count);
+                }
+            });
+
+            // Convert to array and sort (centers with messages first, then alphabetically)
+            const sortedCenters = Array.from(allCenters.entries())
+                .sort((a, b) => {
+                    if (b[1] !== a[1]) return b[1] - a[1]; // By count descending
+                    return a[0].localeCompare(b[0]); // Then alphabetically
+                });
+
+            container.innerHTML = sortedCenters.map(([center, count]) => `
+                <button class="center-filter-chip ${selectedCenterFilters.includes(center) ? 'active' : ''} ${count === 0 ? 'no-messages' : ''}" 
+                        onclick="toggleCenterFilter('${center}')">
+                    📍 ${center}
+                    <span class="chip-count">${count}</span>
+                </button>
+            `).join('');
+        }
+
+        // Toggle center filter
+        function toggleCenterFilter(center) {
+            const index = selectedCenterFilters.indexOf(center);
+            if (index > -1) {
+                selectedCenterFilters.splice(index, 1);
+            } else {
+                selectedCenterFilters.push(center);
+            }
+
+            renderCenterFilters();
+            renderCountryMessages();
+        }
+
+        // Clear all center filters
+        function clearAllCenterFilters() {
+            selectedCenterFilters = [];
+            renderCenterFilters();
+            renderCountryMessages();
+        }
+
+        // Render messages for selected country
+        function renderCountryMessages() {
+            const container = document.getElementById('countryMessagesContainer');
+            let messages = messagesByCountry[selectedCountry] || [];
+
+            // Apply center filters if any
+            if (selectedCenterFilters.length > 0) {
+                messages = messages.filter(msg => {
+                    // Check both extracted center and message content
+                    const content = (msg.message || msg.content || msg.text || '').toLowerCase();
+                    return selectedCenterFilters.some(filter =>
+                        msg.extractedCenter === filter || content.includes(filter.toLowerCase())
+                    );
+                });
+            }
+
+            // Update stats
+            const totalMessages = messagesByCountry[selectedCountry]?.length || 0;
+            const filteredCount = messages.length;
+            const statsText = selectedCenterFilters.length > 0
+                ? `Showing ${filteredCount} of ${totalMessages} messages`
+                : `${totalMessages} message${totalMessages !== 1 ? 's' : ''}`;
+            document.getElementById('selectedCountryStats').textContent = statsText;
+
+            if (messages.length === 0) {
+                container.innerHTML = `
+                    <div class="no-messages-found">
+                        <h3>No messages found</h3>
+                        <p>${selectedCenterFilters.length > 0 ? 'Try clearing some filters' : 'No messages for this country yet'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = messages.map(msg => createCountryMessageHTML(msg)).join('');
+        }
+
+        // Create HTML for a message in country view
+        function createCountryMessageHTML(message) {
+            const timestamp = message.timestamp || message.addedAt || Date.now();
+            const date = new Date(timestamp);
+            const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+            let content = message.message || message.content || message.text || '';
+
+            // Clean up content
+            let cleanContent = content
+                .replace(/Link to visa center site/gi, '')
+                .replace(/link to visa center/gi, '')
+                .trim();
+
+            // Detect center
+            let center = message.extractedCenter || 'Other';
+            if (center === 'Other') {
+                const centersList = ['London', 'Manchester', 'Edinburgh', 'Birmingham', 'Belfast', 'Cardiff', 'Glasgow', 'Paris', 'Berlin', 'Amsterdam'];
+                for (const c of centersList) {
+                    if (content.toLowerCase().includes(c.toLowerCase())) {
+                        center = c;
+                        break;
+                    }
+                }
+            }
+
+            const isPrimeTime = content.toLowerCase().includes('prime time') ||
+                content.toLowerCase().includes('primetime');
+
+            return `
+                <div class="country-message-card">
+                    <div class="country-message-header">
+                        <div class="country-message-meta">
+                            <span class="country-message-time">${time}</span>
+                            <span class="country-message-center">📍${center}</span>
+                        </div>
+                        <span class="country-message-type ${isPrimeTime ? 'prime' : 'regular'}">
+                            ${isPrimeTime ? '⭐PRIME' : '📅REG'}
+                        </span>
+                    </div>
+                    <div class="country-message-content">${cleanContent}</div>
+                </div>
+            `;
+        }
+
+        // Back button event listener
+        document.getElementById('backToCountriesBtn').addEventListener('click', backToCountries);
+
+        // Clear filters button event listener
+        document.getElementById('clearCenterFiltersBtn').addEventListener('click', clearAllCenterFilters);
+
+        // Make functions globally available
+        window.selectCountry = selectCountry;
+        window.toggleCenterFilter = toggleCenterFilter;
+        window.clearAllCenterFilters = clearAllCenterFilters;
+
+        // ============================================
+        // EXPORT FUNCTION
+        // ============================================
+
+        document.getElementById('exportBtn').addEventListener('click', exportData);
+        document.getElementById('exportDataBtn').addEventListener('click', exportData);
+
+        function exportData() {
+            const messages = document.querySelectorAll('.message-card .message-content');
+            let data = 'VisaD Notify Messages Export\n' + '='.repeat(50) + '\n\n';
+            messages.forEach((msg, i) => {
+                data += `Message ${i + 1}:\n${msg.textContent}\n\n`;
+            });
+            const blob = new Blob([data], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `visad-notify-export-${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+        }
+
+        // ============================================
+        // CONNECTION STATUS
+        // ============================================
+
+        function setConnectionStatus(status, text) {
+            const badge = document.getElementById('connectionStatus');
+            badge.classList.remove('connected', 'disconnected', 'offline', 'waiting');
+            if (status === 'connected') badge.classList.add('connected');
+            else if (status === 'disconnected') badge.classList.add('disconnected');
+            else if (status === 'offline') badge.classList.add('offline');
+            else if (status === 'waiting') badge.classList.add('waiting');
+            badge.querySelector('.status-text').textContent = text;
+        }
+
+        // ============================================
+        // MAIN MESSAGE HANDLER - Call this from socket
+        // ============================================
+
+        function addMessage(data) {
+            // Handle various message formats
+            let message = data;
+            if (typeof data === 'string') {
+                message = { content: data };
+            }
+
+            const content = message.content || message.text || message.message || message.msg || '';
+
+            // Add to All Messages
+            addToAllMessages(message);
+
+            // Check filters and add to VisaD Notify
+            if (matchesFilter(content)) {
+                addToFilteredMessages(message, true);
+                if (shouldPlaySound('visad-notify')) playNotificationSound();
+            } else {
+                if (shouldPlaySound('all-messages')) playNotificationSound();
+            }
+        }
+
+        // ============================================
+        // PATH DETECTION FOR SUBDIRECTORY DEPLOYMENT
+        // ============================================
+        const currentPath = window.location.pathname;
+        const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+        const socketPath = basePath ? `${basePath}/noti/socket.io` : '/noti/socket.io';
+        const apiBasePath = basePath || '';  // For API calls
+
+        console.log('🔍 Path detection:', {
+            currentPath,
+            basePath,
+            socketPath,
+            apiBasePath,
+            fullSocketURL: `${window.location.origin}${socketPath}`,
+            fullAPIURL: `${window.location.origin}${apiBasePath}/api/`
+        });
+
+        // ============================================
+        // SOCKET.IO CONNECTION
+        // ============================================
+        const socket = io(window.location.origin, {
+            path: socketPath,
+            transports: ['polling', 'websocket'],  // Polling first for Apache/cPanel compatibility
+            reconnectionDelay: 1000,
+            reconnection: true,
+            reconnectionAttempts: 10,
+            timeout: 10000
+        });
+
+        socket.on('connect', () => {
+            console.log('✅ Connected to server');
+            setConnectionStatus('connected', 'Connected');
+        });
+
+        socket.on('disconnect', (reason) => {
+            console.log('❌ Disconnected:', reason);
+            setConnectionStatus('disconnected', 'Disconnected');
+        });
+
+        socket.on('connect_error', (error) => {
+            console.log('⚠️ Connection error:', error.message);
+            setConnectionStatus('offline', 'Offline');
+        });
+
+        // ============================================
+        // DATABASE INTEGRATION
+        // ============================================
+
+        // Load historical messages from database on page load
+        async function loadHistoricalMessages() {
+            try {
+                console.log('📥 Loading historical messages from database...');
+
+                const response = await fetch(`${apiBasePath}/api/notifications`);
+                const data = await response.json();
+
+                // Add all messages from database (to All Messages view)
+                data.notifications.forEach(msg => {
+                    addToAllMessages(msg);
+                });
+
+                // Apply filter to show matching in VisaD Notify
+                refilterMessages();
+
+                console.log(`✅ Loaded ${data.notifications.length} messages from database`);
+
+            } catch (error) {
+                console.error('❌ Failed to load historical messages:', error);
+            }
+        }
+
+        // Save message to database
+        async function saveToDatabase(message) {
+            try {
+                const response = await fetch(`${apiBasePath}/api/notifications`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message.message || message.content || message.text || '',
+                        keyword: message.keyword || 'New Slot',
+                        sender: message.sender || 'Telegram',
+                        group: message.group || message.group_name || '',
+                        timestamp: message.timestamp || Date.now()
+                    })
+                });
+
+                if (response.ok) {
+                    console.log('💾 Message saved to database');
+                } else {
+                    console.error('❌ Failed to save message:', response.status);
+                }
+            } catch (error) {
+                console.error('❌ Database save error:', error);
+            }
+        }
+
+        // ============================================
+        // TELEGRAM MESSAGE HANDLER
+        // ============================================
+
+        socket.on('telegram-alert', (data) => {
+            console.log('📩 telegram-alert:', data);
+
+            // Save to database
+            saveToDatabase(data);
+
+            // Add to All Messages
+            addToAllMessages(data);
+
+            // Check filters and add to VisaD Notify
+            if (matchesFilter(data.message)) {
+                addToFilteredMessages(data, true);
+                if (shouldPlaySound('visad-notify')) playNotificationSound();
+            } else {
+                if (shouldPlaySound('all-messages')) playNotificationSound();
+            }
+        });
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+
+        // Update time
+        updateTime();
+        setInterval(updateTime, 60000);
+
+        // Load historical messages from database
+        loadHistoricalMessages();
+
+        // Make socket globally available
+        window.socket = socket;
+
+        console.log('🎫 VisaD Notify initialized with database integration');
+        console.log('📡 Server:', window.location.origin);
+        console.log('🔌 Socket path:', socketPath);
+        console.log('🗄️ API path:', `${apiBasePath}/api/`);
+    </script>
+
 </body>
 
 </html>
