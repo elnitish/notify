@@ -1,0 +1,2527 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APP - Applicants Waiting for Appointment</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Primary Colors */
+            --primary-50: #eef2ff;
+            --primary-100: #e0e7ff;
+            --primary-500: #6366f1;
+            --primary-600: #4f46e5;
+            --primary-700: #4338ca;
+
+            /* Neutral Colors */
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
+            --slate-400: #94a3b8;
+            --slate-500: #64748b;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+
+            /* Semantic Colors */
+            --success-50: #f0fdf4;
+            --success-100: #dcfce7;
+            --success-500: #22c55e;
+            --success-600: #16a34a;
+            --success-700: #15803d;
+
+            --warning-50: #fffbeb;
+            --warning-100: #fef3c7;
+            --warning-500: #f59e0b;
+            --warning-600: #d97706;
+            --warning-700: #b45309;
+
+            --danger-50: #fef2f2;
+            --danger-100: #fee2e2;
+            --danger-500: #ef4444;
+            --danger-600: #dc2626;
+            --danger-700: #b91c1c;
+
+            --info-50: #eff6ff;
+            --info-100: #dbeafe;
+            --info-500: #3b82f6;
+            --info-600: #2563eb;
+
+            /* UI Variables */
+            --bg-main: var(--slate-50);
+            --bg-card: #ffffff;
+            --bg-header: linear-gradient(135deg, var(--slate-800) 0%, var(--slate-900) 100%);
+            --text-primary: var(--slate-800);
+            --text-secondary: var(--slate-600);
+            --text-muted: var(--slate-400);
+            --border-color: var(--slate-200);
+            --border-light: var(--slate-100);
+
+            /* Row colors - Light mode */
+            --row-purple: linear-gradient(90deg, rgba(139, 92, 246, 0.08) 0%, rgba(139, 92, 246, 0.03) 100%);
+            --row-green: linear-gradient(90deg, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.03) 100%);
+            --row-blue: linear-gradient(90deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.03) 100%);
+            --row-red: linear-gradient(90deg, rgba(239, 68, 68, 0.08) 0%, rgba(239, 68, 68, 0.03) 100%);
+            --row-amber: linear-gradient(90deg, rgba(245, 158, 11, 0.08) 0%, rgba(245, 158, 11, 0.03) 100%);
+            --row-grey: linear-gradient(90deg, rgba(100, 116, 139, 0.06) 0%, rgba(100, 116, 139, 0.02) 100%);
+
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+
+            /* Transitions */
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+            /* Border Radius */
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --radius-full: 9999px;
+        }
+
+        /* Dark Theme */
+        body.dark-theme {
+            --bg-main: var(--slate-900);
+            --bg-card: var(--slate-800);
+            --bg-header: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            --text-primary: var(--slate-100);
+            --text-secondary: var(--slate-300);
+            --text-muted: var(--slate-500);
+            --border-color: var(--slate-700);
+            --border-light: var(--slate-800);
+
+            --row-purple: linear-gradient(90deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.08) 100%);
+            --row-green: linear-gradient(90deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.08) 100%);
+            --row-blue: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.08) 100%);
+            --row-red: linear-gradient(90deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.08) 100%);
+            --row-amber: linear-gradient(90deg, rgba(245, 158, 11, 0.2) 0%, rgba(245, 158, 11, 0.08) 100%);
+            --row-grey: linear-gradient(90deg, rgba(100, 116, 139, 0.15) 0%, rgba(100, 116, 139, 0.05) 100%);
+        }
+
+        body.dark-theme .stats-bar,
+        body.dark-theme .route-scroller-container,
+        body.dark-theme .tabs-container {
+            background: var(--slate-800);
+            border-color: var(--slate-700);
+        }
+
+        body.dark-theme thead,
+        body.dark-theme thead th {
+            background: var(--slate-800);
+            color: var(--slate-300);
+            border-bottom-color: var(--slate-600);
+        }
+
+        body.dark-theme tbody tr td {
+            color: var(--slate-200);
+            border-bottom-color: var(--slate-700);
+        }
+
+        body.dark-theme .name {
+            color: var(--slate-100);
+        }
+
+        body.dark-theme .route-tag {
+            background: var(--slate-700);
+            border-color: var(--slate-600);
+            color: var(--slate-200);
+        }
+
+        body.dark-theme .route-tag:hover {
+            background: var(--slate-600);
+        }
+
+        body.dark-theme .tab:hover {
+            background: var(--slate-700);
+        }
+
+        body.dark-theme .notes-modal {
+            background: var(--slate-800);
+        }
+
+        body.dark-theme .notes-modal-header {
+            border-color: var(--slate-700);
+        }
+
+        body.dark-theme .notes-modal-header h3 {
+            color: var(--slate-100);
+        }
+
+        body.dark-theme .notes-modal-body textarea {
+            background: var(--slate-900);
+            border-color: var(--slate-600);
+            color: var(--slate-100);
+        }
+
+        body.dark-theme .notes-modal-footer {
+            border-color: var(--slate-700);
+        }
+
+        body.dark-theme .notes-modal-btn.cancel {
+            background: var(--slate-700);
+            color: var(--slate-200);
+        }
+
+        body.dark-theme .notes-edit-btn {
+            background: var(--slate-700);
+            border-color: var(--slate-600);
+            color: var(--slate-300);
+        }
+
+        body.dark-theme .whatsapp-link {
+            color: var(--slate-300);
+        }
+
+        /* Dark theme package badges */
+        body.dark-theme .package-full {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        body.dark-theme .package-fast-full {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fcd34d;
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        body.dark-theme .package-appointment {
+            background: rgba(100, 116, 139, 0.2);
+            color: #cbd5e1;
+            border-color: rgba(100, 116, 139, 0.3);
+        }
+
+        body.dark-theme .package-fast-appointment {
+            background: rgba(139, 92, 246, 0.2);
+            color: #c4b5fd;
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        /* Dark theme payment badges */
+        body.dark-theme .payment-paid {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+        }
+
+        body.dark-theme .payment-pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fcd34d;
+        }
+
+        body.dark-theme .payment-partial {
+            background: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+        }
+
+        body.dark-theme .payment-not-required {
+            background: rgba(100, 116, 139, 0.2);
+            color: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+            font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-header);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--slate-400);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-base);
+            letter-spacing: 0.01em;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            transform: translateX(-2px);
+        }
+
+        .back-btn i {
+            font-size: 12px;
+            transition: transform var(--transition-base);
+        }
+
+        .back-btn:hover i {
+            transform: translateX(-3px);
+        }
+
+        .page-title {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        .page-title .icon-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--warning-500) 0%, var(--warning-600) 100%);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .page-title .icon-wrapper i {
+            font-size: 18px;
+            color: white;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--slate-300);
+            text-decoration: none;
+            letter-spacing: 0.01em;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .header-btn i {
+            font-size: 14px;
+        }
+
+        .header-btn.refresh-btn:hover i {
+            animation: spin 0.6s ease;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            background: var(--bg-card);
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .stat-item i {
+            font-size: 16px;
+            color: var(--primary-500);
+            opacity: 0.8;
+        }
+
+        .stat-value {
+            font-weight: 800;
+            font-size: 18px;
+            background: linear-gradient(135deg, var(--primary-500) 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .uk-time {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            background: var(--slate-100);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        body.dark-theme .uk-time {
+            background: var(--slate-700);
+        }
+
+        .uk-time i {
+            color: var(--info-500);
+        }
+
+        .uk-time .time {
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+            letter-spacing: 0.02em;
+        }
+
+        /* Route Scroller */
+        .route-scroller-container {
+            background: linear-gradient(180deg, var(--bg-card) 0%, rgba(99, 102, 241, 0.02) 100%);
+            padding: 16px 24px;
+            border-bottom: 2px solid var(--primary-100);
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-300) transparent;
+        }
+
+        body.dark-theme .route-scroller-container {
+            background: linear-gradient(180deg, var(--slate-800) 0%, rgba(99, 102, 241, 0.05) 100%);
+            border-bottom-color: rgba(99, 102, 241, 0.2);
+        }
+
+        .route-scroller-container::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .route-scroller-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .route-scroller-container::-webkit-scrollbar-thumb {
+            background: var(--primary-300);
+            border-radius: var(--radius-full);
+        }
+
+        .route-scroller-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary-600);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 12px;
+        }
+
+        .route-scroller-label i {
+            font-size: 14px;
+        }
+
+        body.dark-theme .route-scroller-label {
+            color: #a5b4fc;
+        }
+
+        .route-scroller {
+            display: flex;
+            gap: 10px;
+            flex-wrap: nowrap;
+        }
+
+        .route-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            background: var(--bg-card);
+            border: 2px solid var(--primary-100);
+            border-radius: var(--radius-lg);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .route-tag i {
+            font-size: 14px;
+            color: var(--primary-500);
+        }
+
+        .route-tag:hover {
+            border-color: var(--primary-300);
+            background: var(--primary-50);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .route-tag.active {
+            background: linear-gradient(135deg, var(--primary-500) 0%, #8b5cf6 100%);
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .route-tag.active i {
+            color: #fff;
+        }
+
+        .route-tag .count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 28px;
+            height: 28px;
+            padding: 0 10px;
+            background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 800;
+            border-radius: var(--radius-full);
+            box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
+        }
+
+        .route-tag.active .count {
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: none;
+        }
+
+        .route-tag .centers {
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 10px;
+            padding-left: 6px;
+            border-left: 1px solid var(--border-color);
+            margin-left: 2px;
+        }
+
+        .route-tag .centers .center-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 16px;
+            height: 16px;
+            padding: 0 4px;
+            background: var(--slate-200);
+            color: var(--slate-700);
+            font-size: 9px;
+            font-weight: 700;
+            border-radius: var(--radius-full);
+            margin-left: 2px;
+        }
+
+        .route-tag.active .centers .center-count {
+            background: rgba(255, 255, 255, 0.25);
+            color: #fff;
+        }
+
+        body.dark-theme .route-tag .centers .center-count {
+            background: var(--slate-600);
+            color: var(--slate-200);
+        }
+
+        .route-tag .tag-flag {
+            font-size: 18px;
+            line-height: 1;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+        }
+
+        .route-tag.active .centers {
+            color: rgba(255, 255, 255, 0.8);
+            border-left-color: rgba(255, 255, 255, 0.3);
+        }
+
+        body.dark-theme .route-tag {
+            background: var(--slate-700);
+            border-color: var(--slate-600);
+        }
+
+        body.dark-theme .route-tag:hover {
+            background: var(--slate-600);
+            border-color: var(--primary-400);
+        }
+
+        body.dark-theme .route-tag .centers {
+            border-left-color: var(--slate-500);
+        }
+
+        /* Country-specific route tag styling */
+        .route-tag.tag-uk {
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .route-tag.tag-uk i {
+            color: #3b82f6;
+        }
+
+        .route-tag.tag-uk .count {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        }
+
+        .route-tag.tag-usa {
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .route-tag.tag-usa i {
+            color: #ef4444;
+        }
+
+        .route-tag.tag-usa .count {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .route-tag.tag-canada {
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .route-tag.tag-canada i {
+            color: #dc2626;
+        }
+
+        .route-tag.tag-canada .count {
+            background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+        }
+
+        .route-tag.tag-schengen {
+            border-color: rgba(20, 184, 166, 0.3);
+        }
+
+        .route-tag.tag-schengen i {
+            color: #14b8a6;
+        }
+
+        .route-tag.tag-schengen .count {
+            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+        }
+
+        .route-tag.tag-australia {
+            border-color: rgba(14, 165, 233, 0.3);
+        }
+
+        .route-tag.tag-australia i {
+            color: #0ea5e9;
+        }
+
+        .route-tag.tag-australia .count {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+        }
+
+        .route-tag.tag-uae {
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .route-tag.tag-uae i {
+            color: #22c55e;
+        }
+
+        .route-tag.tag-uae .count {
+            background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+        }
+
+        .route-tag.active.tag-uk,
+        .route-tag.active.tag-usa,
+        .route-tag.active.tag-canada,
+        .route-tag.active.tag-schengen,
+        .route-tag.active.tag-australia,
+        .route-tag.active.tag-uae {
+            border-color: transparent;
+        }
+
+        .route-tag.active i {
+            color: #fff !important;
+        }
+
+        .route-tag.active .count {
+            background: rgba(255, 255, 255, 0.25) !important;
+        }
+
+        /* Month Tabs */
+        .tabs-container {
+            background: var(--bg-card);
+            padding: 12px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 10px 18px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            white-space: nowrap;
+            border: none;
+            background: none;
+            letter-spacing: 0.01em;
+        }
+
+        .tab:hover {
+            background: var(--slate-100);
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--info-500) 0%, var(--info-600) 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Table Container */
+        .table-container {
+            padding: 0;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            min-width: 1100px;
+        }
+
+        thead {
+            background: var(--slate-50);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        th {
+            padding: 14px 12px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 11px;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border-color);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            background: var(--slate-50);
+        }
+
+        th i {
+            margin-right: 6px;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        /* Column widths */
+        th:nth-child(1),
+        td:nth-child(1) {
+            width: 40px;
+            text-align: center;
+        }
+
+        th:nth-child(2),
+        td:nth-child(2) {
+            width: 100px;
+        }
+
+        th:nth-child(3),
+        td:nth-child(3) {
+            width: 200px;
+        }
+
+        th:nth-child(4),
+        td:nth-child(4) {
+            width: 260px;
+        }
+
+        th:nth-child(5),
+        td:nth-child(5) {
+            width: 120px;
+        }
+
+        th:nth-child(6),
+        td:nth-child(6) {
+            width: 140px;
+        }
+
+        th:nth-child(7),
+        td:nth-child(7) {
+            width: 90px;
+        }
+
+        th:nth-child(8),
+        td:nth-child(8) {
+            min-width: 280px;
+        }
+
+        /* Route Column Highlight */
+        th:nth-child(4) {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+            color: var(--primary-600);
+        }
+
+        body.dark-theme th:nth-child(4) {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.1) 100%);
+            color: #a5b4fc;
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-light);
+            vertical-align: middle;
+            font-size: 13px;
+            color: var(--text-secondary);
+            transition: background var(--transition-fast);
+        }
+
+        td:first-child {
+            text-align: center;
+            color: var(--text-muted);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        td:nth-child(3) {
+            font-weight: 600;
+        }
+
+        td:nth-child(8) {
+            white-space: normal;
+            vertical-align: top;
+        }
+
+        td:nth-child(4) {
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        /* Route Display Styling - Compact Single Line */
+        .route-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .route-country {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--primary-600);
+            letter-spacing: -0.01em;
+        }
+
+        .route-country i {
+            font-size: 12px;
+            color: var(--primary-500);
+        }
+
+        .country-flag {
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        body.dark-theme .route-country {
+            color: #a5b4fc;
+        }
+
+        body.dark-theme .route-country i {
+            color: #818cf8;
+        }
+
+        .route-separator {
+            color: var(--slate-300);
+            font-size: 10px;
+        }
+
+        .route-details {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .route-visa-center {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            background: var(--slate-100);
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--slate-700);
+            white-space: nowrap;
+        }
+
+        .route-visa-center i {
+            font-size: 9px;
+            color: var(--slate-500);
+        }
+
+        body.dark-theme .route-visa-center {
+            background: var(--slate-700);
+            color: var(--slate-200);
+        }
+
+        body.dark-theme .route-visa-center i {
+            color: var(--slate-400);
+        }
+
+        .route-visa-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            background: var(--primary-50);
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--primary-700);
+            white-space: nowrap;
+        }
+
+        .route-visa-type i {
+            font-size: 9px;
+            color: var(--primary-500);
+        }
+
+        body.dark-theme .route-visa-type {
+            background: rgba(139, 92, 246, 0.15);
+            color: #c7d2fe;
+        }
+
+        body.dark-theme .route-visa-type i {
+            color: #818cf8;
+        }
+
+        /* Country-specific accent colors */
+        .route-country.uk {
+            color: #1d4ed8;
+        }
+
+        .route-country.uk i {
+            color: #3b82f6;
+        }
+
+        .route-country.usa {
+            color: #dc2626;
+        }
+
+        .route-country.usa i {
+            color: #ef4444;
+        }
+
+        .route-country.canada {
+            color: #dc2626;
+        }
+
+        .route-country.canada i {
+            color: #ef4444;
+        }
+
+        .route-country.schengen {
+            color: #0d9488;
+        }
+
+        .route-country.schengen i {
+            color: #14b8a6;
+        }
+
+        .route-country.australia {
+            color: #0369a1;
+        }
+
+        .route-country.australia i {
+            color: #0ea5e9;
+        }
+
+        .route-country.uae {
+            color: #15803d;
+        }
+
+        .route-country.uae i {
+            color: #22c55e;
+        }
+
+        body.dark-theme .route-country.uk {
+            color: #93c5fd;
+        }
+
+        body.dark-theme .route-country.usa {
+            color: #fca5a5;
+        }
+
+        body.dark-theme .route-country.canada {
+            color: #fca5a5;
+        }
+
+        body.dark-theme .route-country.schengen {
+            color: #5eead4;
+        }
+
+        body.dark-theme .route-country.australia {
+            color: #7dd3fc;
+        }
+
+        body.dark-theme .route-country.uae {
+            color: #86efac;
+        }
+
+        /* Row Colors */
+        tr.purple {
+            background: var(--row-purple);
+            border-left: 4px solid #8b5cf6;
+        }
+
+        tr.green {
+            background: var(--row-green);
+            border-left: 4px solid var(--success-500);
+        }
+
+        tr.blue {
+            background: var(--row-blue);
+            border-left: 4px solid var(--info-500);
+        }
+
+        tr.red {
+            background: var(--row-red);
+            border-left: 4px solid var(--danger-500);
+        }
+
+        tr.yellow {
+            background: linear-gradient(90deg, rgba(234, 179, 8, 0.08) 0%, rgba(234, 179, 8, 0.03) 100%);
+            border-left: 4px solid #eab308;
+        }
+
+        tr.grey {
+            background: var(--row-grey);
+            border-left: 4px solid var(--slate-400);
+        }
+
+        tr.amber {
+            background: var(--row-amber);
+            border-left: 4px solid var(--warning-600);
+        }
+
+        tbody tr:hover {
+            filter: brightness(0.98);
+        }
+
+        /* Date separator */
+        tr.date-separator {
+            height: 8px;
+        }
+
+        tr.date-separator td {
+            padding: 0 !important;
+            border: none !important;
+            background: transparent !important;
+            border-top: 1px solid var(--border-color) !important;
+        }
+
+        tr.date-separator:hover {
+            filter: none !important;
+        }
+
+        /* Name styling */
+        .name {
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 14px;
+            letter-spacing: -0.01em;
+        }
+
+        .cotraveler-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            padding: 3px 10px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: var(--radius-full);
+            box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3);
+        }
+
+        .high-risk-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 10px;
+            padding: 3px 10px;
+            background: linear-gradient(135deg, var(--danger-500) 0%, var(--danger-600) 100%);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            border-radius: var(--radius-full);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+        }
+
+        .risk-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 10px;
+            padding: 3px 10px;
+            background: linear-gradient(135deg, var(--warning-500) 0%, var(--warning-600) 100%);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            border-radius: var(--radius-full);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Risk label */
+        .risk-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            background: linear-gradient(135deg, var(--warning-500) 0%, var(--warning-600) 100%);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            border-radius: var(--radius-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+
+        .risk-label::before {
+            content: '\f071';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 8px;
+        }
+
+        .risk-label.high {
+            background: linear-gradient(135deg, var(--danger-500) 0%, var(--danger-600) 100%);
+        }
+
+        .agent {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 3px;
+            font-weight: 500;
+        }
+
+        .agent i {
+            margin-right: 4px;
+            font-size: 10px;
+        }
+
+        /* Package badge */
+        .package {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: var(--radius-full);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+
+        .package::before {
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 10px;
+        }
+
+        .package-full {
+            background: var(--success-50);
+            color: var(--success-700);
+            border: 1px solid var(--success-100);
+        }
+
+        .package-full::before {
+            content: '\f058';
+        }
+
+        .package-fast-full {
+            background: var(--warning-50);
+            color: var(--warning-700);
+            border: 1px solid var(--warning-100);
+        }
+
+        .package-fast-full::before {
+            content: '\f0e7';
+        }
+
+        .package-appointment {
+            background: var(--slate-100);
+            color: var(--slate-600);
+            border: 1px solid var(--slate-200);
+        }
+
+        .package-appointment::before {
+            content: '\f073';
+        }
+
+        .package-fast-appointment {
+            background: var(--primary-50);
+            color: var(--primary-700);
+            border: 1px solid var(--primary-100);
+        }
+
+        .package-fast-appointment::before {
+            content: '\f3fd';
+        }
+
+        /* WhatsApp */
+        .whatsapp-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 6px 10px;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-base);
+            background: rgba(34, 197, 94, 0.08);
+        }
+
+        .whatsapp-link:hover {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success-600);
+            transform: translateY(-1px);
+        }
+
+        .whatsapp-link i {
+            color: var(--success-500);
+            font-size: 16px;
+        }
+
+        /* Payment Status */
+        .payment {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: var(--radius-full);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+
+        .payment::before {
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 10px;
+        }
+
+        .payment-paid {
+            background: var(--success-100);
+            color: var(--success-700);
+        }
+
+        .payment-paid::before {
+            content: '\f00c';
+        }
+
+        .payment-pending {
+            background: var(--warning-100);
+            color: var(--warning-700);
+        }
+
+        .payment-pending::before {
+            content: '\f017';
+        }
+
+        .payment-partial {
+            background: var(--info-100);
+            color: var(--info-600);
+        }
+
+        .payment-partial::before {
+            content: '\f042';
+        }
+
+        .payment-not-required {
+            background: var(--slate-100);
+            color: var(--slate-500);
+        }
+
+        .payment-not-required::before {
+            content: '\f00d';
+        }
+
+        /* Notes */
+        .notes-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .notes-text {
+            flex: 1;
+            font-size: 13px;
+            color: var(--text-primary);
+            white-space: normal;
+            word-break: break-word;
+            line-height: 1.5;
+        }
+
+        .notes-text.error {
+            color: var(--danger-600);
+            font-weight: 600;
+        }
+
+        .notes-edit-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: var(--slate-100);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 12px;
+            flex-shrink: 0;
+            transition: all var(--transition-base);
+        }
+
+        .notes-edit-btn:hover {
+            background: var(--primary-500);
+            color: #fff;
+            border-color: var(--primary-500);
+            transform: scale(1.05);
+        }
+
+        /* Notes Modal */
+        .notes-modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .notes-modal {
+            background: var(--bg-card);
+            border-radius: var(--radius-xl);
+            width: 90%;
+            max-width: 520px;
+            box-shadow: var(--shadow-xl);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .notes-modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notes-modal-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notes-modal-header h3 i {
+            color: var(--primary-500);
+        }
+
+        .notes-modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-muted);
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-base);
+        }
+
+        .notes-modal-close:hover {
+            background: var(--slate-100);
+            color: var(--text-primary);
+        }
+
+        .notes-modal-body {
+            padding: 24px;
+        }
+
+        .notes-modal-body textarea {
+            width: 100%;
+            min-height: 160px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 14px 16px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            transition: border-color var(--transition-base);
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
+
+        .notes-modal-body textarea:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .notes-modal-footer {
+            padding: 16px 24px 24px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .notes-modal-btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all var(--transition-base);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .notes-modal-btn.cancel {
+            background: var(--slate-100);
+            color: var(--text-secondary);
+        }
+
+        .notes-modal-btn.cancel:hover {
+            background: var(--slate-200);
+        }
+
+        .notes-modal-btn.save {
+            background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .notes-modal-btn.save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 80px 24px;
+            color: var(--text-muted);
+        }
+
+        .empty-state .icon-container {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: var(--slate-100);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .empty-state .icon-container i {
+            font-size: 32px;
+            color: var(--slate-400);
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        /* Loading Animation */
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .loading {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <a href="index.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+            <h1 class="page-title">
+                <span class="icon-wrapper">
+                    <i class="fas fa-hourglass-half"></i>
+                </span>
+                Applicants Waiting for Appointment
+            </h1>
+        </div>
+        <div class="header-right">
+            <button class="header-btn refresh-btn" onclick="loadData()">
+                <i class="fas fa-arrows-rotate"></i> Refresh
+            </button>
+            <button class="header-btn theme-toggle" onclick="toggleTheme()">
+                <i class="fas fa-moon"></i>
+            </button>
+            <a href="index.html" class="header-btn">
+                <i class="fas fa-right-from-bracket"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+        <div class="stat-item">
+            <i class="fas fa-users"></i>
+            Total Applicants: <span class="stat-value" id="stat-total">0</span>
+        </div>
+        <div class="uk-time">
+            <i class="fas fa-clock"></i> UK Time:
+            <span class="time" id="uk-time">--:--:--</span>
+        </div>
+    </div>
+
+    <!-- Route Stats Scroller -->
+    <div class="route-scroller-container">
+        <div class="route-scroller-label">
+            <i class="fas fa-map-location-dot"></i> Filter by Destination
+        </div>
+        <div class="route-scroller" id="route-scroller">
+            <!-- Route tags will be populated dynamically -->
+        </div>
+    </div>
+
+    <!-- Month Tabs -->
+    <div class="tabs-container">
+        <!-- Tabs will be populated dynamically -->
+    </div>
+
+    <!-- Table -->
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th><i class="fas fa-hashtag"></i></th>
+                    <th><i class="fas fa-calendar"></i> Travel Date</th>
+                    <th><i class="fas fa-user"></i> Name</th>
+                    <th><i class="fas fa-route"></i> Route</th>
+                    <th><i class="fas fa-box"></i> Package</th>
+                    <th><i class="fab fa-whatsapp"></i> Contact</th>
+                    <th><i class="fas fa-credit-card"></i> Payment</th>
+                    <th><i class="fas fa-sticky-note"></i> Notes</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+            </tbody>
+        </table>
+
+        <div class="empty-state" id="empty" style="display: none;">
+            <div class="icon-container">
+                <i class="fas fa-inbox"></i>
+            </div>
+            <p>No applicants waiting for appointment</p>
+        </div>
+    </div>
+
+    <!-- Notes Edit Modal -->
+    <div class="notes-modal-backdrop" id="notes-modal">
+        <div class="notes-modal">
+            <div class="notes-modal-header">
+                <h3><i class="fas fa-pen-to-square"></i> Edit Notes</h3>
+                <button class="notes-modal-close" id="notes-modal-close">&times;</button>
+            </div>
+            <div class="notes-modal-body">
+                <textarea id="notes-textarea" placeholder="Enter notes..."></textarea>
+            </div>
+            <div class="notes-modal-footer">
+                <button class="notes-modal-btn cancel" id="notes-cancel">
+                    <i class="fas fa-xmark"></i> Cancel
+                </button>
+                <button class="notes-modal-btn save" id="notes-save">
+                    <i class="fas fa-check"></i> Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        $(function () {
+            let allRecords = [];
+            let currentDisplayedRecords = [];
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+            // Get current month and year
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+
+            // Helper function to get travel date from record (tries multiple field names)
+            function getTravelDate(r) {
+                return r.planned_travel_date || r.travel_date || r.travel_dates || '';
+            }
+
+            // Function to get country flag emoji
+            function getCountryFlag(country) {
+                const c = (country || '').toLowerCase();
+                if (c.includes('uk') || c.includes('united kingdom') || c.includes('britain')) {
+                    return '🇬🇧';
+                } else if (c.includes('usa') || c.includes('united states') || c.includes('america')) {
+                    return '🇺🇸';
+                } else if (c.includes('canada')) {
+                    return '🇨🇦';
+                } else if (c.includes('schengen') || c.includes('europe')) {
+                    return '🇪🇺';
+                } else if (c.includes('france')) {
+                    return '🇫🇷';
+                } else if (c.includes('germany')) {
+                    return '🇩🇪';
+                } else if (c.includes('italy')) {
+                    return '🇮🇹';
+                } else if (c.includes('spain')) {
+                    return '🇪🇸';
+                } else if (c.includes('portugal')) {
+                    return '🇵🇹';
+                } else if (c.includes('netherlands') || c.includes('holland')) {
+                    return '🇳🇱';
+                } else if (c.includes('belgium')) {
+                    return '🇧🇪';
+                } else if (c.includes('switzerland')) {
+                    return '🇨🇭';
+                } else if (c.includes('austria')) {
+                    return '🇦🇹';
+                } else if (c.includes('australia')) {
+                    return '🇦🇺';
+                } else if (c.includes('new zealand')) {
+                    return '🇳🇿';
+                } else if (c.includes('uae') || c.includes('dubai') || c.includes('emirates')) {
+                    return '🇦🇪';
+                } else if (c.includes('singapore')) {
+                    return '🇸🇬';
+                } else if (c.includes('japan')) {
+                    return '🇯🇵';
+                } else if (c.includes('china')) {
+                    return '🇨🇳';
+                } else if (c.includes('india')) {
+                    return '🇮🇳';
+                } else if (c.includes('ireland')) {
+                    return '🇮🇪';
+                } else if (c.includes('greece')) {
+                    return '🇬🇷';
+                } else if (c.includes('thailand')) {
+                    return '🇹🇭';
+                } else if (c.includes('malaysia')) {
+                    return '🇲🇾';
+                } else if (c.includes('saudi')) {
+                    return '🇸🇦';
+                } else if (c.includes('qatar')) {
+                    return '🇶🇦';
+                } else if (c.includes('bahrain')) {
+                    return '🇧🇭';
+                } else if (c.includes('kuwait')) {
+                    return '🇰🇼';
+                } else if (c.includes('oman')) {
+                    return '🇴🇲';
+                } else if (c.includes('south africa')) {
+                    return '🇿🇦';
+                } else if (c.includes('brazil')) {
+                    return '🇧🇷';
+                } else if (c.includes('mexico')) {
+                    return '🇲🇽';
+                } else if (c.includes('turkey')) {
+                    return '🇹🇷';
+                } else if (c.includes('russia')) {
+                    return '🇷🇺';
+                } else if (c.includes('korea') || c.includes('south korea')) {
+                    return '🇰🇷';
+                } else if (c.includes('poland')) {
+                    return '🇵🇱';
+                } else if (c.includes('sweden')) {
+                    return '🇸🇪';
+                } else if (c.includes('norway')) {
+                    return '🇳🇴';
+                } else if (c.includes('denmark')) {
+                    return '🇩🇰';
+                } else if (c.includes('finland')) {
+                    return '🇫🇮';
+                } else {
+                    return '🌍';
+                }
+            }
+
+            // Theme toggle
+            window.toggleTheme = function () {
+                document.body.classList.toggle('dark-theme');
+                const icon = document.querySelector('.theme-toggle i');
+                if (document.body.classList.contains('dark-theme')) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                    localStorage.setItem('theme', 'light');
+                }
+            };
+
+            // Check saved theme
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark-theme');
+                document.querySelector('.theme-toggle i').classList.remove('fa-moon');
+                document.querySelector('.theme-toggle i').classList.add('fa-sun');
+            }
+
+            // UK Time
+            function updateUKTime() {
+                const ukTime = new Date().toLocaleString('en-GB', {
+                    timeZone: 'Europe/London',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                });
+                $('#uk-time').text(ukTime);
+            }
+            updateUKTime();
+            setInterval(updateUKTime, 1000);
+
+            // Generate month tabs based on available data
+            function generateTabs() {
+                const tabsContainer = $('.tabs-container');
+                // Clear existing tabs except icons
+                tabsContainer.find('.tab').remove();
+
+                // Add "All" tab
+                tabsContainer.append(`<button class="tab active" data-filter="all"><i class="fas fa-layer-group"></i> All</button>`);
+
+                // Get unique months from records
+                const monthsSet = new Map();
+
+                allRecords.forEach(r => {
+                    const travelDate = getTravelDate(r);
+                    if (travelDate) {
+                        const parts = travelDate.split('/');
+                        if (parts.length === 3) {
+                            const day = parseInt(parts[0]);
+                            const month = parseInt(parts[1]) - 1; // 0-indexed
+                            const year = parseInt(parts[2]);
+                            const key = year * 100 + (month + 1); // Unique key for sorting
+                            if (!monthsSet.has(key)) {
+                                monthsSet.set(key, { month, year });
+                            }
+                        }
+                    }
+                });
+
+                // Sort months (newest first)
+                const sortedMonths = Array.from(monthsSet.entries()).sort((a, b) => b[0] - a[0]);
+
+                // Add tabs for each month
+                sortedMonths.forEach(([key, { month, year }]) => {
+                    const monthYear = `${monthNames[month]} ${year}`;
+                    tabsContainer.append(`<button class="tab" data-month="${month}" data-year="${year}">${monthYear}</button>`);
+                });
+            }
+
+            // Tab click handler
+            $(document).on('click', '.tab', function () {
+                $('.tab').removeClass('active');
+                $(this).addClass('active');
+
+                // Reset route filter to "All" when switching month tabs
+                $('.route-tag').removeClass('active');
+                $('.route-tag[data-filter="all"]').addClass('active');
+
+                filterRecords();
+            });
+
+            // Load data
+            window.loadData = function () {
+                // Fetch travelers first
+                $.get('api/travelers.php?action=read_all&limit=9999', function (response) {
+                    console.log('Travelers API response:', response);
+
+                    // Now fetch dependents
+                    $.get('api/dependents.php?action=read_all&limit=9999', function (depRes) {
+                        // Parse dependents
+                        let dependents = [];
+                        if (depRes && depRes.records) dependents = depRes.records;
+                        else if (depRes && depRes.data) dependents = depRes.data;
+                        else if (Array.isArray(depRes)) dependents = depRes;
+
+                        console.log('Dependents loaded:', dependents.length);
+                        if (dependents.length > 0) {
+                            console.log('Dependent fields:', Object.keys(dependents[0]));
+                            console.log('First dependent:', dependents[0]);
+                        }
+
+                        // Group dependents by traveler_id
+                        const dependentsByTraveler = {};
+                        dependents.forEach(dep => {
+                            // Try different field names for traveler ID
+                            const travelerId = dep.traveler_id || dep.traveller_id || dep.parent_id || dep.main_traveler_id;
+                            if (travelerId) {
+                                if (!dependentsByTraveler[travelerId]) {
+                                    dependentsByTraveler[travelerId] = [];
+                                }
+                                dependentsByTraveler[travelerId].push(dep);
+                            }
+                        });
+
+                        console.log('Dependents grouped:', Object.keys(dependentsByTraveler).length, 'travelers with dependents');
+
+                        processData(response, dependentsByTraveler);
+                    }).fail(function (xhr, status, error) {
+                        console.log('Dependents API failed:', status, error);
+                        processData(response, {});
+                    });
+                }, 'json').fail(function (xhr, status, error) {
+                    console.error('API Error:', status, error);
+                    $('#empty').html(`
+                    <div class="icon-container">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <p>Error loading data</p>
+                    <p style="font-size: 12px; margin-top: 10px; color: var(--danger-500);">${error}</p>
+                `).show();
+                });
+            };
+
+            function processData(response, dependentsByTraveler) {
+                if (response.status === 'success') {
+                    // Merge dependents into traveler records
+                    (response.data || []).forEach(r => {
+                        if (!r.dependents || r.dependents.length === 0) {
+                            r.dependents = dependentsByTraveler[r.id] || [];
+                        }
+                    });
+
+                    // Check how many have dependents
+                    const withDeps = (response.data || []).filter(r => r.dependents && r.dependents.length > 0);
+                    console.log('Travelers with dependents after merge:', withDeps.length);
+
+                    // Filter records with "Wait App" status
+                    allRecords = (response.data || []).filter(r => {
+                        const status = (r.status || '').toLowerCase().trim();
+                        return status === 'wait app';
+                    });
+
+                    // If no records found, update empty state message
+                    if (allRecords.length === 0) {
+                        const allStatuses = [...new Set((response.data || []).map(r => r.status))];
+                        $('#empty').html(`
+                        <div class="icon-container">
+                            <i class="fas fa-inbox"></i>
+                        </div>
+                        <p>No applicants waiting for appointment</p>
+                        <p style="font-size: 12px; margin-top: 10px; color: var(--text-muted);">
+                            Available statuses: ${allStatuses.join(', ') || 'None'}
+                        </p>
+                    `);
+                    }
+
+                    // Sort by planned_travel_date ascending (earliest first, empty dates at end)
+                    allRecords.sort((a, b) => {
+                        const dateA = getTravelDate(a);
+                        const dateB = getTravelDate(b);
+
+                        // Put empty dates at the end
+                        if (!dateA && !dateB) return 0;
+                        if (!dateA) return 1;
+                        if (!dateB) return -1;
+
+                        // Parse dates (DD/MM/YYYY format)
+                        const parseDate = (d) => {
+                            const parts = d.split('/');
+                            if (parts.length === 3) {
+                                return new Date(parts[2], parts[1] - 1, parts[0]);
+                            }
+                            return new Date(0);
+                        };
+
+                        return parseDate(dateA) - parseDate(dateB);
+                    });
+
+                    // Generate tabs based on available data
+                    generateTabs();
+
+                    filterRecords();
+                }
+            }
+
+            function filterRecords() {
+                const activeTab = $('.tab.active');
+                let filtered = allRecords;
+
+                if (activeTab.data('filter') !== 'all') {
+                    const filterMonth = activeTab.data('month');
+                    const filterYear = activeTab.data('year');
+
+                    filtered = allRecords.filter(r => {
+                        const travelDate = getTravelDate(r);
+                        if (!travelDate) return false;
+
+                        const parts = travelDate.split('/');
+                        if (parts.length === 3) {
+                            const month = parseInt(parts[1]) - 1;
+                            const year = parseInt(parts[2]);
+                            return month === filterMonth && year === filterYear;
+                        }
+                        return false;
+                    });
+                }
+
+                displayRecords(filtered);
+            }
+
+            // Generate route statistics (Country with Visa Centers grouped)
+            function generateRouteStats(records) {
+                const routeScroller = $('#route-scroller');
+                routeScroller.empty();
+
+                // Add "All" tag first
+                const totalCount = records.reduce((sum, r) => {
+                    const deps = r.dependents || [];
+                    return sum + 1 + deps.length;
+                }, 0);
+
+                routeScroller.append(`
+                <div class="route-tag active" data-filter="all">
+                    <span class="tag-flag">🌍</span> All Routes
+                    <span class="count">${totalCount}</span>
+                </div>
+            `);
+
+                // Group by travel_country (destination)
+                const countryStats = {};
+
+                records.forEach(r => {
+                    const country = r.travel_country || 'Unknown';
+                    const visaCenter = r.visa_center || '';
+
+                    if (!countryStats[country]) {
+                        countryStats[country] = { count: 0, centers: {} };
+                    }
+
+                    // Count main traveler
+                    countryStats[country].count++;
+                    if (visaCenter) {
+                        countryStats[country].centers[visaCenter] = (countryStats[country].centers[visaCenter] || 0) + 1;
+                    }
+
+                    // Count dependents
+                    const deps = r.dependents || [];
+                    deps.forEach(dep => {
+                        const depCountry = dep.travel_country || country;
+                        const depCenter = dep.visa_center || visaCenter;
+
+                        if (!countryStats[depCountry]) {
+                            countryStats[depCountry] = { count: 0, centers: {} };
+                        }
+                        countryStats[depCountry].count++;
+                        if (depCenter) {
+                            countryStats[depCountry].centers[depCenter] = (countryStats[depCountry].centers[depCenter] || 0) + 1;
+                        }
+                    });
+                });
+
+                // Sort by count (descending)
+                const sortedCountries = Object.entries(countryStats)
+                    .sort((a, b) => b[1].count - a[1].count);
+
+                sortedCountries.forEach(([country, data]) => {
+                    // Show centre names with counts
+                    const centersEntries = Object.entries(data.centers);
+                    let centersText = '';
+                    if (centersEntries.length > 0) {
+                        // Sort centers by count descending
+                        centersEntries.sort((a, b) => b[1] - a[1]);
+                        const centersList = centersEntries.map(([name, count]) => `${name} <span class="center-count">${count}</span>`).join(' · ');
+                        centersText = `<span class="centers">${centersList}</span>`;
+                    }
+
+                    // Get country flag emoji
+                    const countryFlag = getCountryFlag(country);
+
+                    // Determine country class for styling
+                    const countryLower = country.toLowerCase();
+                    let countryClass = '';
+
+                    if (countryLower.includes('uk') || countryLower.includes('united kingdom') || countryLower.includes('britain')) {
+                        countryClass = 'tag-uk';
+                    } else if (countryLower.includes('usa') || countryLower.includes('united states') || countryLower.includes('america')) {
+                        countryClass = 'tag-usa';
+                    } else if (countryLower.includes('canada')) {
+                        countryClass = 'tag-canada';
+                    } else if (countryLower.includes('schengen') || countryLower.includes('europe') || countryLower.includes('france') || countryLower.includes('germany') || countryLower.includes('italy') || countryLower.includes('spain') || countryLower.includes('netherlands') || countryLower.includes('austria') || countryLower.includes('belgium') || countryLower.includes('portugal') || countryLower.includes('greece') || countryLower.includes('switzerland') || countryLower.includes('poland') || countryLower.includes('sweden') || countryLower.includes('norway') || countryLower.includes('denmark') || countryLower.includes('finland')) {
+                        countryClass = 'tag-schengen';
+                    } else if (countryLower.includes('australia') || countryLower.includes('new zealand')) {
+                        countryClass = 'tag-australia';
+                    } else if (countryLower.includes('uae') || countryLower.includes('dubai') || countryLower.includes('emirates')) {
+                        countryClass = 'tag-uae';
+                    }
+
+                    routeScroller.append(`
+                    <div class="route-tag ${countryClass}" data-country="${country}">
+                        <span class="tag-flag">${countryFlag}</span> ${country}
+                        <span class="count">${data.count}</span>
+                        ${centersText}
+                    </div>
+                `);
+                });
+            }
+
+            // Route tag click handler
+            $(document).on('click', '.route-tag', function () {
+                $('.route-tag').removeClass('active');
+                $(this).addClass('active');
+
+                const filter = $(this).data('filter');
+                const country = $(this).data('country');
+
+                if (filter === 'all') {
+                    filterRecords();
+                } else if (country) {
+                    // Filter by country
+                    const activeTab = $('.tab.active');
+                    let filtered = allRecords;
+
+                    if (activeTab.data('filter') !== 'all') {
+                        const filterMonth = activeTab.data('month');
+                        const filterYear = activeTab.data('year');
+
+                        filtered = allRecords.filter(r => {
+                            const travelDate = getTravelDate(r);
+                            if (!travelDate) return false;
+
+                            const parts = travelDate.split('/');
+                            if (parts.length === 3) {
+                                const month = parseInt(parts[1]) - 1;
+                                const year = parseInt(parts[2]);
+                                return month === filterMonth && year === filterYear;
+                            }
+                            return false;
+                        });
+                    }
+
+                    // Further filter by country
+                    filtered = filtered.filter(r => {
+                        const mainCountry = r.travel_country || 'Unknown';
+                        if (mainCountry === country) return true;
+
+                        // Check dependents
+                        const deps = r.dependents || [];
+                        return deps.some(dep => (dep.travel_country || mainCountry) === country);
+                    });
+
+                    displayRecords(filtered, country);
+                }
+            });
+
+            function displayRecords(records, countryFilter = null) {
+                const tbody = $('#table-body');
+                tbody.empty();
+
+                // Generate route stats for ALL records (not filtered)
+                generateRouteStats(records);
+
+                // Update total count (including dependents)
+                let totalWithDeps = records.reduce((sum, r) => {
+                    const deps = r.dependents || [];
+                    return sum + 1 + deps.length;
+                }, 0);
+                $('#stat-total').text(totalWithDeps);
+
+                if (records.length === 0) {
+                    $('#empty').show();
+                    return;
+                }
+
+                $('#empty').hide();
+
+                // Track previous date for separator
+                let prevDate = null;
+                let rowNum = 0;
+
+                // Risk level checker (compares to current date)
+                function getRiskLevel(travelDate) {
+                    if (!travelDate) return null;
+                    const parts = travelDate.split('/');
+                    if (parts.length !== 3) return null;
+
+                    const travel = new Date(parts[2], parts[1] - 1, parts[0]);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    const diffDays = Math.ceil((travel - today) / (1000 * 60 * 60 * 24));
+
+                    if (diffDays <= 7) return 'high';
+                    if (diffDays <= 14) return 'risk';
+                    return null;
+                }
+
+                records.forEach(r => {
+                    // Increment row counter for main traveler
+                    rowNum++;
+
+                    const travelDate = getTravelDate(r);
+
+                    // Add date separator if date changed
+                    if (prevDate !== null && prevDate !== travelDate) {
+                        tbody.append(`<tr class="date-separator"><td colspan="8"></td></tr>`);
+                    }
+                    prevDate = travelDate;
+
+                    // Risk level check
+                    const riskLevel = getRiskLevel(travelDate);
+                    let riskBadge = '';
+                    if (riskLevel === 'high') {
+                        riskBadge = `<div class="risk-label high">High Risk</div>`;
+                    } else if (riskLevel === 'risk') {
+                        riskBadge = `<div class="risk-label">Risk</div>`;
+                    }
+
+                    // Travel date with risk badge
+                    const travelDateHtml = riskBadge ? `${riskBadge}<span>${travelDate || '-'}</span>` : (travelDate || '-');
+
+                    // Name and dependents
+                    const name = `${r.first_name || ''} ${r.last_name || ''}`.trim().toUpperCase();
+                    const dependentsArray = r.dependents || [];
+                    const depCount = dependentsArray.length;
+                    const depBadge = depCount > 0 ? `<span class="cotraveler-badge">+${depCount}</span>` : '';
+                    const nameHtml = `<span class="name">${name}</span>${depBadge}`;
+
+                    // Agent
+                    const agent = r.agent || '';
+                    const agentHtml = agent ? `<div class="agent"><i class="fas fa-user-tie"></i> ${agent}</div>` : '';
+
+                    // Route with highlighted display
+                    const visaCenter = r.visa_center || '';
+                    const travelCountry = r.travel_country || '';
+                    const visaType = r.visa_type || '';
+
+                    // Determine country class for color coding
+                    const countryLower = travelCountry.toLowerCase();
+                    let countryClass = '';
+                    if (countryLower.includes('uk') || countryLower.includes('united kingdom') || countryLower.includes('britain')) {
+                        countryClass = 'uk';
+                    } else if (countryLower.includes('usa') || countryLower.includes('united states') || countryLower.includes('america')) {
+                        countryClass = 'usa';
+                    } else if (countryLower.includes('canada')) {
+                        countryClass = 'canada';
+                    } else if (countryLower.includes('schengen') || countryLower.includes('europe') || countryLower.includes('france') || countryLower.includes('germany') || countryLower.includes('italy') || countryLower.includes('spain')) {
+                        countryClass = 'schengen';
+                    } else if (countryLower.includes('australia')) {
+                        countryClass = 'australia';
+                    } else if (countryLower.includes('uae') || countryLower.includes('dubai') || countryLower.includes('emirates')) {
+                        countryClass = 'uae';
+                    }
+
+                    const countryFlag = getCountryFlag(travelCountry);
+
+                    const routeHtml = `
+                    <div class="route-display">
+                        <div class="route-country ${countryClass}">
+                            <span class="country-flag">${countryFlag}</span>
+                            ${travelCountry || '-'}
+                        </div>
+                        ${visaCenter ? `<span class="route-visa-center">${visaCenter}</span>` : ''}
+                        ${visaType ? `<span class="route-visa-type">${visaType}</span>` : ''}
+                    </div>
+                `;
+
+                    // Package with styling
+                    const pkgCheck = (r.package || '').toLowerCase();
+                    const pkgText = r.package || '-';
+                    let pkgClass = 'package';
+                    if (pkgCheck.includes('fast') && pkgCheck.includes('full')) {
+                        pkgClass = 'package package-fast-full';
+                    } else if (pkgCheck.includes('full')) {
+                        pkgClass = 'package package-full';
+                    } else if (pkgCheck.includes('fast') && pkgCheck.includes('appointment')) {
+                        pkgClass = 'package package-fast-appointment';
+                    } else if (pkgCheck.includes('appointment')) {
+                        pkgClass = 'package package-appointment';
+                    }
+
+                    // WhatsApp
+                    const phone = r.whatsapp_contact || r.contact_number || '';
+                    const cleanPhone = phone.replace(/[^0-9+]/g, '');
+                    let whatsappHtml = '-';
+                    if (cleanPhone) {
+                        const waNum = cleanPhone.startsWith('+') ? cleanPhone.substring(1) : cleanPhone;
+                        whatsappHtml = `<a href="https://wa.me/${waNum}" target="_blank" class="whatsapp-link"><i class="fab fa-whatsapp"></i> ${phone}</a>`;
+                    }
+
+                    // Payment status
+                    const paymentStatus = r.payment_status || '';
+                    const paymentLower = paymentStatus.toLowerCase();
+                    let paymentClass = 'payment';
+                    let paymentText = paymentStatus || '-';
+                    if (paymentLower === 'paid') {
+                        paymentClass = 'payment payment-paid';
+                    } else if (paymentLower === 'pending') {
+                        paymentClass = 'payment payment-pending';
+                    } else if (paymentLower === 'partial') {
+                        paymentClass = 'payment payment-partial';
+                    } else if (paymentLower === 'not required') {
+                        paymentClass = 'payment payment-not-required';
+                    }
+
+                    // Row color based on risk or package
+                    let rowClass = 'purple';
+                    if (riskLevel === 'high') {
+                        rowClass = 'red';
+                    } else if (riskLevel === 'risk') {
+                        rowClass = 'amber';
+                    } else if (pkgCheck.includes('full') || pkgCheck.includes('fast')) {
+                        rowClass = 'purple';
+                    } else if (pkgCheck.includes('appointment')) {
+                        rowClass = 'grey';
+                    }
+
+                    // Notes
+                    const notesText = r.notes || '';
+                    const notesClass = notesText.toLowerCase().includes('error') ? 'notes-text error' : 'notes-text';
+
+                    tbody.append(`
+                    <tr class="${rowClass}" data-id="${r.id}" data-date="${travelDate}">
+                        <td>${rowNum}</td>
+                        <td>${travelDateHtml}</td>
+                        <td title="${name}">${nameHtml}${agentHtml}</td>
+                        <td>${routeHtml}</td>
+                        <td><span class="${pkgClass}">${pkgText}</span></td>
+                        <td>${whatsappHtml}</td>
+                        <td><span class="${paymentClass}">${paymentText}</span></td>
+                        <td>
+                            <div class="notes-wrapper">
+                                <span class="${notesClass}" data-id="${r.id}">${notesText}</span>
+                                <button class="notes-edit-btn" data-id="${r.id}" data-notes="${notesText.replace(/"/g, '&quot;')}" title="Edit Notes"><i class="fas fa-pen"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `);
+
+                    // Display dependents (co-travellers) if any
+                    if (dependentsArray.length > 0) {
+                        dependentsArray.forEach((dep) => {
+                            // Increment row counter for each dependent
+                            rowNum++;
+
+                            const depName = `${dep.first_name || ''} ${dep.last_name || ''}`.trim().toUpperCase();
+
+                            // Dependent's own travel date (fallback to main traveler)
+                            const depTravelDate = getTravelDate(dep) || travelDate;
+
+                            // Check risk level for dependent's own date
+                            const depRiskLevel = getRiskLevel(depTravelDate);
+                            let depRiskBadge = '';
+                            if (depRiskLevel === 'high') {
+                                depRiskBadge = `<div class="risk-label high">High Risk</div>`;
+                            } else if (depRiskLevel === 'risk') {
+                                depRiskBadge = `<div class="risk-label">Risk</div>`;
+                            }
+                            const depNameHtml = `<span class="name">${depName}</span>`;
+
+                            // Travel date with risk badge
+                            const depTravelDateHtml = depRiskBadge ? `${depRiskBadge}<span>${depTravelDate || '-'}</span>` : (depTravelDate || '-');
+
+                            // Dependent's own route (fallback to main traveler)
+                            const depVisaCenter = dep.visa_center || visaCenter;
+                            const depTravelCountry = dep.travel_country || travelCountry;
+                            const depVisaType = dep.visa_type || visaType;
+
+                            // Determine country class for color coding
+                            const depCountryLower = depTravelCountry.toLowerCase();
+                            let depCountryClass = '';
+                            if (depCountryLower.includes('uk') || depCountryLower.includes('united kingdom') || depCountryLower.includes('britain')) {
+                                depCountryClass = 'uk';
+                            } else if (depCountryLower.includes('usa') || depCountryLower.includes('united states') || depCountryLower.includes('america')) {
+                                depCountryClass = 'usa';
+                            } else if (depCountryLower.includes('canada')) {
+                                depCountryClass = 'canada';
+                            } else if (depCountryLower.includes('schengen') || depCountryLower.includes('europe') || depCountryLower.includes('france') || depCountryLower.includes('germany') || depCountryLower.includes('italy') || depCountryLower.includes('spain')) {
+                                depCountryClass = 'schengen';
+                            } else if (depCountryLower.includes('australia')) {
+                                depCountryClass = 'australia';
+                            } else if (depCountryLower.includes('uae') || depCountryLower.includes('dubai') || depCountryLower.includes('emirates')) {
+                                depCountryClass = 'uae';
+                            }
+
+                            const depCountryFlag = getCountryFlag(depTravelCountry);
+
+                            const depRouteHtml = `
+                            <div class="route-display">
+                                <div class="route-country ${depCountryClass}">
+                                    <span class="country-flag">${depCountryFlag}</span>
+                                    ${depTravelCountry || '-'}
+                                </div>
+                                ${depVisaCenter ? `<span class="route-visa-center">${depVisaCenter}</span>` : ''}
+                                ${depVisaType ? `<span class="route-visa-type">${depVisaType}</span>` : ''}
+                            </div>
+                        `;
+
+                            // Dependent's own package (fallback to main traveler)
+                            const depPkgCheck = (dep.package || r.package || '').toLowerCase();
+                            const depPkgText = dep.package || pkgText;
+                            let depPkgClass = 'package';
+                            if (depPkgCheck.includes('fast') && depPkgCheck.includes('full')) {
+                                depPkgClass = 'package package-fast-full';
+                            } else if (depPkgCheck.includes('full')) {
+                                depPkgClass = 'package package-full';
+                            } else if (depPkgCheck.includes('fast') && depPkgCheck.includes('appointment')) {
+                                depPkgClass = 'package package-fast-appointment';
+                            } else if (depPkgCheck.includes('appointment')) {
+                                depPkgClass = 'package package-appointment';
+                            }
+
+                            // Dependent's own payment status (fallback to main traveler)
+                            const depPaymentStatus = dep.payment_status || paymentStatus;
+                            const depPaymentLower = depPaymentStatus.toLowerCase();
+                            let depPaymentClass = 'payment';
+                            let depPaymentText = depPaymentStatus || '-';
+                            if (depPaymentLower === 'paid') {
+                                depPaymentClass = 'payment payment-paid';
+                            } else if (depPaymentLower === 'pending') {
+                                depPaymentClass = 'payment payment-pending';
+                            } else if (depPaymentLower === 'partial') {
+                                depPaymentClass = 'payment payment-partial';
+                            } else if (depPaymentLower === 'not required') {
+                                depPaymentClass = 'payment payment-not-required';
+                            }
+
+                            // Dependent row color (based on risk level or package)
+                            let depRowClass = 'purple';
+                            if (depRiskLevel === 'high') {
+                                depRowClass = 'red';
+                            } else if (depRiskLevel === 'risk') {
+                                depRowClass = 'amber';
+                            } else if (depPkgCheck.includes('full') || depPkgCheck.includes('fast')) {
+                                depRowClass = 'purple';
+                            } else if (depPkgCheck.includes('appointment')) {
+                                depRowClass = 'grey';
+                            }
+
+                            // Dependent WhatsApp
+                            const depPhone = dep.whatsapp_contact || dep.contact_number || '';
+                            const depCleanPhone = depPhone.replace(/[^0-9+]/g, '');
+                            let depWhatsappHtml = '-';
+                            if (depCleanPhone) {
+                                const waNum = depCleanPhone.startsWith('+') ? depCleanPhone.substring(1) : depCleanPhone;
+                                depWhatsappHtml = `<a href="https://wa.me/${waNum}" target="_blank" class="whatsapp-link"><i class="fab fa-whatsapp"></i> ${depPhone}</a>`;
+                            }
+
+                            // Dependent notes
+                            const depNotes = dep.notes || '';
+                            const depNotesClass = depNotes.toLowerCase().includes('error') ? 'notes-text error' : 'notes-text';
+
+                            tbody.append(`
+                            <tr class="${depRowClass}" data-id="${dep.id}" data-date="${depTravelDate}">
+                                <td>${rowNum}</td>
+                                <td>${depTravelDateHtml}</td>
+                                <td title="${depName}">${depNameHtml}</td>
+                                <td>${depRouteHtml}</td>
+                                <td><span class="${depPkgClass}">${depPkgText}</span></td>
+                                <td>${depWhatsappHtml}</td>
+                                <td><span class="${depPaymentClass}">${depPaymentText}</span></td>
+                                <td>
+                                    <div class="notes-wrapper">
+                                        <span class="${depNotesClass}" data-id="${dep.id}">${depNotes}</span>
+                                        <button class="notes-edit-btn" data-id="${dep.id}" data-table="dependents" data-notes="${depNotes.replace(/"/g, '&quot;')}" title="Edit Notes"><i class="fas fa-pen"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `);
+                        });
+                    }
+                });
+            }
+
+            // Notes Edit Modal
+            let currentEditId = null;
+            let currentEditTable = 'travelers';
+
+            $(document).on('click', '.notes-edit-btn', function () {
+                currentEditId = $(this).data('id');
+                currentEditTable = $(this).data('table') || 'travelers';
+                const notes = $(this).data('notes') || '';
+                $('#notes-textarea').val(notes);
+                $('#notes-modal').css('display', 'flex');
+            });
+
+            $('#notes-modal-close, #notes-cancel').click(function () {
+                $('#notes-modal').hide();
+                currentEditId = null;
+                currentEditTable = 'travelers';
+            });
+
+            $('#notes-modal').click(function (e) {
+                if (e.target === this) {
+                    $(this).hide();
+                    currentEditId = null;
+                    currentEditTable = 'travelers';
+                }
+            });
+
+            $('#notes-save').click(function () {
+                if (!currentEditId) return;
+
+                const newNotes = $('#notes-textarea').val();
+                const apiEndpoint = currentEditTable === 'dependents'
+                    ? 'api/dependents.php?action=update_field'
+                    : 'api/travelers.php?action=update_field';
+
+                $.post(apiEndpoint, {
+                    id: currentEditId,
+                    field: 'notes',
+                    value: newNotes
+                }, function (res) {
+                    if (res.status === 'success') {
+                        $(`.notes-text[data-id="${currentEditId}"]`).text(newNotes);
+                        $(`.notes-edit-btn[data-id="${currentEditId}"]`).data('notes', newNotes);
+
+                        if (currentEditTable === 'travelers') {
+                            const record = allRecords.find(r => r.id == currentEditId);
+                            if (record) record.notes = newNotes;
+                        }
+
+                        $('#notes-modal').hide();
+                        currentEditId = null;
+                        currentEditTable = 'travelers';
+                    } else {
+                        alert('Failed to save notes');
+                    }
+                }, 'json').fail(function () {
+                    alert('Error saving notes');
+                });
+            });
+
+            // Initial load
+            loadData();
+        });
+    </script>
+</body>
+
+</html>
