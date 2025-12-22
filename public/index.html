@@ -1052,6 +1052,12 @@
             height: 14px;
         }
 
+        .route-filter-tag {
+            background: var(--accent-success-subtle);
+            border-color: rgba(34, 197, 94, 0.2);
+            color: var(--accent-success);
+        }
+
         /* Settings Grid */
         .settings-grid {
             display: grid;
@@ -2591,17 +2597,10 @@
                 const country = routeCard.dataset.country;
                 const centre = routeCard.dataset.centre;
 
-                // Add both country and centre as filters
-                if (country && !activeFilters.includes(country)) {
-                    activeFilters.push(country);
+                // Add as a single route filter
+                if (country && centre) {
+                    addRouteFilter(country, centre);
                 }
-                if (centre && !activeFilters.includes(centre)) {
-                    activeFilters.push(centre);
-                }
-
-                renderFilters();
-                saveKeywordsToDatabase();
-                refilterMessages();
 
                 // Switch to filtered view
                 document.querySelector('.nav-item[data-view="filtered"]').click();
@@ -2832,6 +2831,9 @@
         // FILTER FUNCTIONALITY
         // ============================================
 
+        // Active filters can be:
+        // 1. Route objects: { type: 'route', country: 'Spain', centre: 'London', id: 'Spain-London' }
+        // 2. Keyword strings: 'Prime Time'
         let activeFilters = [];
         const filterInput = document.getElementById('filterInput');
         const applyFilterBtn = document.getElementById('applyFilterBtn');
@@ -2839,29 +2841,53 @@
         const activeFiltersContainer = document.getElementById('activeFilters');
 
         function renderFilters() {
-            activeFiltersContainer.innerHTML = activeFilters.map(filter => `
-                <span class="filter-tag">
-                    ${filter}
-                    <button onclick="removeFilter('${filter}')">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-                        </svg>
-                    </button>
-                </span>
-            `).join('');
+            activeFiltersContainer.innerHTML = activeFilters.map(filter => {
+                if (typeof filter === 'object' && filter.type === 'route') {
+                    // Route filter tag
+                    return `
+                        <span class="filter-tag route-filter-tag">
+                            ${filter.country} → ${filter.centre}
+                            <button onclick="removeFilter('${filter.id}')">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                                </svg>
+                            </button>
+                        </span>
+                    `;
+                } else {
+                    // Regular keyword filter tag
+                    return `
+                        <span class="filter-tag">
+                            ${filter}
+                            <button onclick="removeFilter('${filter}')">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                                </svg>
+                            </button>
+                        </span>
+                    `;
+                }
+            }).join('');
         }
 
-        // Save keywords to database
+        // Save keywords to database (convert routes to serializable format)
         async function saveKeywordsToDatabase() {
             try {
+                const serializedFilters = activeFilters.map(filter => {
+                    if (typeof filter === 'object' && filter.type === 'route') {
+                        return { type: 'route', country: filter.country, centre: filter.centre, id: filter.id };
+                    }
+                    return filter;
+                });
+
                 await fetch(`${apiBasePath}/api/keywords`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ keywords: activeFilters })
+                    body: JSON.stringify({ keywords: serializedFilters })
                 });
-                console.log('💾 Keywords saved to database');
+                console.log('💾 Filters saved to database');
             } catch (error) {
-                console.error('❌ Failed to save keywords:', error);
+                console.error('❌ Failed to save filters:', error);
             }
         }
 
@@ -2873,36 +2899,88 @@
                 if (data.keywords && Array.isArray(data.keywords)) {
                     activeFilters = data.keywords;
                     renderFilters();
-                    console.log(`✅ Loaded ${activeFilters.length} keywords from database`);
+                    console.log(`✅ Loaded ${activeFilters.length} filters from database`);
                 }
             } catch (error) {
-                console.error('❌ Failed to load keywords:', error);
+                console.error('❌ Failed to load filters:', error);
             }
         }
 
-        function addFilter(keyword) {
-            const trimmed = keyword.trim();
-            if (trimmed && !activeFilters.includes(trimmed)) {
-                activeFilters.push(trimmed);
+        // Add a route filter
+        function addRouteFilter(country, centre) {
+            const routeId = `${country}-${centre}`;
+
+            // Check if this route already exists
+            const exists = activeFilters.some(f =>
+                typeof f === 'object' && f.type === 'route' && f.id === routeId
+            );
+
+            if (!exists) {
+                activeFilters.push({
+                    type: 'route',
+                    country: country,
+                    centre: centre,
+                    id: routeId
+                });
                 renderFilters();
-                filterInput.value = '';
-                saveKeywordsToDatabase(); // Save to database
+                saveKeywordsToDatabase();
                 refilterMessages();
             }
         }
 
-        function removeFilter(keyword) {
-            activeFilters = activeFilters.filter(f => f !== keyword);
+        // Add a keyword filter
+        function addFilter(keyword) {
+            const trimmed = keyword.trim();
+            if (!trimmed) return;
+
+            // Check if it already exists as a keyword
+            const exists = activeFilters.some(f =>
+                typeof f === 'string' && f === trimmed
+            );
+
+            if (!exists) {
+                activeFilters.push(trimmed);
+                renderFilters();
+                filterInput.value = '';
+                saveKeywordsToDatabase();
+                refilterMessages();
+            }
+        }
+
+        function removeFilter(identifier) {
+            if (typeof identifier === 'string') {
+                // Remove by route ID or keyword string
+                activeFilters = activeFilters.filter(f => {
+                    if (typeof f === 'object' && f.type === 'route') {
+                        return f.id !== identifier;
+                    }
+                    return f !== identifier;
+                });
+            }
             renderFilters();
-            saveKeywordsToDatabase(); // Save to database
+            saveKeywordsToDatabase();
             refilterMessages();
         }
 
         function matchesFilter(messageText) {
             if (activeFilters.length === 0) return true;
             const text = (messageText || '').toLowerCase();
-            // ALL filters must match (AND logic) - important for route filtering
-            return activeFilters.every(filter => text.includes(filter.toLowerCase()));
+
+            // OR logic between filters
+            // Each filter can be:
+            // 1. A route (country AND centre must both match)
+            // 2. A keyword (just the keyword must match)
+            return activeFilters.some(filter => {
+                if (typeof filter === 'object' && filter.type === 'route') {
+                    // Route: both country AND centre must be present
+                    const hasCountry = text.includes(filter.country.toLowerCase());
+                    const hasCentre = text.includes(filter.centre.toLowerCase());
+                    return hasCountry && hasCentre;
+                } else {
+                    // Keyword: just check if present
+                    return text.includes(filter.toLowerCase());
+                }
+            });
         }
 
         // Re-filter all stored messages
