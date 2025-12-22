@@ -74,6 +74,32 @@ app.get('/api/stats', (req, res) => {
     }
 });
 
+// Get saved keywords/filters
+app.get('/api/keywords', (req, res) => {
+    try {
+        // For now, return empty array - you can implement database storage later
+        // Or read from a JSON file
+        res.json({ keywords: [] });
+    } catch (error) {
+        console.error('API error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Save keywords/filters
+app.post('/api/keywords', (req, res) => {
+    try {
+        const { keywords } = req.body;
+        // For now, just acknowledge - you can implement database storage later
+        // Or save to a JSON file
+        console.log('Keywords saved:', keywords);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('API error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Save notification (POST)
 app.post('/api/notifications', (req, res) => {
     try {
