@@ -3040,18 +3040,19 @@
                 console.log(`📊 Total messages in DB: ${totalMessagesInDB}`);
                 console.log(`📥 Loaded: ${data.notifications.length} messages`);
 
-                // Add all messages from database (to All Messages view)
+                // Add all messages from database (to All Messages view ONLY)
                 data.notifications.forEach(msg => {
                     addToAllMessages(msg);
                 });
 
-                // Apply filter to show matching in VisaD Notify
-                refilterMessages();
+                // DO NOT call refilterMessages() here - VisaD Notify should start empty
+                // User must enter keywords to see filtered messages
 
                 // Show/hide Load More button
                 updateLoadMoreButton(data.hasMore);
 
                 console.log(`✅ Loaded ${data.notifications.length} of ${totalMessagesInDB} messages`);
+                console.log(`ℹ️  VisaD Notify is empty - waiting for user to enter keywords`);
 
             } catch (error) {
                 console.error('❌ Failed to load historical messages:', error);
@@ -3079,7 +3080,7 @@
 
                 console.log(`📥 Loaded ${data.notifications.length} more messages`);
 
-                // Add messages to the view
+                // Add messages to All Messages view only
                 data.notifications.forEach(msg => {
                     addToAllMessages(msg);
                 });
@@ -3087,8 +3088,8 @@
                 // Update offset
                 currentOffset += data.notifications.length;
 
-                // Apply filter to show matching in VisaD Notify
-                refilterMessages();
+                // DO NOT call refilterMessages() - only update when user applies filters
+                // If user has filters active, they can re-apply to see new matching messages
 
                 // Show/hide Load More button
                 updateLoadMoreButton(data.hasMore);
