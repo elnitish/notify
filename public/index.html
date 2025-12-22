@@ -575,155 +575,371 @@
         /* Messages Grid */
         .messages-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 6px;
         }
 
         .message-card {
             background: var(--bg-secondary);
             border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-md);
-            padding: 12px 14px;
-            transition: all var(--transition-base);
-            animation: slideIn 0.2s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: scale(0.98);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+            border-radius: 6px;
+            padding: 8px 10px;
+            cursor: pointer;
+            transition: all 0.15s ease;
         }
 
         .message-card:hover {
             border-color: var(--accent-primary);
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .message-card.highlight {
             border-left: 3px solid var(--accent-primary);
         }
 
-        .message-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid var(--border-subtle);
-        }
-
-        .message-meta {
+        .msg-row1 {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            margin-bottom: 6px;
         }
 
-        .message-time {
-            font-size: 11px;
-            font-weight: 500;
+        .msg-time {
+            font-size: 10px;
             font-family: 'JetBrains Mono', monospace;
             color: var(--text-muted);
+            flex-shrink: 0;
         }
 
-        .message-center {
-            font-size: 10px;
-            color: var(--accent-primary);
-            font-weight: 600;
-            background: var(--accent-primary-subtle);
-            padding: 3px 8px;
-            border-radius: 100px;
-        }
-
-        .message-badge {
-            padding: 3px 8px;
-            background: var(--accent-success-subtle);
-            color: var(--accent-success);
-            border-radius: 100px;
-            font-size: 10px;
+        .msg-type {
+            font-size: 8px;
             font-weight: 700;
+            padding: 2px 5px;
+            border-radius: 3px;
             text-transform: uppercase;
+            flex-shrink: 0;
         }
 
-        .message-badge.prime {
+        .msg-type.regular {
+            background: var(--accent-primary-subtle);
+            color: var(--accent-primary);
+        }
+
+        .msg-type.prime {
             background: var(--accent-warning-subtle);
             color: var(--accent-warning);
         }
 
-        .message-content {
-            font-size: 13px;
-            line-height: 1.6;
-            color: var(--text-secondary);
-            white-space: pre-wrap;
-            word-wrap: break-word;
+        .msg-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        @media (max-width: 900px) {
+        .msg-row2 {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .msg-dates {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .date-chip {
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .date-chip.prime {
+            background: var(--accent-warning-subtle);
+            color: var(--accent-warning);
+        }
+
+        .date-chip.more {
+            background: var(--accent-primary-subtle);
+            color: var(--accent-primary);
+        }
+
+        .msg-view {
+            font-size: 9px;
+            color: var(--accent-primary);
+            font-weight: 500;
+            flex-shrink: 0;
+            margin-left: 8px;
+        }
+
+        /* Message Modal */
+        .msg-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .msg-modal-content {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .msg-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-subtle);
+            font-weight: 600;
+        }
+
+        .msg-modal-header button {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .msg-modal-header button:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .msg-modal-body {
+            padding: 16px;
+            overflow-y: auto;
+            max-height: 60vh;
+        }
+
+        .msg-modal-body pre {
+            font-size: 12px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 0;
+            font-family: inherit;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
             .messages-grid {
                 grid-template-columns: 1fr;
             }
         }
 
-        /* Load More Button Container */
-        .load-more-container {
-            display: flex;
-            justify-content: center;
-            margin-top: 24px;
-            padding: 20px 0;
+        /* Load More Button */
+        .load-more-btn {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 12px 20px;
+            background: var(--bg-secondary);
+            border: 2px dashed var(--border-default);
+            border-radius: 8px;
+            color: var(--accent-primary);
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 8px;
         }
 
-        .btn-load-more {
+        .load-more-btn:hover {
+            background: var(--accent-primary-subtle);
+            border-color: var(--accent-primary);
+        }
+
+        /* Today's Summary - Compact */
+        .today-summary {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+        }
+
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .summary-title {
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--text-primary);
+        }
+
+        .summary-date {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .summary-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .summary-country {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            padding: 12px 24px;
-            font-family: inherit;
-            font-size: 14px;
-            font-weight: 600;
-            border-radius: var(--radius-md);
-            background: var(--bg-secondary);
-            color: var(--text-secondary);
-            border: 2px solid var(--border-default);
-            cursor: pointer;
-            transition: all var(--transition-base);
-        }
-
-        .btn-load-more:hover {
+            gap: 4px;
             background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .summary-country:hover {
             border-color: var(--accent-primary);
+            background: var(--accent-primary-subtle);
+        }
+
+        .summary-country .flag {
+            font-size: 12px;
+        }
+
+        .summary-country .name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .summary-country .centres {
+            color: var(--text-secondary);
+            font-size: 10px;
+        }
+
+        .summary-country .centre-count {
             color: var(--accent-primary);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
         }
 
-        .btn-load-more:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
+        .summary-centre {
+            cursor: pointer;
+            transition: color 0.15s ease;
         }
 
-        .btn-load-more svg {
-            width: 18px;
-            height: 18px;
+        .summary-centre:hover {
+            color: var(--accent-primary);
+            text-decoration: underline;
         }
 
-        .btn-load-more.loading svg {
-            animation: spin 1s linear infinite;
+        .summary-no-data {
+            color: var(--text-muted);
+            font-size: 11px;
+            font-style: italic;
         }
 
-        @keyframes spin {
-            from {
-                transform: rotate(0deg);
-            }
+        /* Monitored Routes Section */
+        .monitored-routes {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+        }
 
-            to {
-                transform: rotate(360deg);
-            }
+        .routes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .routes-title {
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--text-primary);
+        }
+
+        .routes-count {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .routes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 6px;
+        }
+
+        .route-card {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 6px 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .route-card:hover {
+            border-color: var(--accent-primary);
+            background: var(--accent-primary-subtle);
+            transform: translateY(-1px);
+        }
+
+        .route-flag {
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .route-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .route-country {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .route-centre {
+            font-size: 9px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .route-arrow {
+            font-size: 10px;
+            color: var(--text-muted);
+            flex-shrink: 0;
         }
 
         /* Empty State */
@@ -1355,83 +1571,18 @@
         /* Country Messages Container */
         .country-messages-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 6px;
         }
 
-        .country-message-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-md);
-            padding: 12px 14px;
-            transition: all var(--transition-base);
-        }
-
-        .country-message-card:hover {
-            border-color: var(--accent-primary);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .country-message-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid var(--border-subtle);
-        }
-
-        .country-message-meta {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .country-message-time {
-            font-size: 11px;
-            color: var(--text-muted);
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .country-message-center {
-            font-size: 10px;
-            color: var(--accent-primary);
-            font-weight: 600;
-            background: var(--accent-primary-subtle);
-            padding: 3px 8px;
-            border-radius: 100px;
-        }
-
-        .country-message-type {
-            padding: 3px 8px;
-            border-radius: 100px;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .country-message-type.prime {
-            background: var(--accent-warning-subtle);
-            color: var(--accent-warning);
-        }
-
-        .country-message-type.regular {
-            background: var(--accent-primary-subtle);
-            color: var(--accent-primary);
-        }
-
-        .country-message-content {
-            font-size: 13px;
-            line-height: 1.6;
-            color: var(--text-secondary);
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-
-        @media (max-width: 900px) {
+        @media (max-width: 768px) {
             .country-messages-container {
                 grid-template-columns: 1fr;
             }
+        }
+
+        .country-messages-container .load-more-btn {
+            grid-column: 1 / -1;
         }
 
         .no-messages-found {
@@ -1688,18 +1839,6 @@
                         <p>All messages will appear here</p>
                     </div>
                 </div>
-
-                <!-- Load More Button -->
-                <div class="load-more-container" id="loadMoreContainer" style="display: none;">
-                    <button class="btn-load-more" id="loadMoreBtn">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 5v14" />
-                            <path d="m19 12-7 7-7-7" />
-                        </svg>
-                        <span id="loadMoreText">Load More Messages</span>
-                    </button>
-                </div>
             </div>
 
             <!-- VisaD Notify View -->
@@ -1727,6 +1866,53 @@
                             </svg>
                             <span class="sound-label">Sound On</span>
                         </button>
+                    </div>
+                </div>
+
+                <!-- Today's Summary - Compact -->
+                <div class="today-summary" id="todaySummary">
+                    <div class="summary-header">
+                        <span class="summary-title">📊 Today's Slots</span>
+                        <span class="summary-date" id="summaryDate"></span>
+                    </div>
+                    <div class="summary-content" id="summaryContent">
+                        <div class="summary-no-data">Loading...</div>
+                    </div>
+                </div>
+
+                <!-- Monitored Routes Section -->
+                <div class="monitored-routes" id="monitoredRoutes">
+                    <div class="routes-header">
+                        <span class="routes-title">🎯 Monitored Routes</span>
+                        <span class="routes-count" id="routesCount">3 routes</span>
+                    </div>
+                    <div class="routes-grid" id="routesGrid">
+                        <!-- Route 1: Spain → London -->
+                        <div class="route-card" data-country="Spain" data-centre="London">
+                            <span class="route-flag">🇪🇸</span>
+                            <div class="route-info">
+                                <div class="route-country">Spain</div>
+                                <div class="route-centre">→ London</div>
+                            </div>
+                        </div>
+
+                        <!-- Route 2: France → Manchester -->
+                        <div class="route-card" data-country="France" data-centre="Manchester">
+                            <span class="route-flag">🇫🇷</span>
+                            <div class="route-info">
+                                <div class="route-country">France</div>
+                                <div class="route-centre">→ Manchester</div>
+                            </div>
+                        </div>
+
+                        <!-- Route 3: Portugal → London -->
+                        <div class="route-card" data-country="Portugal" data-centre="London">
+                            <span class="route-flag">🇵🇹</span>
+                            <div class="route-info">
+                                <div class="route-country">Portugal</div>
+                                <div class="route-centre">→ London</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1766,18 +1952,6 @@
                         <h3>No filter applied</h3>
                         <p>Enter keywords above to get notified for matching visa slots</p>
                     </div>
-                </div>
-
-                <!-- Load More Button for Filtered Messages -->
-                <div class="load-more-container" id="loadMoreFilteredContainer" style="display: none;">
-                    <button class="btn-load-more" id="loadMoreFilteredBtn">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 5v14" />
-                            <path d="m19 12-7 7-7-7" />
-                        </svg>
-                        <span id="loadMoreFilteredText">Load More Filtered Messages</span>
-                    </button>
                 </div>
             </div>
 
@@ -1856,164 +2030,163 @@
                     </div>
                 </div>
             </div>
-    </div>
 
-    <!-- Settings View -->
-    <div class="view-container" id="settingsView">
-        <div class="view-header">
-            <div>
-                <h1 class="view-title">Settings</h1>
-                <p class="view-subtitle">Configure your monitoring preferences</p>
-            </div>
-        </div>
+            <!-- Settings View -->
+            <div class="view-container" id="settingsView">
+                <div class="view-header">
+                    <div>
+                        <h1 class="view-title">Settings</h1>
+                        <p class="view-subtitle">Configure your monitoring preferences</p>
+                    </div>
+                </div>
 
-        <div class="settings-grid">
-            <div class="setting-card">
-                <h3>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-                        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-                    </svg>
-                    Notifications
-                </h3>
-                <div class="setting-item">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="soundEnabledToggle" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                    <div>
-                        <div class="setting-label">Sound Alerts</div>
-                        <div class="setting-description">Play sound when new messages arrive</div>
+                <div class="settings-grid">
+                    <div class="setting-card">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                            </svg>
+                            Notifications
+                        </h3>
+                        <div class="setting-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="soundEnabledToggle" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div>
+                                <div class="setting-label">Sound Alerts</div>
+                                <div class="setting-description">Play sound when new messages arrive</div>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="desktopNotifications">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div>
+                                <div class="setting-label">Desktop Notifications</div>
+                                <div class="setting-description">Show browser notifications</div>
+                            </div>
+                        </div>
+                        <div class="setting-item" style="flex-direction: column; align-items: stretch;">
+                            <div>
+                                <div class="setting-label">Alert Volume</div>
+                                <div class="setting-description">Adjust bell sound loudness</div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.75rem;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" style="color: var(--text-tertiary);">
+                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                                </svg>
+                                <input type="range" id="volumeSlider" min="0" max="100" value="80" style="flex: 1;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" style="color: var(--text-tertiary);">
+                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                                </svg>
+                                <span id="volumeValue"
+                                    style="min-width: 3rem; text-align: right; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary);">80%</span>
+                                <button id="testSoundBtn"
+                                    style="margin-left: 10px; padding: 6px 12px; background: var(--accent-primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">🔔
+                                    Test</button>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="setting-item">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="desktopNotifications">
-                        <span class="toggle-slider"></span>
-                    </label>
-                    <div>
-                        <div class="setting-label">Desktop Notifications</div>
-                        <div class="setting-description">Show browser notifications</div>
-                    </div>
-                </div>
-                <div class="setting-item" style="flex-direction: column; align-items: stretch;">
-                    <div>
-                        <div class="setting-label">Alert Volume</div>
-                        <div class="setting-description">Adjust bell sound loudness</div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.75rem;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            style="color: var(--text-tertiary);">
-                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                        </svg>
-                        <input type="range" id="volumeSlider" min="0" max="100" value="80" style="flex: 1;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            style="color: var(--text-tertiary);">
-                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-                        </svg>
-                        <span id="volumeValue"
-                            style="min-width: 3rem; text-align: right; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary);">80%</span>
-                        <button id="testSoundBtn"
-                            style="margin-left: 10px; padding: 6px 12px; background: var(--accent-primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">🐓
-                            Test</button>
-                    </div>
-                </div>
-            </div>
 
-            <div class="setting-card">
-                <h3>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect width="18" height="18" x="3" y="3" rx="2" />
-                        <path d="M3 9h18" />
-                        <path d="M9 21V9" />
-                    </svg>
-                    Display
-                </h3>
-                <div class="setting-item">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="autoRefresh" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                    <div>
-                        <div class="setting-label">Auto Refresh</div>
-                        <div class="setting-description">Automatically update message list</div>
+                    <div class="setting-card">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect width="18" height="18" x="3" y="3" rx="2" />
+                                <path d="M3 9h18" />
+                                <path d="M9 21V9" />
+                            </svg>
+                            Display
+                        </h3>
+                        <div class="setting-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="autoRefresh" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div>
+                                <div class="setting-label">Auto Refresh</div>
+                                <div class="setting-description">Automatically update message list</div>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="compactMode">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div>
+                                <div class="setting-label">Compact Mode</div>
+                                <div class="setting-description">Show more messages in less space</div>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="darkModeToggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div>
+                                <div class="setting-label">Dark Mode</div>
+                                <div class="setting-description">Switch to dark theme</div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="setting-item">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="compactMode">
-                        <span class="toggle-slider"></span>
-                    </label>
-                    <div>
-                        <div class="setting-label">Compact Mode</div>
-                        <div class="setting-description">Show more messages in less space</div>
-                    </div>
-                </div>
-                <div class="setting-item">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="darkModeToggle">
-                        <span class="toggle-slider"></span>
-                    </label>
-                    <div>
-                        <div class="setting-label">Dark Mode</div>
-                        <div class="setting-description">Switch to dark theme</div>
-                    </div>
-                </div>
-            </div>
 
-            <div class="setting-card">
-                <h3>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <ellipse cx="12" cy="5" rx="9" ry="3" />
-                        <path d="M3 5V19A9 3 0 0 0 21 19V5" />
-                        <path d="M3 12A9 3 0 0 0 21 12" />
-                    </svg>
-                    Data Management
-                </h3>
-                <button class="btn btn-secondary btn-block" id="exportDataBtn">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="7 10 12 15 17 10" />
-                        <line x1="12" x2="12" y1="15" y2="3" />
-                    </svg>
-                    Export All Data
-                </button>
-            </div>
+                    <div class="setting-card">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <ellipse cx="12" cy="5" rx="9" ry="3" />
+                                <path d="M3 5V19A9 3 0 0 0 21 19V5" />
+                                <path d="M3 12A9 3 0 0 0 21 12" />
+                            </svg>
+                            Data Management
+                        </h3>
+                        <button class="btn btn-secondary btn-block" id="exportDataBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="7 10 12 15 17 10" />
+                                <line x1="12" x2="12" y1="15" y2="3" />
+                            </svg>
+                            Export All Data
+                        </button>
+                    </div>
 
-            <div class="setting-card">
-                <h3>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M12 16v-4" />
-                        <path d="M12 8h.01" />
-                    </svg>
-                    Information
-                </h3>
-                <div class="info-item">
-                    <span class="info-label">Bot Name</span>
-                    <span class="info-value">visard</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Connection</span>
-                    <span class="info-value">MTProto</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Total Messages</span>
-                    <span class="info-value" id="totalMessagesInfo">0</span>
+                    <div class="setting-card">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M12 16v-4" />
+                                <path d="M12 8h.01" />
+                            </svg>
+                            Information
+                        </h3>
+                        <div class="info-item">
+                            <span class="info-label">Bot Name</span>
+                            <span class="info-value">visard</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Connection</span>
+                            <span class="info-value">MTProto</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Total Messages</span>
+                            <span class="info-value" id="totalMessagesInfo">0</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-    </main>
+        </main>
     </div>
 
     <!-- Socket.IO - Local version with path detection -->
@@ -2023,21 +2196,39 @@
         // Navigation
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {
+                console.log('Navigation clicked:', item.dataset.view);
+
+                // Remove active from all nav items
                 document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
                 item.classList.add('active');
 
+                // Get view ID
                 const viewId = item.dataset.view;
-                document.querySelectorAll('.view-container').forEach(view => view.classList.remove('active'));
 
+                // Hide all views
+                document.querySelectorAll('.view-container').forEach(view => {
+                    view.classList.remove('active');
+                });
+
+                // Show selected view
+                let targetView = null;
                 if (viewId === 'all-messages') {
-                    document.getElementById('allMessagesView').classList.add('active');
+                    targetView = document.getElementById('allMessagesView');
                 } else if (viewId === 'filtered') {
-                    document.getElementById('filteredView').classList.add('active');
+                    targetView = document.getElementById('filteredView');
                 } else if (viewId === 'country') {
-                    document.getElementById('countryView').classList.add('active');
-                    renderCountryView();
+                    targetView = document.getElementById('countryView');
                 } else if (viewId === 'settings') {
-                    document.getElementById('settingsView').classList.add('active');
+                    targetView = document.getElementById('settingsView');
+                }
+
+                if (targetView) {
+                    targetView.classList.add('active');
+                    console.log('View activated:', viewId);
+
+                    if (viewId === 'country') {
+                        renderCountryView();
+                    }
                 }
             });
         });
@@ -2202,6 +2393,138 @@
         let filteredMessagesCount = 0;
         let todayCount = 0;
 
+        // Today's summary tracking
+        let todaySummaryData = {}; // { country: { flag, centres: { centreName: count } } }
+
+        // Country flag mapping
+        const countryFlagMap = {
+            'france': '🇫🇷', 'germany': '🇩🇪', 'netherlands': '🇳🇱', 'belgium': '🇧🇪',
+            'portugal': '🇵🇹', 'italy': '🇮🇹', 'spain': '🇪🇸', 'austria': '🇦🇹',
+            'iceland': '🇮🇸', 'switzerland': '🇨🇭', 'ireland': '🇮🇪', 'uk': '🇬🇧',
+            'poland': '🇵🇱', 'greece': '🇬🇷', 'sweden': '🇸🇪', 'norway': '🇳🇴',
+            'denmark': '🇩🇰', 'finland': '🇫🇮', 'czech': '🇨🇿', 'hungary': '🇭🇺'
+        };
+
+        // Centre list
+        const centresList = ['London', 'Manchester', 'Edinburgh', 'Birmingham', 'Belfast', 'Cardiff', 'Glasgow', 'Sheffield', 'Nottingham'];
+
+        // Extract country and centre from message
+        function extractCountryAndCentre(content) {
+            const text = content.toLowerCase();
+            let country = null;
+            let flag = '🌍';
+            let centre = null;
+
+            // Find country
+            for (const [c, f] of Object.entries(countryFlagMap)) {
+                if (text.includes(c)) {
+                    country = c.charAt(0).toUpperCase() + c.slice(1);
+                    flag = f;
+                    break;
+                }
+            }
+
+            // Find centre
+            for (const c of centresList) {
+                if (text.includes(c.toLowerCase())) {
+                    centre = c;
+                    break;
+                }
+            }
+
+            return { country, flag, centre };
+        }
+
+        // Check if message is from today
+        function isToday(timestamp) {
+            const msgDate = new Date(timestamp);
+            const today = new Date();
+            return msgDate.toDateString() === today.toDateString();
+        }
+
+        // Add to today's summary
+        function addToTodaySummary(message) {
+            const timestamp = message.timestamp || Date.now();
+            if (!isToday(timestamp)) return;
+
+            const content = message.message || message.content || message.text || '';
+            const { country, flag, centre } = extractCountryAndCentre(content);
+
+            if (country) {
+                if (!todaySummaryData[country]) {
+                    todaySummaryData[country] = { flag, centres: {}, total: 0 };
+                }
+                todaySummaryData[country].total++;
+
+                if (centre) {
+                    if (!todaySummaryData[country].centres[centre]) {
+                        todaySummaryData[country].centres[centre] = 0;
+                    }
+                    todaySummaryData[country].centres[centre]++;
+                }
+            }
+
+            updateTodaySummaryDisplay();
+        }
+
+        // Update the summary display
+        function updateTodaySummaryDisplay() {
+            const container = document.getElementById('summaryContent');
+            const dateSpan = document.getElementById('summaryDate');
+
+            // Set today's date
+            const today = new Date();
+            dateSpan.textContent = today.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+
+            const countries = Object.entries(todaySummaryData);
+
+            if (countries.length === 0) {
+                container.innerHTML = '<div class="summary-no-data">No slots opened today yet</div>';
+                return;
+            }
+
+            // Sort by total count descending
+            countries.sort((a, b) => b[1].total - a[1].total);
+
+            let html = '';
+            for (const [country, data] of countries) {
+                // Build centres list with individual counts
+                const centresWithCounts = Object.entries(data.centres)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([centre, count]) => `<span class="summary-centre" data-centre="${centre}">${centre}</span> <span class="centre-count">[${count}]</span>`)
+                    .join(', ');
+
+                html += `
+                    <div class="summary-country" data-country="${country}">
+                        <span class="flag">${data.flag}</span>
+                        <span class="name">${country}</span>
+                        <span class="centres">${centresWithCounts}</span>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+
+            // Add click listeners
+            container.querySelectorAll('.summary-country').forEach(el => {
+                el.addEventListener('click', function (e) {
+                    // Check if clicked on centre
+                    if (e.target.classList.contains('summary-centre')) {
+                        const centre = e.target.dataset.centre;
+                        if (centre) {
+                            addFilter(centre);
+                        }
+                    } else {
+                        // Clicked on country
+                        const country = this.dataset.country;
+                        if (country) {
+                            addFilter(country);
+                        }
+                    }
+                });
+            });
+        }
+
         // Create message HTML
         function createMessageHTML(message, isHighlight = false) {
             const timestamp = message.timestamp || Date.now();
@@ -2210,43 +2533,139 @@
 
             let content = message.message || message.content || message.text || '';
 
-            // Clean up content - remove "Link to visa center site"
+            // Clean up content
             let cleanContent = content
                 .replace(/Link to visa center site/gi, '')
                 .replace(/link to visa center/gi, '')
                 .trim();
 
-            // Detect center
-            let center = 'Other';
-            const centersList = ['London', 'Manchester', 'Edinburgh', 'Birmingham', 'Belfast', 'Cardiff', 'Glasgow', 'Paris', 'Berlin', 'Munich', 'Rome', 'Milan', 'Madrid', 'Barcelona', 'Amsterdam', 'Brussels'];
-            for (const c of centersList) {
-                if (content.toLowerCase().includes(c.toLowerCase())) {
-                    center = c;
-                    break;
-                }
-            }
-
             // Detect if Prime Time
             const isPrimeTime = content.toLowerCase().includes('prime time') ||
                 content.toLowerCase().includes('primetime');
 
+            // Get title (first line - full visa info)
+            const lines = cleanContent.split('\n').filter(l => l.trim());
+            let title = lines[0] || 'Visa Slot';
+            if (title.length > 50) title = title.substring(0, 47) + '...';
+
+            // Extract dates
+            const dateMatches = cleanContent.match(/\d{1,2}[.\/]\d{1,2}/g) || [];
+            const uniqueDates = [...new Set(dateMatches)].slice(0, 4);
+            let dateHtml = '';
+            if (uniqueDates.length > 0) {
+                dateHtml = uniqueDates.map(d => `<span class="date-chip ${isPrimeTime ? 'prime' : ''}">${d}</span>`).join('');
+                if (dateMatches.length > 4) {
+                    dateHtml += `<span class="date-chip more">+${dateMatches.length - 4}</span>`;
+                }
+            } else {
+                dateHtml = '<span class="date-chip">Waitlist</span>';
+            }
+
             return `
-                <div class="message-card ${isHighlight ? 'highlight' : ''}">
-                    <div class="message-header">
-                        <div class="message-meta">
-                            <span class="message-time">${time}</span>
-                            <span class="message-center">📍${center}</span>
-                        </div>
-                        <span class="message-badge ${isPrimeTime ? 'prime' : ''}">${isPrimeTime ? '⭐PRIME' : '📅REG'}</span>
+                <div class="message-card ${isHighlight ? 'highlight' : ''}" data-content="${cleanContent.replace(/"/g, '&quot;').replace(/\n/g, '&#10;')}">
+                    <div class="msg-row1">
+                        <span class="msg-time">${time}</span>
+                        <span class="msg-type ${isPrimeTime ? 'prime' : 'regular'}">${isPrimeTime ? 'PRIME' : 'REGULAR'}</span>
+                        <span class="msg-title">${title}</span>
                     </div>
-                    <div class="message-content">${cleanContent}</div>
+                    <div class="msg-row2">
+                        <div class="msg-dates">${dateHtml}</div>
+                        <span class="msg-view">view</span>
+                    </div>
                 </div>
             `;
         }
 
+        // Add click listener for message cards (using event delegation)
+        document.addEventListener('click', function (e) {
+            // Handle message card clicks
+            const card = e.target.closest('.message-card');
+            if (card && card.dataset.content) {
+                showMessageDetail(card);
+                return;
+            }
+
+            // Handle route card clicks
+            const routeCard = e.target.closest('.route-card');
+            if (routeCard) {
+                const country = routeCard.dataset.country;
+                const centre = routeCard.dataset.centre;
+
+                // Add both country and centre as filters
+                if (country && !activeFilters.includes(country)) {
+                    activeFilters.push(country);
+                }
+                if (centre && !activeFilters.includes(centre)) {
+                    activeFilters.push(centre);
+                }
+
+                renderFilters();
+                saveKeywordsToDatabase();
+                refilterMessages();
+
+                // Switch to filtered view
+                document.querySelector('.nav-item[data-view="filtered"]').click();
+                return;
+            }
+
+            // Handle load more clicks
+            const loadMoreBtn = e.target.closest('.load-more-btn');
+            if (loadMoreBtn) {
+                const container = loadMoreBtn.closest('.messages-grid, .country-messages-container');
+                if (container) {
+                    if (container.id === 'allMessagesList') {
+                        loadMoreMessages();
+                    } else if (container.id === 'filteredMessagesList') {
+                        loadMoreFilteredMessages();
+                    }
+                }
+            }
+        });
+
+        // Show message detail in modal
+        function showMessageDetail(card) {
+            const content = card.dataset.content.replace(/&#10;/g, '\n');
+
+            // Create or get modal
+            let modal = document.getElementById('msgModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'msgModal';
+                modal.className = 'msg-modal';
+                modal.innerHTML = `
+                    <div class="msg-modal-content">
+                        <div class="msg-modal-header">
+                            <span>Message Details</span>
+                            <button id="closeModalBtn">✕</button>
+                        </div>
+                        <div class="msg-modal-body"></div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+
+                // Close button
+                modal.querySelector('#closeModalBtn').addEventListener('click', function () {
+                    modal.style.display = 'none';
+                });
+
+                // Close on backdrop click
+                modal.addEventListener('click', function (e) {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            }
+
+            modal.querySelector('.msg-modal-body').innerHTML = `<pre>${content}</pre>`;
+            modal.style.display = 'flex';
+        }
+
         // Helper functions moved after main function
         // Store all messages for re-filtering
+        const INITIAL_LOAD = 50;
+        const LOAD_MORE_COUNT = 50;
         let allStoredMessages = [];
+        let displayedCount = 0;
 
         // Add message to All Messages
         function addToAllMessages(message) {
@@ -2256,19 +2675,59 @@
                 emptyState.remove();
             }
 
+            // Remove load more button temporarily
+            const loadMoreBtn = container.querySelector('.load-more-btn');
+            if (loadMoreBtn) loadMoreBtn.remove();
+
             // Store message for re-filtering
             allStoredMessages.unshift(message);
 
             container.insertAdjacentHTML('afterbegin', createMessageHTML(message));
-            allMessagesCount++;
+            displayedCount++;
+            allMessagesCount = allStoredMessages.length;
             document.getElementById('allMessagesBadge').textContent = allMessagesCount;
-            todayCount++;
-            document.getElementById('todayCount').textContent = todayCount;
+
+            // Track today's messages
+            const timestamp = message.timestamp || Date.now();
+            if (isToday(timestamp)) {
+                todayCount++;
+                document.getElementById('todayCount').textContent = todayCount;
+                addToTodaySummary(message);
+            }
+
             document.getElementById('totalMessagesInfo').textContent = allMessagesCount;
             updateTime();
 
             // Also track by country
             addToCountryMessages(message);
+        }
+
+        // Load more messages
+        function loadMoreMessages() {
+            const container = document.getElementById('allMessagesList');
+            const loadMoreBtn = container.querySelector('.load-more-btn');
+
+            const start = displayedCount;
+            const end = Math.min(start + LOAD_MORE_COUNT, allStoredMessages.length);
+
+            // Remove load more button
+            if (loadMoreBtn) loadMoreBtn.remove();
+
+            // Add more messages
+            for (let i = start; i < end; i++) {
+                container.insertAdjacentHTML('beforeend', createMessageHTML(allStoredMessages[i]));
+            }
+            displayedCount = end;
+
+            // Add load more button if more messages exist
+            if (displayedCount < allStoredMessages.length) {
+                const remaining = allStoredMessages.length - displayedCount;
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="load-more-btn">
+                        Load More (${remaining} remaining)
+                    </div>
+                `);
+            }
         }
 
         // Add message to VisaD Notify (filtered) - only called for new incoming messages
@@ -2280,6 +2739,7 @@
             }
 
             container.insertAdjacentHTML('afterbegin', createMessageHTML(message, isHighlight));
+
             filteredMessagesCount++;
             document.getElementById('filteredBadge').textContent = filteredMessagesCount;
             updateTime();
@@ -2311,38 +2771,51 @@
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const vol = volumeSlider ? (parseInt(volumeSlider.value) / 100) * 0.5 : 0.3;
 
-                // Rooster crow sound
-                function playNote(startTime, freq, duration, freqEnd = null) {
+                // Bell sound function
+                function playBell(startTime) {
+                    // Main bell tone
                     const osc = audioContext.createOscillator();
                     const gain = audioContext.createGain();
 
                     osc.connect(gain);
                     gain.connect(audioContext.destination);
 
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(freq, startTime);
-                    if (freqEnd) {
-                        osc.frequency.linearRampToValueAtTime(freqEnd, startTime + duration * 0.8);
-                    }
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(830, startTime); // Bell frequency
 
+                    // Bell envelope - sharp attack, long decay
                     gain.gain.setValueAtTime(0, startTime);
-                    gain.gain.linearRampToValueAtTime(vol, startTime + 0.01);
-                    gain.gain.linearRampToValueAtTime(0, startTime + duration);
+                    gain.gain.linearRampToValueAtTime(vol, startTime + 0.005);
+                    gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.8);
 
                     osc.start(startTime);
-                    osc.stop(startTime + duration);
+                    osc.stop(startTime + 0.8);
+
+                    // Harmonic overtone for richer bell sound
+                    const osc2 = audioContext.createOscillator();
+                    const gain2 = audioContext.createGain();
+
+                    osc2.connect(gain2);
+                    gain2.connect(audioContext.destination);
+
+                    osc2.type = 'sine';
+                    osc2.frequency.setValueAtTime(1660, startTime); // 2nd harmonic
+
+                    gain2.gain.setValueAtTime(0, startTime);
+                    gain2.gain.linearRampToValueAtTime(vol * 0.4, startTime + 0.005);
+                    gain2.gain.exponentialRampToValueAtTime(0.01, startTime + 0.5);
+
+                    osc2.start(startTime);
+                    osc2.stop(startTime + 0.5);
                 }
 
                 const now = audioContext.currentTime;
 
-                // "Cock-a-doodle-doo" pattern
-                playNote(now, 500, 0.12, 700);          // Cock
-                playNote(now + 0.15, 400, 0.06);        // a
-                playNote(now + 0.23, 550, 0.1, 650);    // doo
-                playNote(now + 0.35, 600, 0.08, 680);   // dle
-                playNote(now + 0.45, 450, 0.35, 800);   // dooo!
+                // Two bell sounds
+                playBell(now);           // First bell
+                playBell(now + 0.4);     // Second bell
 
-                console.log('🐓 Rooster sound played!');
+                console.log('🔔🔔 Two bells played!');
             } catch (e) {
                 console.log('Audio error:', e);
             }
@@ -2378,20 +2851,51 @@
             `).join('');
         }
 
+        // Save keywords to database
+        async function saveKeywordsToDatabase() {
+            try {
+                await fetch(`${apiBasePath}/api/keywords`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ keywords: activeFilters })
+                });
+                console.log('💾 Keywords saved to database');
+            } catch (error) {
+                console.error('❌ Failed to save keywords:', error);
+            }
+        }
+
+        // Load keywords from database
+        async function loadKeywordsFromDatabase() {
+            try {
+                const response = await fetch(`${apiBasePath}/api/keywords`);
+                const data = await response.json();
+                if (data.keywords && Array.isArray(data.keywords)) {
+                    activeFilters = data.keywords;
+                    renderFilters();
+                    console.log(`✅ Loaded ${activeFilters.length} keywords from database`);
+                }
+            } catch (error) {
+                console.error('❌ Failed to load keywords:', error);
+            }
+        }
+
         function addFilter(keyword) {
             const trimmed = keyword.trim();
             if (trimmed && !activeFilters.includes(trimmed)) {
                 activeFilters.push(trimmed);
                 renderFilters();
                 filterInput.value = '';
-                refilterMessages(); // Re-filter when adding filter
+                saveKeywordsToDatabase(); // Save to database
+                refilterMessages();
             }
         }
 
         function removeFilter(keyword) {
             activeFilters = activeFilters.filter(f => f !== keyword);
             renderFilters();
-            refilterMessages(); // Re-filter when removing filter
+            saveKeywordsToDatabase(); // Save to database
+            refilterMessages();
         }
 
         function matchesFilter(messageText) {
@@ -2400,38 +2904,25 @@
             return activeFilters.some(filter => text.includes(filter.toLowerCase()));
         }
 
-        // Re-filter all stored messages with pagination
-        let displayedFilteredCount = 0;
-        const filteredMessagesPerPage = 50;
+        // Re-filter all stored messages
+        let filteredDisplayedCount = 0;
+        let currentFilteredMessages = [];
 
-        function refilterMessages(append = false) {
+        function refilterMessages() {
             const container = document.getElementById('filteredMessagesList');
 
             // Filter messages that match
-            const filteredMessages = allStoredMessages.filter(msg => {
+            currentFilteredMessages = allStoredMessages.filter(msg => {
                 const content = msg.message || msg.content || msg.text || '';
                 return matchesFilter(content);
             });
 
             // Update count
-            filteredMessagesCount = filteredMessages.length;
+            filteredMessagesCount = currentFilteredMessages.length;
             document.getElementById('filteredBadge').textContent = filteredMessagesCount;
 
-            if (!append) {
-                // Reset displayed count when not appending
-                displayedFilteredCount = 0;
-            }
-
-            // Determine how many to show
-            const startIndex = append ? displayedFilteredCount : 0;
-            const endIndex = Math.min(startIndex + filteredMessagesPerPage, filteredMessages.length);
-            const messagesToShow = filteredMessages.slice(startIndex, endIndex);
-
-            // Update displayed count
-            displayedFilteredCount = endIndex;
-
-            // Clear and re-render or append
-            if (filteredMessages.length === 0) {
+            // Clear and re-render (initial load)
+            if (currentFilteredMessages.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">
@@ -2445,39 +2936,51 @@
                         <p>${activeFilters.length > 0 ? 'Try different keywords' : 'Enter keywords above to filter visa slots'}</p>
                     </div>
                 `;
-                updateLoadMoreFilteredButton(false);
+                filteredDisplayedCount = 0;
             } else {
-                if (append) {
-                    // Append new messages
-                    container.insertAdjacentHTML('beforeend', messagesToShow.map(msg => createMessageHTML(msg, true)).join(''));
-                } else {
-                    // Replace all messages
-                    container.innerHTML = messagesToShow.map(msg => createMessageHTML(msg, true)).join('');
+                // Show initial batch
+                const initialBatch = currentFilteredMessages.slice(0, INITIAL_LOAD);
+                container.innerHTML = initialBatch.map(msg => createMessageHTML(msg, true)).join('');
+                filteredDisplayedCount = initialBatch.length;
+
+                // Add load more if needed
+                if (filteredDisplayedCount < currentFilteredMessages.length) {
+                    const remaining = currentFilteredMessages.length - filteredDisplayedCount;
+                    container.insertAdjacentHTML('beforeend', `
+                        <div class="load-more-btn">
+                            Load More (${remaining} remaining)
+                        </div>
+                    `);
                 }
-
-                // Show/hide Load More button
-                const hasMore = displayedFilteredCount < filteredMessages.length;
-                updateLoadMoreFilteredButton(hasMore, filteredMessages.length - displayedFilteredCount);
             }
         }
 
-        // Update Load More button for filtered messages
-        function updateLoadMoreFilteredButton(hasMore, remaining = 0) {
-            const loadMoreContainer = document.getElementById('loadMoreFilteredContainer');
-            const loadMoreText = document.getElementById('loadMoreFilteredText');
+        function loadMoreFilteredMessages() {
+            const container = document.getElementById('filteredMessagesList');
+            const loadMoreBtn = container.querySelector('.load-more-btn');
 
-            if (hasMore) {
-                loadMoreContainer.style.display = 'flex';
-                loadMoreText.textContent = `Load More (${remaining} remaining)`;
-            } else {
-                loadMoreContainer.style.display = 'none';
+            const start = filteredDisplayedCount;
+            const end = Math.min(start + LOAD_MORE_COUNT, currentFilteredMessages.length);
+
+            // Remove load more button
+            if (loadMoreBtn) loadMoreBtn.remove();
+
+            // Add more messages
+            for (let i = start; i < end; i++) {
+                container.insertAdjacentHTML('beforeend', createMessageHTML(currentFilteredMessages[i], true));
+            }
+            filteredDisplayedCount = end;
+
+            // Add load more button if more messages exist
+            if (filteredDisplayedCount < currentFilteredMessages.length) {
+                const remaining = currentFilteredMessages.length - filteredDisplayedCount;
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="load-more-btn">
+                        Load More (${remaining} remaining)
+                    </div>
+                `);
             }
         }
-
-        // Load More filtered messages handler
-        document.getElementById('loadMoreFilteredBtn').addEventListener('click', () => {
-            refilterMessages(true); // Append mode
-        });
 
         applyFilterBtn.addEventListener('click', () => addFilter(filterInput.value));
         filterInput.addEventListener('keypress', (e) => {
@@ -2487,7 +2990,8 @@
             activeFilters = [];
             renderFilters();
             filterInput.value = '';
-            refilterMessages(); // Re-filter when clearing
+            saveKeywordsToDatabase(); // Save to database
+            refilterMessages();
         });
 
         // ============================================
@@ -2568,14 +3072,45 @@
 
         // Extract country from message content
         function extractCountry(messageContent) {
-            const content = (messageContent || '').toLowerCase();
+            const content = (messageContent || '');
+            const contentLower = content.toLowerCase();
 
-            // Check each country name first
+            // Message format is typically: "Center - Country - VisaType"
+            // e.g., "London - Italy - Italy UK VisaCategory"
+            // Try to extract country from the structured format first
+            const parts = content.split(' - ');
+            if (parts.length >= 2) {
+                // Check the second part (index 1) which should be the country
+                const potentialCountry = parts[1].trim();
+                for (const [name, data] of Object.entries(countryData)) {
+                    if (potentialCountry.toLowerCase() === name.toLowerCase()) {
+                        return name;
+                    }
+                }
+            }
+
+            // Fallback: Check for country names with word boundaries (avoid partial matches)
             for (const [name, data] of Object.entries(countryData)) {
-                if (content.includes(name.toLowerCase())) {
+                // Use word boundary check to avoid matching "UK" in "UK VisaCategory"
+                const regex = new RegExp(`\\b${name}\\b`, 'i');
+                // Only match if it's a standalone country reference, not part of a compound term
+                if (regex.test(content)) {
+                    // Check if this is likely the actual country (not part of visa type name)
+                    // Look for patterns like "- Country -" or "Country -" at start
+                    const countryPattern = new RegExp(`(^|\\s*-\\s*)${name}(\\s*-|\\s*$)`, 'i');
+                    if (countryPattern.test(content)) {
+                        return name;
+                    }
+                }
+            }
+
+            // Final fallback: simple includes check
+            for (const [name, data] of Object.entries(countryData)) {
+                if (contentLower.includes(name.toLowerCase())) {
                     return name;
                 }
             }
+
             return 'Other';
         }
 
@@ -2870,33 +3405,38 @@
                 .replace(/link to visa center/gi, '')
                 .trim();
 
-            // Detect center
-            let center = message.extractedCenter || 'Other';
-            if (center === 'Other') {
-                const centersList = ['London', 'Manchester', 'Edinburgh', 'Birmingham', 'Belfast', 'Cardiff', 'Glasgow', 'Paris', 'Berlin', 'Amsterdam'];
-                for (const c of centersList) {
-                    if (content.toLowerCase().includes(c.toLowerCase())) {
-                        center = c;
-                        break;
-                    }
-                }
-            }
-
             const isPrimeTime = content.toLowerCase().includes('prime time') ||
                 content.toLowerCase().includes('primetime');
 
+            // Get title (first line)
+            const lines = cleanContent.split('\n').filter(l => l.trim());
+            let title = lines[0] || 'Visa Slot';
+            if (title.length > 50) title = title.substring(0, 47) + '...';
+
+            // Extract dates
+            const dateMatches = cleanContent.match(/\d{1,2}[.\/]\d{1,2}/g) || [];
+            const uniqueDates = [...new Set(dateMatches)].slice(0, 4);
+            let dateHtml = '';
+            if (uniqueDates.length > 0) {
+                dateHtml = uniqueDates.map(d => `<span class="date-chip ${isPrimeTime ? 'prime' : ''}">${d}</span>`).join('');
+                if (dateMatches.length > 4) {
+                    dateHtml += `<span class="date-chip more">+${dateMatches.length - 4}</span>`;
+                }
+            } else {
+                dateHtml = '<span class="date-chip">Waitlist</span>';
+            }
+
             return `
-                <div class="country-message-card">
-                    <div class="country-message-header">
-                        <div class="country-message-meta">
-                            <span class="country-message-time">${time}</span>
-                            <span class="country-message-center">📍${center}</span>
-                        </div>
-                        <span class="country-message-type ${isPrimeTime ? 'prime' : 'regular'}">
-                            ${isPrimeTime ? '⭐PRIME' : '📅REG'}
-                        </span>
+                <div class="message-card" data-content="${cleanContent.replace(/"/g, '&quot;').replace(/\n/g, '&#10;')}">
+                    <div class="msg-row1">
+                        <span class="msg-time">${time}</span>
+                        <span class="msg-type ${isPrimeTime ? 'prime' : 'regular'}">${isPrimeTime ? 'PRIME' : 'REGULAR'}</span>
+                        <span class="msg-title">${title}</span>
                     </div>
-                    <div class="country-message-content">${cleanContent}</div>
+                    <div class="msg-row2">
+                        <div class="msg-dates">${dateHtml}</div>
+                        <span class="msg-view">view</span>
+                    </div>
                 </div>
             `;
         }
@@ -2911,6 +3451,8 @@
         window.selectCountry = selectCountry;
         window.toggleCenterFilter = toggleCenterFilter;
         window.clearAllCenterFilters = clearAllCenterFilters;
+        window.loadMoreMessages = loadMoreMessages;
+        window.loadMoreFilteredMessages = loadMoreFilteredMessages;
 
         // ============================================
         // EXPORT FUNCTION
@@ -3017,115 +3559,72 @@
         });
 
         // ============================================
-        // DATABASE INTEGRATION WITH PAGINATION
+        // DATABASE INTEGRATION
         // ============================================
-
-        // Pagination state
-        let currentOffset = 0;
-        const messagesPerPage = 50;
-        let totalMessagesInDB = 0;
-        let isLoadingMore = false;
 
         // Load historical messages from database on page load
         async function loadHistoricalMessages() {
             try {
-                console.log('📥 Loading initial messages from database...');
+                console.log('📥 Loading historical messages from database...');
 
-                const response = await fetch(`${apiBasePath}/api/notifications?limit=${messagesPerPage}&offset=0`);
+                const response = await fetch(`${apiBasePath}/api/notifications`);
                 const data = await response.json();
 
-                totalMessagesInDB = data.total;
-                currentOffset = data.notifications.length;
+                // Get all messages
+                const messages = data.notifications || [];
 
-                console.log(`📊 Total messages in DB: ${totalMessagesInDB}`);
-                console.log(`📥 Loaded: ${data.notifications.length} messages`);
+                // Store all messages
+                allStoredMessages = messages;
+                allMessagesCount = messages.length;
 
-                // Add all messages from database (to All Messages view ONLY)
-                data.notifications.forEach(msg => {
-                    addToAllMessages(msg);
+                // Reset today's tracking
+                todaySummaryData = {};
+                todayCount = 0;
+
+                // Process today's summary for all messages
+                messages.forEach(msg => {
+                    const timestamp = msg.timestamp || Date.now();
+                    if (isToday(timestamp)) {
+                        todayCount++;
+                        addToTodaySummary(msg);
+                    }
                 });
+                document.getElementById('todayCount').textContent = todayCount;
+                updateTodaySummaryDisplay();
 
-                // DO NOT call refilterMessages() here - VisaD Notify should start empty
-                // User must enter keywords to see filtered messages
+                // Render All Messages view (initial batch)
+                const allContainer = document.getElementById('allMessagesList');
+                if (messages.length > 0) {
+                    const initialBatch = messages.slice(0, INITIAL_LOAD);
+                    allContainer.innerHTML = initialBatch.map(msg => createMessageHTML(msg)).join('');
+                    displayedCount = initialBatch.length;
 
-                // Show/hide Load More button
-                updateLoadMoreButton(data.hasMore);
+                    document.getElementById('allMessagesBadge').textContent = allMessagesCount;
+                    document.getElementById('totalMessagesInfo').textContent = allMessagesCount;
 
-                console.log(`✅ Loaded ${data.notifications.length} of ${totalMessagesInDB} messages`);
-                console.log(`ℹ️  VisaD Notify is empty - waiting for user to enter keywords`);
+                    // Add load more if needed
+                    if (displayedCount < allStoredMessages.length) {
+                        const remaining = allStoredMessages.length - displayedCount;
+                        allContainer.insertAdjacentHTML('beforeend', `
+                            <div class="load-more-btn">
+                                Load More (${remaining} remaining)
+                            </div>
+                        `);
+                    }
+
+                    // Also add to country messages
+                    messages.forEach(msg => addToCountryMessages(msg));
+                }
+
+                // Apply filter to show matching in VisaD Notify
+                refilterMessages();
+
+                console.log(`✅ Loaded ${messages.length} messages from database`);
 
             } catch (error) {
                 console.error('❌ Failed to load historical messages:', error);
             }
         }
-
-        // Load more messages when button is clicked
-        async function loadMoreMessages() {
-            if (isLoadingMore) return;
-
-            try {
-                isLoadingMore = true;
-                const loadMoreBtn = document.getElementById('loadMoreBtn');
-                const loadMoreText = document.getElementById('loadMoreText');
-
-                // Update button state
-                loadMoreBtn.disabled = true;
-                loadMoreBtn.classList.add('loading');
-                loadMoreText.textContent = 'Loading...';
-
-                console.log(`📥 Loading more messages (offset: ${currentOffset})...`);
-
-                const response = await fetch(`${apiBasePath}/api/notifications?limit=${messagesPerPage}&offset=${currentOffset}`);
-                const data = await response.json();
-
-                console.log(`📥 Loaded ${data.notifications.length} more messages`);
-
-                // Add messages to All Messages view only
-                data.notifications.forEach(msg => {
-                    addToAllMessages(msg);
-                });
-
-                // Update offset
-                currentOffset += data.notifications.length;
-
-                // DO NOT call refilterMessages() - only update when user applies filters
-                // If user has filters active, they can re-apply to see new matching messages
-
-                // Show/hide Load More button
-                updateLoadMoreButton(data.hasMore);
-
-                console.log(`✅ Now showing ${currentOffset} of ${totalMessagesInDB} messages`);
-
-            } catch (error) {
-                console.error('❌ Failed to load more messages:', error);
-            } finally {
-                isLoadingMore = false;
-                const loadMoreBtn = document.getElementById('loadMoreBtn');
-                const loadMoreText = document.getElementById('loadMoreText');
-
-                // Reset button state
-                loadMoreBtn.disabled = false;
-                loadMoreBtn.classList.remove('loading');
-                loadMoreText.textContent = 'Load More Messages';
-            }
-        }
-
-        // Update Load More button visibility and text
-        function updateLoadMoreButton(hasMore) {
-            const loadMoreContainer = document.getElementById('loadMoreContainer');
-            const loadMoreText = document.getElementById('loadMoreText');
-
-            if (hasMore && totalMessagesInDB > messagesPerPage) {
-                loadMoreContainer.style.display = 'flex';
-                const remaining = totalMessagesInDB - currentOffset;
-                loadMoreText.textContent = `Load More (${remaining} remaining)`;
-            } else {
-                loadMoreContainer.style.display = 'none';
-            }
-        }
-
-        // Load More button click handler
-        document.getElementById('loadMoreBtn').addEventListener('click', loadMoreMessages);
 
         // Save message to database
         async function saveToDatabase(message) {
@@ -3184,8 +3683,15 @@
         updateTime();
         setInterval(updateTime, 60000);
 
-        // Load historical messages from database
-        loadHistoricalMessages();
+        // Initialize: Load keywords first, then messages
+        async function initialize() {
+            // Show initial date in summary
+            updateTodaySummaryDisplay();
+
+            await loadKeywordsFromDatabase();
+            await loadHistoricalMessages();
+        }
+        initialize();
 
         // Make socket globally available
         window.socket = socket;

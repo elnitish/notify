@@ -33,7 +33,7 @@ app.use(express.json());
 // Get all notifications with pagination
 app.get('/api/notifications', (req, res) => {
     try {
-        const limit = parseInt(req.query.limit) || 100;
+        const limit = parseInt(req.query.limit) || 10000;
         const offset = parseInt(req.query.offset) || 0;
 
         const notifications = getNotifications(limit, offset);
