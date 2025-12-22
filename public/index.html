@@ -2901,7 +2901,8 @@
         function matchesFilter(messageText) {
             if (activeFilters.length === 0) return true;
             const text = (messageText || '').toLowerCase();
-            return activeFilters.some(filter => text.includes(filter.toLowerCase()));
+            // ALL filters must match (AND logic) - important for route filtering
+            return activeFilters.every(filter => text.includes(filter.toLowerCase()));
         }
 
         // Re-filter all stored messages
