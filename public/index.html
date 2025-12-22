@@ -3762,13 +3762,179 @@
         updateTime();
         setInterval(updateTime, 60000);
 
-        // Initialize: Load keywords first, then messages
+        // Country flag mapping for routes
+        const countryFlagMapping = {
+            'uk': '🇬🇧', 'united kingdom': '🇬🇧', 'britain': '🇬🇧',
+            'usa': '🇺🇸', 'united states': '🇺🇸', 'america': '🇺🇸',
+            'canada': '🇨🇦',
+            'france': '🇫🇷', 'germany': '🇩🇪', 'italy': '🇮🇹', 'spain': '🇪🇸',
+            'portugal': '🇵🇹', 'netherlands': '🇳🇱', 'belgium': '🇧🇪',
+            'switzerland': '🇨🇭', 'austria': '🇦🇹', 'greece': '🇬🇷',
+            'poland': '🇵🇱', 'ireland': '🇮🇪', 'sweden': '🇸🇪', 'norway': '🇳🇴',
+            'denmark': '🇩🇰', 'finland': '🇫🇮',
+            'australia': '🇦🇺', 'new zealand': '🇳🇿',
+            'uae': '🇦🇪', 'dubai': '🇦🇪', 'emirates': '🇦🇪',
+            'singapore': '🇸🇬', 'japan': '🇯🇵', 'china': '🇨🇳', 'india': '🇮🇳'
+        };
+
+        function getCountryFlagForRoute(country) {
+            const c = (country || '').toLowerCase();
+            for (const [key, flag] of Object.entries(countryFlagMapping)) {
+                if (c.includes(key)) return flag;
+            }
+            return '🌍';
+        }
+
+        // Load monitored routes from PHP API
+        async function loadMonitoredRoutes() {
+            try {
+                // IMPORTANT: Update this URL to match your PHP API location
+                const phpApiUrl = 'https://visad.co.uk/api/travelers.php?action=read_all&limit=9999';
+
+                console.log('🔄 Fetching monitored routes from PHP API...');
+
+                const response = await fetch(phpApiUrl);
+                const data = await response.json();
+
+                if (data.status !== 'success' || !data.data) {
+                    console.error('❌ Invalid API response:', data);
+                    return;
+                }
+
+                // Filter for "Wait App" status only
+                const waitingRecords = data.data.filter(r => {
+                    const status = (r.status || '').toLowerCase().trim();
+                    return status === 'wait app';
+                });
+
+                console.log(`✅ Found ${waitingRecords.length} applicants waiting for appointment`);
+
+                // Group by country and visa center
+                const routeMap = new Map();
+
+                waitingRecords.forEach(r => {
+                    const country = r.travel_country || 'Unknown';
+                    const center = r.visa_center || '';
+
+                    if (!center) return; // Skip if no visa center
+
+                    const routeKey = `${country}-${center}`;
+
+                    if (!routeMap.has(routeKey)) {
+                        routeMap.set(routeKey, {
+                            country: country,
+                            centre: center,
+                            flag: getCountryFlagForRoute(country),
+                            count: 0
+                        });
+                    }
+
+                    routeMap.get(routeKey).count++;
+
+                    // Also count dependents if they exist
+                    const dependents = r.dependents || [];
+                    dependents.forEach(dep => {
+                        const depCountry = dep.travel_country || country;
+                        const depCenter = dep.visa_center || center;
+                        const depRouteKey = `${depCountry}-${depCenter}`;
+
+                        if (!routeMap.has(depRouteKey)) {
+                            routeMap.set(depRouteKey, {
+                                country: depCountry,
+                                centre: depCenter,
+                                flag: getCountryFlagForRoute(depCountry),
+                                count: 0
+                            });
+                        }
+
+                        routeMap.get(depRouteKey).count++;
+                    });
+                });
+
+                // Convert to array and sort by count (descending)
+                const routes = Array.from(routeMap.values())
+                    .sort((a, b) => b.count - a.count);
+
+                console.log(`📊 Generated ${routes.length} unique routes`);
+
+                // Update the UI
+                renderMonitoredRoutes(routes);
+
+            } catch (error) {
+                console.error('❌ Failed to load monitored routes:', error);
+                // Show error in UI
+                const routesGrid = document.getElementById('routesGrid');
+                if (routesGrid) {
+                    routesGrid.innerHTML = `
+                        <div style="grid-column: 1/-1; padding: 12px; text-align: center; color: var(--text-muted); font-size: 12px;">
+                            <i class="fas fa-exclamation-triangle"></i> Failed to load routes
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Render monitored routes in the UI
+        function renderMonitoredRoutes(routes) {
+            const routesGrid = document.getElementById('routesGrid');
+            const routesCount = document.getElementById('routesCount');
+
+            if (!routesGrid) {
+                console.error('Routes grid element not found');
+                return;
+            }
+
+            // Update count
+            if (routesCount) {
+                routesCount.textContent = `${routes.length} route${routes.length !== 1 ? 's' : ''}`;
+            }
+
+            // Clear existing routes
+            routesGrid.innerHTML = '';
+
+            if (routes.length === 0) {
+                routesGrid.innerHTML = `
+                    <div style="grid-column: 1/-1; padding: 12px; text-align: center; color: var(--text-muted); font-size: 12px;">
+                        No active routes found
+                    </div>
+                `;
+                return;
+            }
+
+            // Render each route
+            routes.forEach(route => {
+                const routeCard = document.createElement('div');
+                routeCard.className = 'route-card';
+                routeCard.dataset.country = route.country;
+                routeCard.dataset.centre = route.centre;
+
+                routeCard.innerHTML = `
+                    <span class="route-flag">${route.flag}</span>
+                    <div class="route-info">
+                        <div class="route-country">${route.country}</div>
+                        <div class="route-centre">→ ${route.centre}</div>
+                    </div>
+                `;
+
+                routesGrid.appendChild(routeCard);
+            });
+
+            console.log(`✅ Rendered ${routes.length} monitored routes`);
+        }
+
+        // Initialize: Load keywords first, then messages, then monitored routes
         async function initialize() {
             // Show initial date in summary
             updateTodaySummaryDisplay();
 
             await loadKeywordsFromDatabase();
             await loadHistoricalMessages();
+
+            // Load monitored routes from PHP API
+            await loadMonitoredRoutes();
+
+            // Refresh routes every 5 minutes
+            setInterval(loadMonitoredRoutes, 5 * 60 * 1000);
         }
         initialize();
 
