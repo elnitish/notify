@@ -4029,16 +4029,35 @@
             // Update applicant count
             routeApplicantCount.textContent = applicants.length;
 
+            // Sort applicants by travel date (nearest first)
+            const sortedApplicants = [...applicants].sort((a, b) => {
+                // Helper function to parse date string (dd/mm/yyyy or dd/mm/yy)
+                const parseDate = (dateStr) => {
+                    if (dateStr === 'Not set' || !dateStr) return new Date('9999-12-31');
+                    const parts = dateStr.split('/');
+                    if (parts.length === 3) {
+                        const day = parseInt(parts[0]);
+                        const month = parseInt(parts[1]) - 1;
+                        let year = parseInt(parts[2]);
+                        if (year < 100) year += 2000; // Convert 2-digit year to 4-digit
+                        return new Date(year, month, day);
+                    }
+                    return new Date('9999-12-31');
+                };
+
+                return parseDate(a.travelDate) - parseDate(b.travelDate);
+            });
+
             // Render applicants list
             routeApplicantsList.innerHTML = '';
-            if (applicants.length === 0) {
+            if (sortedApplicants.length === 0) {
                 routeApplicantsList.innerHTML = `
                     <div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 12px;">
                         No applicants found
                     </div>
                 `;
             } else {
-                applicants.forEach((app, index) => {
+                sortedApplicants.forEach((app, index) => {
                     const applicantCard = document.createElement('div');
                     applicantCard.style.cssText = `
                         padding: 10px;
