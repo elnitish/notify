@@ -2631,22 +2631,6 @@
                 return;
             }
 
-            // Handle route card clicks
-            const routeCard = e.target.closest('.route-card');
-            if (routeCard) {
-                const country = routeCard.dataset.country;
-                const centre = routeCard.dataset.centre;
-
-                // Add as a single route filter
-                if (country && centre) {
-                    addRouteFilter(country, centre);
-                }
-
-                // Switch to filtered view
-                document.querySelector('.nav-item[data-view="filtered"]').click();
-                return;
-            }
-
             // Handle load more clicks
             const loadMoreBtn = e.target.closest('.load-more-btn');
             if (loadMoreBtn) {
