@@ -3849,11 +3849,18 @@
                             country: country,
                             centre: center,
                             flag: getCountryFlagForRoute(country),
-                            count: 0
+                            count: 0,
+                            applicants: [] // Store applicant details
                         });
                     }
 
-                    routeMap.get(routeKey).count++;
+                    const route = routeMap.get(routeKey);
+                    route.count++;
+
+                    // Add main traveler details
+                    const name = `${r.first_name || ''} ${r.last_name || ''}`.trim() || r.name || 'Unknown';
+                    const travelDate = r.planned_travel_date || r.planned_travel_date_raw || 'Not set';
+                    route.applicants.push({ name, travelDate, type: 'main' });
 
                     // Also count dependents if they exist
                     const dependents = r.dependents || [];
@@ -3867,11 +3874,18 @@
                                 country: depCountry,
                                 centre: depCenter,
                                 flag: getCountryFlagForRoute(depCountry),
-                                count: 0
+                                count: 0,
+                                applicants: []
                             });
                         }
 
-                        routeMap.get(depRouteKey).count++;
+                        const depRoute = routeMap.get(depRouteKey);
+                        depRoute.count++;
+
+                        // Add dependent details
+                        const depName = `${dep.first_name || ''} ${dep.last_name || ''}`.trim() || dep.name || 'Unknown';
+                        const depTravelDate = dep.planned_travel_date || dep.planned_travel_date_raw || 'Not set';
+                        depRoute.applicants.push({ name: depName, travelDate: depTravelDate, type: 'dependent' });
                     });
                 });
 
@@ -3938,13 +3952,24 @@
                 routeCard.dataset.country = route.country;
                 routeCard.dataset.centre = route.centre;
 
+                // Create applicants list for tooltip
+                const applicantsList = route.applicants.map(app =>
+                    `${app.name} (${app.travelDate})`
+                ).join('\n');
+
                 routeCard.innerHTML = `
                     <span class="route-flag">${route.flag}</span>
                     <div class="route-info">
                         <div class="route-country">${route.country}</div>
                         <div class="route-centre">→ ${route.centre}</div>
+                        <div class="route-count" style="font-size: 9px; color: var(--text-muted); margin-top: 2px;">
+                            ${route.count} applicant${route.count !== 1 ? 's' : ''}
+                        </div>
                     </div>
                 `;
+
+                // Add title attribute for tooltip
+                routeCard.title = `Applicants:\n${applicantsList}`;
 
                 // Add click handler to filter messages for this route
                 routeCard.addEventListener('click', () => {
