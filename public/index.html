@@ -1730,6 +1730,16 @@
                     <span class="nav-text">All Messages</span>
                     <span class="nav-badge" id="allMessagesBadge">0</span>
                 </button>
+                <button class="nav-item" data-view="monitored-routes">
+                    <span class="nav-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 11l19-9-9 19-2-8-8-2z" />
+                        </svg>
+                    </span>
+                    <span class="nav-text">Monitored Routes</span>
+                    <span class="nav-badge" id="monitoredRoutesBadge">0</span>
+                </button>
                 <button class="nav-item" data-view="country">
                     <span class="nav-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -1886,16 +1896,7 @@
                     </div>
                 </div>
 
-                <!-- Monitored Routes Section -->
-                <div class="monitored-routes" id="monitoredRoutes">
-                    <div class="routes-header">
-                        <span class="routes-title">🎯 Monitored Routes</span>
-                        <span class="routes-count" id="routesCount">0 routes</span>
-                    </div>
-                    <div class="routes-grid" id="routesGrid">
-                        <!-- Routes will be loaded dynamically from PHP API -->
-                    </div>
-                </div>
+
 
                 <div class="filter-section">
                     <div class="filter-input-group">
@@ -1933,6 +1934,38 @@
                         <h3>No filter applied</h3>
                         <p>Enter keywords above to get notified for matching visa slots</p>
                     </div>
+                </div>
+            </div>
+
+            <!-- Monitored Routes View -->
+            <div class="view-container" id="monitoredRoutesView">
+                <div class="view-header">
+                    <div>
+                        <h1 class="view-title">Monitored Routes</h1>
+                        <p class="view-subtitle">Active visa application routes from travelers database</p>
+                    </div>
+                </div>
+
+                <!-- Monitored Routes Section -->
+                <div class="monitored-routes" id="monitoredRoutes">
+                    <div class="routes-header">
+                        <span class="routes-title">🎯 Active Routes</span>
+                        <span class="routes-count" id="routesCount">0 routes</span>
+                    </div>
+                    <div class="routes-grid" id="routesGrid">
+                        <!-- Routes will be loaded dynamically from PHP API -->
+                    </div>
+                </div>
+
+                <div class="empty-state" id="routesEmptyState" style="display: none;">
+                    <div class="empty-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 11l19-9-9 19-2-8-8-2z" />
+                        </svg>
+                    </div>
+                    <h3>No active routes</h3>
+                    <p>Routes will appear here when travelers are waiting for appointments</p>
                 </div>
             </div>
 
@@ -2197,6 +2230,8 @@
                     targetView = document.getElementById('allMessagesView');
                 } else if (viewId === 'filtered') {
                     targetView = document.getElementById('filteredView');
+                } else if (viewId === 'monitored-routes') {
+                    targetView = document.getElementById('monitoredRoutesView');
                 } else if (viewId === 'country') {
                     targetView = document.getElementById('countryView');
                 } else if (viewId === 'settings') {
@@ -2209,6 +2244,9 @@
 
                     if (viewId === 'country') {
                         renderCountryView();
+                    } else if (viewId === 'monitored-routes') {
+                        // Reload routes when tab is activated
+                        loadMonitoredRoutes();
                     }
                 }
             });
@@ -3853,6 +3891,7 @@
         function renderMonitoredRoutes(routes) {
             const routesGrid = document.getElementById('routesGrid');
             const routesCount = document.getElementById('routesCount');
+            const routesBadge = document.getElementById('monitoredRoutesBadge');
 
             if (!routesGrid) {
                 console.error('Routes grid element not found');
@@ -3862,6 +3901,11 @@
             // Update count
             if (routesCount) {
                 routesCount.textContent = `${routes.length} route${routes.length !== 1 ? 's' : ''}`;
+            }
+
+            // Update navigation badge
+            if (routesBadge) {
+                routesBadge.textContent = routes.length;
             }
 
             // Clear existing routes
@@ -3890,6 +3934,33 @@
                         <div class="route-centre">→ ${route.centre}</div>
                     </div>
                 `;
+
+                // Add click handler to auto-filter this route
+                routeCard.addEventListener('click', () => {
+                    console.log(`🎯 Route clicked: ${route.country} - ${route.centre}`);
+
+                    // Switch to VisaD Notify tab
+                    const visadNotifyTab = document.querySelector('.nav-item[data-view="filtered"]');
+                    if (visadNotifyTab) {
+                        visadNotifyTab.click();
+                    }
+
+                    // Auto-populate filter with route details
+                    const filterInput = document.getElementById('filterInput');
+                    if (filterInput) {
+                        // Create a filter string with both country and centre
+                        const filterText = `${route.country}, ${route.centre}`;
+                        filterInput.value = filterText;
+
+                        // Trigger the filter apply
+                        setTimeout(() => {
+                            const applyFilterBtn = document.getElementById('applyFilterBtn');
+                            if (applyFilterBtn) {
+                                applyFilterBtn.click();
+                            }
+                        }, 100);
+                    }
+                });
 
                 routesGrid.appendChild(routeCard);
             });
