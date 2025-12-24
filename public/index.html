@@ -1979,8 +1979,31 @@
                             Clear Selection
                         </button>
                     </div>
-                    <div class="messages-grid" id="routeMessagesList">
-                        <!-- Messages will be displayed here -->
+
+                    <!-- Two Column Layout -->
+                    <div style="display: grid; grid-template-columns: 350px 1fr; gap: 20px;">
+                        <!-- Left: Applicants List -->
+                        <div
+                            style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 16px; max-height: 600px; overflow-y: auto;">
+                            <h3
+                                style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px;">
+                                📋 Applicants (<span id="routeApplicantCount">0</span>)
+                            </h3>
+                            <div id="routeApplicantsList">
+                                <!-- Applicants will be displayed here -->
+                            </div>
+                        </div>
+
+                        <!-- Right: Messages -->
+                        <div>
+                            <h3
+                                style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px;">
+                                💬 Messages (<span id="routeMessageCount">0</span>)
+                            </h3>
+                            <div class="messages-grid" id="routeMessagesList">
+                                <!-- Messages will be displayed here -->
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -3974,7 +3997,7 @@
                 // Add click handler to filter messages for this route
                 routeCard.addEventListener('click', () => {
                     console.log(`🎯 Route clicked: ${route.country} - ${route.centre}`);
-                    filterMessagesForRoute(route.country, route.centre);
+                    filterMessagesForRoute(route.country, route.centre, route.applicants);
                 });
 
                 routesGrid.appendChild(routeCard);
@@ -3984,13 +4007,15 @@
         }
 
         // Filter and display messages for a specific route
-        function filterMessagesForRoute(country, centre) {
+        function filterMessagesForRoute(country, centre, applicants = []) {
             const routeMessagesSection = document.getElementById('routeMessagesSection');
             const selectedRouteName = document.getElementById('selectedRouteName');
             const routeMessageCount = document.getElementById('routeMessageCount');
+            const routeApplicantCount = document.getElementById('routeApplicantCount');
             const routeMessagesList = document.getElementById('routeMessagesList');
+            const routeApplicantsList = document.getElementById('routeApplicantsList');
 
-            if (!routeMessagesSection || !routeMessagesList) {
+            if (!routeMessagesSection || !routeMessagesList || !routeApplicantsList) {
                 console.error('Route messages elements not found');
                 return;
             }
@@ -4000,6 +4025,43 @@
 
             // Update the route name
             selectedRouteName.textContent = `${country} → ${centre}`;
+
+            // Update applicant count
+            routeApplicantCount.textContent = applicants.length;
+
+            // Render applicants list
+            routeApplicantsList.innerHTML = '';
+            if (applicants.length === 0) {
+                routeApplicantsList.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 12px;">
+                        No applicants found
+                    </div>
+                `;
+            } else {
+                applicants.forEach((app, index) => {
+                    const applicantCard = document.createElement('div');
+                    applicantCard.style.cssText = `
+                        padding: 10px;
+                        margin-bottom: 8px;
+                        background: var(--bg-tertiary);
+                        border: 1px solid var(--border-subtle);
+                        border-radius: 6px;
+                        font-size: 12px;
+                    `;
+                    applicantCard.innerHTML = `
+                        <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">
+                            ${index + 1}. ${app.name}
+                        </div>
+                        <div style="color: var(--text-secondary); font-size: 11px;">
+                            📅 ${app.travelDate}
+                        </div>
+                        <div style="color: var(--text-muted); font-size: 10px; margin-top: 2px;">
+                            ${app.type === 'main' ? '👤 Main' : '👥 Dependent'}
+                        </div>
+                    `;
+                    routeApplicantsList.appendChild(applicantCard);
+                });
+            }
 
             // Filter messages from messagesByCountry
             let matchingMessages = [];
