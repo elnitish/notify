@@ -1957,6 +1957,33 @@
                     </div>
                 </div>
 
+                <!-- Filtered Messages for Selected Route -->
+                <div id="routeMessagesSection" style="display: none; margin-top: 24px;">
+                    <div class="view-header" style="margin-bottom: 16px;">
+                        <div>
+                            <h2
+                                style="font-size: 20px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">
+                                Messages for <span id="selectedRouteName" style="color: var(--accent-primary);"></span>
+                            </h2>
+                            <p style="font-size: 13px; color: var(--text-tertiary);">
+                                <span id="routeMessageCount">0</span> messages found
+                            </p>
+                        </div>
+                        <button class="btn btn-secondary" id="clearRouteSelection"
+                            style="font-size: 13px; padding: 8px 14px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 6 6 18" />
+                                <path d="m6 6 12 12" />
+                            </svg>
+                            Clear Selection
+                        </button>
+                    </div>
+                    <div class="messages-grid" id="routeMessagesList">
+                        <!-- Messages will be displayed here -->
+                    </div>
+                </div>
+
                 <div class="empty-state" id="routesEmptyState" style="display: none;">
                     <div class="empty-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -3935,31 +3962,10 @@
                     </div>
                 `;
 
-                // Add click handler to auto-filter this route
+                // Add click handler to filter messages for this route
                 routeCard.addEventListener('click', () => {
                     console.log(`🎯 Route clicked: ${route.country} - ${route.centre}`);
-
-                    // Switch to VisaD Notify tab
-                    const visadNotifyTab = document.querySelector('.nav-item[data-view="filtered"]');
-                    if (visadNotifyTab) {
-                        visadNotifyTab.click();
-                    }
-
-                    // Auto-populate filter with route details
-                    const filterInput = document.getElementById('filterInput');
-                    if (filterInput) {
-                        // Create a filter string with both country and centre
-                        const filterText = `${route.country}, ${route.centre}`;
-                        filterInput.value = filterText;
-
-                        // Trigger the filter apply
-                        setTimeout(() => {
-                            const applyFilterBtn = document.getElementById('applyFilterBtn');
-                            if (applyFilterBtn) {
-                                applyFilterBtn.click();
-                            }
-                        }, 100);
-                    }
+                    filterMessagesForRoute(route.country, route.centre);
                 });
 
                 routesGrid.appendChild(routeCard);
@@ -3967,6 +3973,81 @@
 
             console.log(`✅ Rendered ${routes.length} monitored routes`);
         }
+
+        // Filter and display messages for a specific route
+        function filterMessagesForRoute(country, centre) {
+            const routeMessagesSection = document.getElementById('routeMessagesSection');
+            const selectedRouteName = document.getElementById('selectedRouteName');
+            const routeMessageCount = document.getElementById('routeMessageCount');
+            const routeMessagesList = document.getElementById('routeMessagesList');
+
+            if (!routeMessagesSection || !routeMessagesList) {
+                console.error('Route messages elements not found');
+                return;
+            }
+
+            // Show the messages section
+            routeMessagesSection.style.display = 'block';
+
+            // Update the route name
+            selectedRouteName.textContent = `${country} → ${centre}`;
+
+            // Filter messages from messagesByCountry
+            let matchingMessages = [];
+
+            // Search through all countries' messages
+            Object.keys(messagesByCountry).forEach(countryKey => {
+                const messages = messagesByCountry[countryKey];
+                messages.forEach(msg => {
+                    const msgText = msg.text.toLowerCase();
+                    const searchCountry = country.toLowerCase();
+                    const searchCentre = centre.toLowerCase();
+
+                    // Check if message contains both country and centre
+                    if (msgText.includes(searchCountry) && msgText.includes(searchCentre)) {
+                        matchingMessages.push(msg);
+                    }
+                });
+            });
+
+            // Update count
+            routeMessageCount.textContent = matchingMessages.length;
+
+            // Clear existing messages
+            routeMessagesList.innerHTML = '';
+
+            if (matchingMessages.length === 0) {
+                routeMessagesList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                            </svg>
+                        </div>
+                        <h3>No messages found</h3>
+                        <p>No messages match this route yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Render matching messages
+            matchingMessages.forEach(msg => {
+                const messageCard = createMessageCard(msg);
+                routeMessagesList.appendChild(messageCard);
+            });
+
+            console.log(`📊 Showing ${matchingMessages.length} messages for ${country} - ${centre}`);
+        }
+
+        // Clear route selection
+        document.getElementById('clearRouteSelection')?.addEventListener('click', () => {
+            const routeMessagesSection = document.getElementById('routeMessagesSection');
+            if (routeMessagesSection) {
+                routeMessagesSection.style.display = 'none';
+            }
+        });
 
         // Initialize: Load keywords first, then messages, then monitored routes
         async function initialize() {
