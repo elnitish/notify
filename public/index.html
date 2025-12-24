@@ -4035,8 +4035,7 @@
 
             // Render matching messages
             matchingMessages.forEach(msg => {
-                const messageCard = createMessageCard(msg);
-                routeMessagesList.appendChild(messageCard);
+                routeMessagesList.insertAdjacentHTML('beforeend', createMessageHTML(msg));
             });
 
             console.log(`📊 Showing ${matchingMessages.length} messages for ${country} - ${centre}`);
