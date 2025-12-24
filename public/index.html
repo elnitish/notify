@@ -3983,19 +3983,33 @@
             Object.keys(messagesByCountry).forEach(countryKey => {
                 const messages = messagesByCountry[countryKey];
                 messages.forEach(msg => {
-                    // Check if message has text property
-                    if (!msg || !msg.text) return;
+                    // Check if message has text property (try multiple property names)
+                    const msgText = msg.text || msg.message || msg.content || '';
+                    if (!msgText) return;
 
-                    const msgText = msg.text.toLowerCase();
+                    const msgTextLower = msgText.toLowerCase();
                     const searchCountry = country.toLowerCase();
                     const searchCentre = centre.toLowerCase();
 
-                    // Check if message contains both country and centre
-                    if (msgText.includes(searchCountry) && msgText.includes(searchCentre)) {
+                    // Also check extracted properties if they exist
+                    const extractedCountry = (msg.extractedCountry || '').toLowerCase();
+                    const extractedCenter = (msg.extractedCenter || '').toLowerCase();
+
+                    // Match if:
+                    // 1. Message text contains both country and centre, OR
+                    // 2. Extracted properties match
+                    const textMatch = msgTextLower.includes(searchCountry) && msgTextLower.includes(searchCentre);
+                    const extractedMatch = extractedCountry.includes(searchCountry) && extractedCenter.includes(searchCentre);
+
+                    if (textMatch || extractedMatch) {
                         matchingMessages.push(msg);
                     }
                 });
             });
+
+            console.log(`🔍 Searching for: "${country}" + "${centre}"`);
+            console.log(`📊 Total messages in database: ${Object.values(messagesByCountry).reduce((sum, msgs) => sum + msgs.length, 0)}`);
+            console.log(`✅ Found ${matchingMessages.length} matching messages`);
 
             // Update count
             routeMessageCount.textContent = matchingMessages.length;
