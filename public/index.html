@@ -3999,6 +3999,9 @@
             Object.keys(messagesByCountry).forEach(countryKey => {
                 const messages = messagesByCountry[countryKey];
                 messages.forEach(msg => {
+                    // Check if message has text property
+                    if (!msg || !msg.text) return;
+
                     const msgText = msg.text.toLowerCase();
                     const searchCountry = country.toLowerCase();
                     const searchCentre = centre.toLowerCase();
