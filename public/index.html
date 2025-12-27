@@ -3883,7 +3883,8 @@
                     // Add main traveler details
                     const name = `${r.first_name || ''} ${r.last_name || ''}`.trim() || r.name || 'Unknown';
                     const travelDate = r.planned_travel_date || r.planned_travel_date_raw || 'Not set';
-                    route.applicants.push({ name, travelDate, type: 'main' });
+                    const visaLink = r.visa_link || '';
+                    route.applicants.push({ name, travelDate, visaLink, type: 'main' });
 
                     // Also count dependents if they exist
                     const dependents = r.dependents || [];
@@ -3908,7 +3909,8 @@
                         // Add dependent details
                         const depName = `${dep.first_name || ''} ${dep.last_name || ''}`.trim() || dep.name || 'Unknown';
                         const depTravelDate = dep.planned_travel_date || dep.planned_travel_date_raw || 'Not set';
-                        depRoute.applicants.push({ name: depName, travelDate: depTravelDate, type: 'dependent' });
+                        const depVisaLink = dep.visa_link || '';
+                        depRoute.applicants.push({ name: depName, travelDate: depTravelDate, visaLink: depVisaLink, type: 'dependent' });
                     });
                 });
 
@@ -4068,8 +4070,22 @@
                         font-size: 12px;
                     `;
                     applicantCard.innerHTML = `
-                        <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">
-                            ${index + 1}. ${app.name}
+                        <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                            <span>${index + 1}. ${app.name}</span>
+                            ${app.visaLink ? `
+                                <a href="${app.visaLink}" 
+                                   target="_blank" 
+                                   title="${app.visaLink}"
+                                   style="color: var(--accent-primary); text-decoration: none; display: inline-flex; align-items: center;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" 
+                                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                         style="width: 14px; height: 14px;">
+                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                        <polyline points="15 3 21 3 21 9"></polyline>
+                                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                                    </svg>
+                                </a>
+                            ` : ''}
                         </div>
                         <div style="color: var(--text-secondary); font-size: 11px;">
                             📅 ${app.travelDate}
