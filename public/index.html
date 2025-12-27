@@ -3699,16 +3699,32 @@
                 // Get all messages
                 const messages = data.notifications || [];
 
+                // Deduplicate messages based on timestamp + content
+                const seenMessages = new Map();
+                const uniqueMessages = [];
+
+                messages.forEach(msg => {
+                    const msgText = msg.message || msg.content || msg.text || '';
+                    const msgKey = `${msg.timestamp || ''}-${msgText.substring(0, 100)}`;
+
+                    if (!seenMessages.has(msgKey)) {
+                        seenMessages.set(msgKey, true);
+                        uniqueMessages.push(msg);
+                    }
+                });
+
+                console.log(`📊 Deduplication: ${messages.length} total → ${uniqueMessages.length} unique messages`);
+
                 // Store all messages
-                allStoredMessages = messages;
-                allMessagesCount = messages.length;
+                allStoredMessages = uniqueMessages;
+                allMessagesCount = uniqueMessages.length;
 
                 // Reset today's tracking
                 todaySummaryData = {};
                 todayCount = 0;
 
                 // Process today's summary for all messages
-                messages.forEach(msg => {
+                uniqueMessages.forEach(msg => {
                     const timestamp = msg.timestamp || Date.now();
                     if (isToday(timestamp)) {
                         todayCount++;
@@ -3720,8 +3736,8 @@
 
                 // Render All Messages view (initial batch)
                 const allContainer = document.getElementById('allMessagesList');
-                if (messages.length > 0) {
-                    const initialBatch = messages.slice(0, INITIAL_LOAD);
+                if (uniqueMessages.length > 0) {
+                    const initialBatch = uniqueMessages.slice(0, INITIAL_LOAD);
                     allContainer.innerHTML = initialBatch.map(msg => createMessageHTML(msg)).join('');
                     displayedCount = initialBatch.length;
 
@@ -3739,7 +3755,7 @@
                     }
 
                     // Also add to country messages
-                    messages.forEach(msg => addToCountryMessages(msg));
+                    uniqueMessages.forEach(msg => addToCountryMessages(msg));
                 }
 
                 // Apply filter to show matching in VisaD Notify
