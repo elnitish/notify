@@ -2713,130 +2713,6 @@
         let allStoredMessages = [];
         let displayedCount = 0;
 
-        // ===== VIRTUAL SCROLLER CLASS =====
-        class VirtualScroller {
-            constructor(container, items = [], renderItemFn, itemHeight = 120) {
-                this.container = container;
-                this.items = items;
-                this.renderItem = renderItemFn;
-                this.itemHeight = itemHeight;
-                this.bufferSize = 10; // Render 10 extra items above/below viewport
-
-                this.scrollTop = 0;
-                this.visibleStart = 0;
-                this.visibleEnd = 0;
-
-                this.spacer = null;
-                this.content = null;
-                this.scrollHandler = null;
-
-                this.init();
-            }
-
-            init() {
-                // Clear container
-                this.container.innerHTML = '';
-                this.container.style.position = 'relative';
-                this.container.style.overflowY = 'auto';
-
-                // Create spacer (maintains scroll height)
-                this.spacer = document.createElement('div');
-                this.spacer.style.height = `${this.items.length * this.itemHeight}px`;
-                this.spacer.style.position = 'relative';
-
-                // Create content container (holds visible items)
-                this.content = document.createElement('div');
-                this.content.style.position = 'absolute';
-                this.content.style.top = '0';
-                this.content.style.left = '0';
-                this.content.style.right = '0';
-
-                this.spacer.appendChild(this.content);
-                this.container.appendChild(this.spacer);
-
-                // Attach scroll listener with throttling
-                this.scrollHandler = this.throttle(() => this.onScroll(), 16); // ~60fps
-                this.container.addEventListener('scroll', this.scrollHandler);
-
-                // Initial render
-                this.render();
-            }
-
-            throttle(func, wait) {
-                let timeout;
-                return function executedFunction(...args) {
-                    const later = () => {
-                        clearTimeout(timeout);
-                        func(...args);
-                    };
-                    clearTimeout(timeout);
-                    timeout = setTimeout(later, wait);
-                };
-            }
-
-            onScroll() {
-                this.scrollTop = this.container.scrollTop;
-                this.render();
-            }
-
-            render() {
-                if (this.items.length === 0) {
-                    this.content.innerHTML = '';
-                    return;
-                }
-
-                const containerHeight = this.container.clientHeight;
-                const visibleCount = Math.ceil(containerHeight / this.itemHeight);
-
-                // Calculate visible range with buffer
-                this.visibleStart = Math.max(0, Math.floor(this.scrollTop / this.itemHeight) - this.bufferSize);
-                this.visibleEnd = Math.min(
-                    this.items.length,
-                    this.visibleStart + visibleCount + (this.bufferSize * 2)
-                );
-
-                // Update content position
-                const offsetY = this.visibleStart * this.itemHeight;
-                this.content.style.transform = `translateY(${offsetY}px)`;
-
-                // Render visible items
-                const visibleItems = this.items.slice(this.visibleStart, this.visibleEnd);
-                this.content.innerHTML = visibleItems.map(item => this.renderItem(item)).join('');
-
-                console.log(`📊 Virtual Scroll: Rendering ${visibleItems.length} of ${this.items.length} items (${this.visibleStart}-${this.visibleEnd})`);
-            }
-
-            update(newItems) {
-                this.items = newItems;
-
-                // Update spacer height
-                if (this.spacer) {
-                    this.spacer.style.height = `${this.items.length * this.itemHeight}px`;
-                }
-
-                // Re-render
-                this.render();
-            }
-
-            scrollToTop() {
-                if (this.container) {
-                    this.container.scrollTop = 0;
-                }
-            }
-
-            destroy() {
-                if (this.scrollHandler) {
-                    this.container.removeEventListener('scroll', this.scrollHandler);
-                }
-                this.container.innerHTML = '';
-            }
-        }
-
-        // Virtual scroller instances
-        let allMessagesScroller = null;
-        let filteredMessagesScroller = null;
-        let routeMessagesScroller = null;
-
         // Add message to All Messages
         function addToAllMessages(message) {
             const container = document.getElementById('allMessagesList');
@@ -3171,7 +3047,7 @@
             filteredMessagesCount = currentFilteredMessages.length;
             document.getElementById('filteredBadge').textContent = filteredMessagesCount;
 
-            // Initialize or update virtual scroller for Filtered Messages
+            // Clear and re-render (initial load)
             if (currentFilteredMessages.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
@@ -3186,24 +3062,21 @@
                         <p>${activeFilters.length > 0 ? 'Try different keywords' : 'Enter keywords above to filter visa slots'}</p>
                     </div>
                 `;
-                // Destroy scroller if exists
-                if (filteredMessagesScroller) {
-                    filteredMessagesScroller.destroy();
-                    filteredMessagesScroller = null;
-                }
+                filteredDisplayedCount = 0;
             } else {
-                // Initialize virtual scroller if not exists
-                if (!filteredMessagesScroller) {
-                    filteredMessagesScroller = new VirtualScroller(
-                        container,
-                        currentFilteredMessages,
-                        (msg) => createMessageHTML(msg, true), // Highlight enabled
-                        120
-                    );
-                } else {
-                    // Update existing scroller
-                    filteredMessagesScroller.update(currentFilteredMessages);
-                    filteredMessagesScroller.scrollToTop();
+                // Show initial batch
+                const initialBatch = currentFilteredMessages.slice(0, INITIAL_LOAD);
+                container.innerHTML = initialBatch.map(msg => createMessageHTML(msg, true)).join('');
+                filteredDisplayedCount = initialBatch.length;
+
+                // Add load more if needed
+                if (filteredDisplayedCount < currentFilteredMessages.length) {
+                    const remaining = currentFilteredMessages.length - filteredDisplayedCount;
+                    container.insertAdjacentHTML('beforeend', `
+                        <div class="load-more-btn">
+                            Load More (${remaining} remaining)
+                        </div>
+                    `);
                 }
             }
         }
@@ -3845,24 +3718,25 @@
                 document.getElementById('todayCount').textContent = todayCount;
                 updateTodaySummaryDisplay();
 
-                // Initialize or update virtual scroller for All Messages
+                // Render All Messages view (initial batch)
                 const allContainer = document.getElementById('allMessagesList');
                 if (messages.length > 0) {
-                    // Initialize virtual scroller if not exists
-                    if (!allMessagesScroller) {
-                        allMessagesScroller = new VirtualScroller(
-                            allContainer,
-                            messages,
-                            createMessageHTML,
-                            120 // Average message card height
-                        );
-                    } else {
-                        // Update existing scroller with new messages
-                        allMessagesScroller.update(messages);
-                    }
+                    const initialBatch = messages.slice(0, INITIAL_LOAD);
+                    allContainer.innerHTML = initialBatch.map(msg => createMessageHTML(msg)).join('');
+                    displayedCount = initialBatch.length;
 
                     document.getElementById('allMessagesBadge').textContent = allMessagesCount;
                     document.getElementById('totalMessagesInfo').textContent = allMessagesCount;
+
+                    // Add load more if needed
+                    if (displayedCount < allStoredMessages.length) {
+                        const remaining = allStoredMessages.length - displayedCount;
+                        allContainer.insertAdjacentHTML('beforeend', `
+                            <div class="load-more-btn">
+                                Load More (${remaining} remaining)
+                            </div>
+                        `);
+                    }
 
                     // Also add to country messages
                     messages.forEach(msg => addToCountryMessages(msg));
