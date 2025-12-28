@@ -4143,7 +4143,7 @@
                         <div style="color: var(--text-secondary); font-size: 11px;">
                             📅 ${app.travelDate}
                         </div>
-                        ${(app.appUser || app.sysUser || app.email || app.appPass || app.sysPass || app.vfsPass || app.portalPass || app.loginPass) ? `
+                        ${(app.appUser || app.sysUser || app.email || app.appPass || app.sysPass || app.vfsPass || app.portalPass || app.loginPass || app.note) ? `
                             <div style="margin-top: 5px; padding-top: 5px; border-top: 1px solid var(--border-subtle); display: grid; gap: 3px; font-size: 10px;">
                                 ${app.appUser ? `
                                     <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -4188,12 +4188,17 @@
                                         <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.loginPass}</span>
                                     </div>
                                 ` : ''}
+                                ${app.note ? `
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <span style="color: var(--text-muted);">Note/Pass:</span>
+                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.note}</span>
+                                    </div>
+                                ` : ''}
                             </div>
                         ` : ''}
-                        ${(app.remarks || app.note) ? `
+                        ${(app.remarks) ? `
                             <div style="margin-top: 5px; padding-top: 3px; border-top: 1px dashed var(--border-subtle); display: grid; gap: 2px;">
                                 ${app.remarks ? `<div style="font-size: 10px; font-style: italic; color: var(--text-secondary);"><span style="color:var(--text-muted); font-style:normal;">Rmks:</span> ${app.remarks}</div>` : ''}
-                                ${app.note ? `<div style="font-size: 10px; font-style: italic; color: #f59e0b;"><span style="color:var(--text-muted); font-style:normal;">Note:</span> ${app.note}</div>` : ''}
                             </div>
                         ` : ''}
                         <div style="color: var(--text-muted); font-size: 10px; margin-top: 2px;">
