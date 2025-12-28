@@ -3900,9 +3900,22 @@
                     const name = `${r.first_name || ''} ${r.last_name || ''}`.trim() || r.name || 'Unknown';
                     const travelDate = r.planned_travel_date || r.planned_travel_date_raw || 'Not set';
                     const visaLink = r.visa_link || r.application_form_link || '';
-                    const username = r.username || r.application_form_username || r.email || '';
-                    const password = r.password || r.application_form_password || '';
-                    route.applicants.push({ name, travelDate, visaLink, username, password, type: 'main' });
+
+                    // Extract specific credentials
+                    const appUser = r.application_form_username || '';
+                    const appPass = r.application_form_password || '';
+                    const sysUser = r.username || '';
+                    const sysPass = r.password || '';
+                    const vfsPass = r.vfs_password || '';
+                    const portalPass = r.portal_password || '';
+                    const loginPass = r.login_password || '';
+                    const email = r.email || '';
+
+                    route.applicants.push({
+                        name, travelDate, visaLink,
+                        appUser, appPass, sysUser, sysPass, vfsPass, portalPass, loginPass, email,
+                        type: 'main'
+                    });
 
                     // Also count dependents if they exist
                     const dependents = r.dependents || [];
@@ -3928,9 +3941,21 @@
                         const depName = `${dep.first_name || ''} ${dep.last_name || ''}`.trim() || dep.name || 'Unknown';
                         const depTravelDate = dep.planned_travel_date || dep.planned_travel_date_raw || 'Not set';
                         const depVisaLink = dep.visa_link || dep.application_form_link || '';
-                        const depUsername = dep.username || dep.application_form_username || dep.email || '';
-                        const depPassword = dep.password || dep.application_form_password || '';
-                        depRoute.applicants.push({ name: depName, travelDate: depTravelDate, visaLink: depVisaLink, username: depUsername, password: depPassword, type: 'dependent' });
+
+                        const appUser = dep.application_form_username || '';
+                        const appPass = dep.application_form_password || '';
+                        const sysUser = dep.username || '';
+                        const sysPass = dep.password || '';
+                        const vfsPass = dep.vfs_password || '';
+                        const portalPass = dep.portal_password || '';
+                        const loginPass = dep.login_password || '';
+                        const email = dep.email || '';
+
+                        depRoute.applicants.push({
+                            name: depName, travelDate: depTravelDate, visaLink: depVisaLink,
+                            appUser, appPass, sysUser, sysPass, vfsPass, portalPass, loginPass, email,
+                            type: 'dependent'
+                        });
                     });
                 });
 
@@ -4110,18 +4135,49 @@
                         <div style="color: var(--text-secondary); font-size: 11px;">
                             📅 ${app.travelDate}
                         </div>
-                        ${(app.username || app.password) ? `
+                        ${(app.appUser || app.sysUser || app.email || app.appPass || app.sysPass || app.vfsPass || app.portalPass || app.loginPass) ? `
                             <div style="margin-top: 5px; padding-top: 5px; border-top: 1px solid var(--border-subtle); display: grid; gap: 3px; font-size: 10px;">
-                                ${app.username ? `
+                                ${app.appUser ? `
                                     <div style="display: flex; align-items: center; justify-content: space-between;">
                                         <span style="color: var(--text-muted);">User:</span>
-                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.username}</span>
+                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.appUser}</span>
                                     </div>
                                 ` : ''}
-                                ${app.password ? `
+                                ${(app.sysUser && app.sysUser !== app.appUser) ? `
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <span style="color: var(--text-muted);">Sys User:</span>
+                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.sysUser}</span>
+                                    </div>
+                                ` : ''}
+                                
+                                ${app.appPass ? `
                                     <div style="display: flex; align-items: center; justify-content: space-between;">
                                         <span style="color: var(--text-muted);">Pass:</span>
-                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.password}</span>
+                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.appPass}</span>
+                                    </div>
+                                ` : ''}
+                                ${(app.sysPass && app.sysPass !== app.appPass) ? `
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <span style="color: var(--text-muted);">Sys Pass:</span>
+                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.sysPass}</span>
+                                    </div>
+                                ` : ''}
+                                ${app.vfsPass ? `
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <span style="color: var(--text-muted);">VFS Pass:</span>
+                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.vfsPass}</span>
+                                    </div>
+                                ` : ''}
+                                ${app.portalPass ? `
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <span style="color: var(--text-muted);">Portal Pass:</span>
+                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.portalPass}</span>
+                                    </div>
+                                ` : ''}
+                                ${app.loginPass ? `
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <span style="color: var(--text-muted);">Login Pass:</span>
+                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.loginPass}</span>
                                     </div>
                                 ` : ''}
                             </div>
