@@ -3911,9 +3911,13 @@
                     const loginPass = r.login_password || '';
                     const email = r.email || '';
 
+                    const remarks = r.appointment_remarks || r.remarks || '';
+                    const note = r.note || '';
+
                     route.applicants.push({
                         name, travelDate, visaLink,
                         appUser, appPass, sysUser, sysPass, vfsPass, portalPass, loginPass, email,
+                        remarks, note,
                         type: 'main'
                     });
 
@@ -3951,9 +3955,13 @@
                         const loginPass = dep.login_password || '';
                         const email = dep.email || '';
 
+                        const remarks = dep.appointment_remarks || dep.remarks || '';
+                        const note = dep.note || '';
+
                         depRoute.applicants.push({
                             name: depName, travelDate: depTravelDate, visaLink: depVisaLink,
                             appUser, appPass, sysUser, sysPass, vfsPass, portalPass, loginPass, email,
+                            remarks, note,
                             type: 'dependent'
                         });
                     });
@@ -4180,6 +4188,12 @@
                                         <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.loginPass}</span>
                                     </div>
                                 ` : ''}
+                            </div>
+                        ` : ''}
+                        ${(app.remarks || app.note) ? `
+                            <div style="margin-top: 5px; padding-top: 3px; border-top: 1px dashed var(--border-subtle); display: grid; gap: 2px;">
+                                ${app.remarks ? `<div style="font-size: 10px; font-style: italic; color: var(--text-secondary);"><span style="color:var(--text-muted); font-style:normal;">Rmks:</span> ${app.remarks}</div>` : ''}
+                                ${app.note ? `<div style="font-size: 10px; font-style: italic; color: #f59e0b;"><span style="color:var(--text-muted); font-style:normal;">Note:</span> ${app.note}</div>` : ''}
                             </div>
                         ` : ''}
                         <div style="color: var(--text-muted); font-size: 10px; margin-top: 2px;">
