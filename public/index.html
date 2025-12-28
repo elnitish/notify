@@ -4145,7 +4145,7 @@
                         <div style="color: var(--text-secondary); font-size: 11px;">
                             📅 ${app.travelDate}
                         </div>
-                        ${(app.appUser || app.sysUser || app.email || app.appPass || app.sysPass || app.vfsPass || app.portalPass || app.loginPass || app.note) ? `
+                        ${(app.appUser || app.sysUser || app.email || app.appPass || app.sysPass || app.vfsPass || app.portalPass || app.loginPass || app.note || app.aptRemarks) ? `
                             <div style="margin-top: 5px; padding-top: 5px; border-top: 1px solid var(--border-subtle); display: grid; gap: 3px; font-size: 10px;">
                                 ${app.appUser ? `
                                     <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -4192,7 +4192,14 @@
                                 ` : ''}
                                 ${app.note ? `
                                     <div style="display: flex; align-items: center; justify-content: space-between;">
-                                        <span style="color: var(--text-muted);">Pass:</span>                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.note}</span>
+                                        <span style="color: var(--text-muted);">Note/Pass:</span>
+                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.note}</span>
+                                    </div>
+                                ` : ''}
+                                ${app.aptRemarks ? `
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <span style="color: var(--text-muted);">Apt/Pass:</span>
+                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.aptRemarks}</span>
                                     </div>
                                 ` : ''}
                             </div>
