@@ -4204,12 +4204,6 @@
                                 ` : ''}
                             </div>
                         ` : ''}
-                        ${(app.aptRemarks || app.remarks) ? `
-                            <div style="margin-top: 5px; padding-top: 3px; border-top: 1px dashed var(--border-subtle); display: grid; gap: 2px;">
-                                ${app.aptRemarks ? `<div style="font-size: 10px; font-style: italic; color: var(--text-secondary);"><span style="color:var(--text-muted); font-style:normal;">Apt:</span> ${app.aptRemarks}</div>` : ''}
-                                ${app.remarks ? `<div style="font-size: 10px; font-style: italic; color: var(--text-secondary);"><span style="color:var(--text-muted); font-style:normal;">Rmks:</span> ${app.remarks}</div>` : ''}
-                            </div>
-                        ` : ''}
                         <div style="color: var(--text-muted); font-size: 10px; margin-top: 2px;">
                             ${app.type === 'main' ? '👤 Main' : '👥 Dependent'}
                         </div>
