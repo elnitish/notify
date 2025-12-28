@@ -3899,9 +3899,9 @@
                     // Add main traveler details
                     const name = `${r.first_name || ''} ${r.last_name || ''}`.trim() || r.name || 'Unknown';
                     const travelDate = r.planned_travel_date || r.planned_travel_date_raw || 'Not set';
-                    const visaLink = r.visa_link || '';
-                    const username = r.username || '';
-                    const password = r.password || '';
+                    const visaLink = r.visa_link || r.application_form_link || '';
+                    const username = r.username || r.application_form_username || r.email || '';
+                    const password = r.password || r.application_form_password || '';
                     route.applicants.push({ name, travelDate, visaLink, username, password, type: 'main' });
 
                     // Also count dependents if they exist
@@ -3927,9 +3927,9 @@
                         // Add dependent details
                         const depName = `${dep.first_name || ''} ${dep.last_name || ''}`.trim() || dep.name || 'Unknown';
                         const depTravelDate = dep.planned_travel_date || dep.planned_travel_date_raw || 'Not set';
-                        const depVisaLink = dep.visa_link || '';
-                        const depUsername = dep.username || '';
-                        const depPassword = dep.password || '';
+                        const depVisaLink = dep.visa_link || dep.application_form_link || '';
+                        const depUsername = dep.username || dep.application_form_username || dep.email || '';
+                        const depPassword = dep.password || dep.application_form_password || '';
                         depRoute.applicants.push({ name: depName, travelDate: depTravelDate, visaLink: depVisaLink, username: depUsername, password: depPassword, type: 'dependent' });
                     });
                 });
