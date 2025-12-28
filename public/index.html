@@ -3900,7 +3900,9 @@
                     const name = `${r.first_name || ''} ${r.last_name || ''}`.trim() || r.name || 'Unknown';
                     const travelDate = r.planned_travel_date || r.planned_travel_date_raw || 'Not set';
                     const visaLink = r.visa_link || '';
-                    route.applicants.push({ name, travelDate, visaLink, type: 'main' });
+                    const username = r.username || '';
+                    const password = r.password || '';
+                    route.applicants.push({ name, travelDate, visaLink, username, password, type: 'main' });
 
                     // Also count dependents if they exist
                     const dependents = r.dependents || [];
@@ -3926,7 +3928,9 @@
                         const depName = `${dep.first_name || ''} ${dep.last_name || ''}`.trim() || dep.name || 'Unknown';
                         const depTravelDate = dep.planned_travel_date || dep.planned_travel_date_raw || 'Not set';
                         const depVisaLink = dep.visa_link || '';
-                        depRoute.applicants.push({ name: depName, travelDate: depTravelDate, visaLink: depVisaLink, type: 'dependent' });
+                        const depUsername = dep.username || '';
+                        const depPassword = dep.password || '';
+                        depRoute.applicants.push({ name: depName, travelDate: depTravelDate, visaLink: depVisaLink, username: depUsername, password: depPassword, type: 'dependent' });
                     });
                 });
 
@@ -4106,6 +4110,22 @@
                         <div style="color: var(--text-secondary); font-size: 11px;">
                             📅 ${app.travelDate}
                         </div>
+                        ${(app.username || app.password) ? `
+                            <div style="margin-top: 5px; padding-top: 5px; border-top: 1px solid var(--border-subtle); display: grid; gap: 3px; font-size: 10px;">
+                                ${app.username ? `
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <span style="color: var(--text-muted);">User:</span>
+                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.username}</span>
+                                    </div>
+                                ` : ''}
+                                ${app.password ? `
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <span style="color: var(--text-muted);">Pass:</span>
+                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.password}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        ` : ''}
                         <div style="color: var(--text-muted); font-size: 10px; margin-top: 2px;">
                             ${app.type === 'main' ? '👤 Main' : '👥 Dependent'}
                         </div>
