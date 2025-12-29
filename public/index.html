@@ -3869,6 +3869,8 @@
                     setTimeout(() => {
                         loginModal.style.display = 'none';
                     }, 300);
+                    // AUTH SUCCESS: Initialize App
+                    initialize();
                 } else {
                     loginModal.classList.add('active');
                     loginModal.style.display = 'flex';
@@ -3903,8 +3905,8 @@
                     setTimeout(() => {
                         document.getElementById('loginModal').style.display = 'none';
                     }, 300);
-                    // Reload data
-                    if (typeof loadHistoricalMessages === 'function') loadHistoricalMessages();
+                    // LOGIN SUCCESS: Initialize App
+                    initialize();
                 } else {
                     errorDiv.textContent = data.error || 'Invalid credentials';
                     errorDiv.style.display = 'block';
