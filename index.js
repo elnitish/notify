@@ -16,6 +16,11 @@ import {
     deleteOldNotifications
 } from './db.js';
 
+// ... imports
+import session from "express-session";
+
+// ... previous imports
+
 dotenv.config();
 
 // Express & Socket.IO setup
@@ -29,9 +34,61 @@ const io = new Server(server, {
 // Express middleware
 app.use(express.json());
 
-// API Endpoints
+// Session Middleware
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'fallback_secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: false, // Set to true if using HTTPS
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+}));
+
+// Authentication Middleware
+const checkAuth = (req, res, next) => {
+    if (req.session.isAuthenticated) {
+        next();
+    } else {
+        res.status(401).json({ error: 'Unauthorized' });
+    }
+};
+
+// Auth API Endpoints
+
+// Login
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+    const adminUsername = process.env.ADMIN_USERNAME || 'admin';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'password';
+
+    if (username === adminUsername && password === adminPassword) {
+        req.session.isAuthenticated = true;
+        req.session.user = username;
+        res.json({ success: true });
+    } else {
+        res.status(401).json({ error: 'Invalid credentials' });
+    }
+});
+
+// Logout
+app.post('/api/logout', (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+            return res.status(500).json({ error: 'Could not log out' });
+        }
+        res.json({ success: true });
+    });
+});
+
+// Check Auth Status
+app.get('/api/auth/status', (req, res) => {
+    res.json({ isAuthenticated: !!req.session.isAuthenticated });
+});
+
+// API Endpoints - Protected
 // Get all notifications with pagination
-app.get('/api/notifications', (req, res) => {
+app.get('/api/notifications', checkAuth, (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 10000;
         const offset = parseInt(req.query.offset) || 0;
@@ -51,7 +108,7 @@ app.get('/api/notifications', (req, res) => {
 });
 
 // Get notifications since timestamp
-app.get('/api/notifications/since/:timestamp', (req, res) => {
+app.get('/api/notifications/since/:timestamp', checkAuth, (req, res) => {
     try {
         const timestamp = parseInt(req.params.timestamp);
         const notifications = getNotificationsSince(timestamp);
@@ -64,7 +121,7 @@ app.get('/api/notifications/since/:timestamp', (req, res) => {
 });
 
 // Get statistics
-app.get('/api/stats', (req, res) => {
+app.get('/api/stats', checkAuth, (req, res) => {
     try {
         const stats = getStats();
         res.json(stats);
@@ -75,7 +132,7 @@ app.get('/api/stats', (req, res) => {
 });
 
 // Get saved keywords/filters
-app.get('/api/keywords', (req, res) => {
+app.get('/api/keywords', checkAuth, (req, res) => {
     try {
         // For now, return empty array - you can implement database storage later
         // Or read from a JSON file
@@ -87,7 +144,7 @@ app.get('/api/keywords', (req, res) => {
 });
 
 // Save keywords/filters
-app.post('/api/keywords', (req, res) => {
+app.post('/api/keywords', checkAuth, (req, res) => {
     try {
         const { keywords } = req.body;
         // For now, just acknowledge - you can implement database storage later
@@ -101,7 +158,7 @@ app.post('/api/keywords', (req, res) => {
 });
 
 // Save notification (POST)
-app.post('/api/notifications', (req, res) => {
+app.post('/api/notifications', checkAuth, (req, res) => {
     try {
         const { message, keyword, sender, group, timestamp } = req.body;
 
@@ -124,7 +181,7 @@ app.post('/api/notifications', (req, res) => {
 });
 
 // Clear all notifications
-app.delete('/api/notifications', (req, res) => {
+app.delete('/api/notifications', checkAuth, (req, res) => {
     try {
         const deletedCount = clearAllNotifications();
         res.json({ success: true, deletedCount });
@@ -135,7 +192,7 @@ app.delete('/api/notifications', (req, res) => {
 });
 
 // Delete old notifications
-app.delete('/api/notifications/old', (req, res) => {
+app.delete('/api/notifications/old', checkAuth, (req, res) => {
     try {
         const days = parseInt(req.query.days) || 30;
         const deletedCount = deleteOldNotifications(days);
