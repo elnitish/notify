@@ -43,23 +43,29 @@ console.log('✅ Database tables and indexes created');
 
 // Save notification
 export function saveNotification(data) {
-    const stmt = db.prepare(`
-        INSERT INTO notifications 
-        (keyword, message, group_name, sender, chat_id, is_keyword_match, timestamp)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    `);
+    try {
+        const stmt = db.prepare(`
+            INSERT INTO notifications 
+            (keyword, message, group_name, sender, chat_id, is_keyword_match, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `);
 
-    const result = stmt.run(
-        data.keyword,
-        data.message,
-        data.group,
-        data.sender,
-        data.chatId,
-        data.isKeywordMatch ? 1 : 0,
-        data.timestamp
-    );
+        // Ensure all values are defined or safe defaults
+        const result = stmt.run(
+            data.keyword || 'Unknown',
+            data.message || '',
+            data.group || 'Unknown',
+            data.sender || 'Unknown',
+            data.chatId || 'manual',
+            data.isKeywordMatch ? 1 : 0,
+            data.timestamp || Date.now()
+        );
 
-    return result.lastInsertRowid;
+        return result.lastInsertRowid;
+    } catch (error) {
+        console.error('❌ Database save error:', error);
+        throw error;
+    }
 }
 
 // Get notifications with pagination
