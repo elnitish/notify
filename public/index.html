@@ -2497,54 +2497,7 @@
                 console.error('Logout failed:', error);
             }
         }
-        }
 
-        async function handleLogin(event) {
-            event.preventDefault();
-            const usernameInput = document.getElementById('username');
-            const passwordInput = document.getElementById('password');
-            const errorDiv = document.getElementById('loginError');
-
-            errorDiv.style.display = 'none';
-
-            try {
-                const response = await fetch(`${API_BASE}/api/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        username: usernameInput.value,
-                        password: passwordInput.value
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    document.getElementById('loginModal').classList.remove('active');
-                    setTimeout(() => {
-                        document.getElementById('loginModal').style.display = 'none';
-                    }, 300);
-                    // Reload data
-                    if (typeof loadHistoricalMessages === 'function') loadHistoricalMessages();
-                } else {
-                    errorDiv.textContent = data.error || 'Invalid credentials';
-                    errorDiv.style.display = 'block';
-                }
-            } catch (error) {
-                errorDiv.textContent = 'Login failed. Please try again.';
-                errorDiv.style.display = 'block';
-            }
-        }
-
-        // Logout function
-        async function logout() {
-            try {
-                await fetch(`${API_BASE}/api/logout`, { method: 'POST' });
-                window.location.reload();
-            } catch (error) {
-                console.error('Logout failed:', error);
-            }
-        }
 
         // Initialize Auth
         document.addEventListener('DOMContentLoaded', () => {
