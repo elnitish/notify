@@ -3925,6 +3925,85 @@
         });
 
         // ============================================
+        // AUTHENTICATION LOGIC
+        // ============================================
+
+        async function checkAuthStatus() {
+            try {
+                console.log('🔐 Checking auth status at:', `${apiBasePath}/api/auth/status`);
+                const response = await fetch(`${apiBasePath}/api/auth/status`);
+
+                if (response.status === 404) {
+                    console.error('❌ Auth API not found (404). Check server configuration.');
+                    return;
+                }
+
+                const data = await response.json();
+
+                const loginModal = document.getElementById('loginModal');
+                if (data.isAuthenticated) {
+                    loginModal.classList.remove('active');
+                    setTimeout(() => {
+                        loginModal.style.display = 'none';
+                    }, 300);
+                } else {
+                    loginModal.classList.add('active');
+                    loginModal.style.display = 'flex';
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+            }
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const errorDiv = document.getElementById('loginError');
+
+            errorDiv.style.display = 'none';
+
+            try {
+                const response = await fetch(`${apiBasePath}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: usernameInput.value,
+                        password: passwordInput.value
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('loginModal').classList.remove('active');
+                    setTimeout(() => {
+                        document.getElementById('loginModal').style.display = 'none';
+                    }, 300);
+                    // Reload data
+                    if (typeof loadHistoricalMessages === 'function') loadHistoricalMessages();
+                } else {
+                    errorDiv.textContent = data.error || 'Invalid credentials';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorDiv.textContent = 'Login failed. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        // Logout function
+        async function logout() {
+            try {
+                await fetch(`${apiBasePath}/api/logout`, { method: 'POST' });
+                window.location.reload();
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        }
+
+        // ============================================
         // SOCKET.IO CONNECTION
         // ============================================
         const socket = io(window.location.origin, {
