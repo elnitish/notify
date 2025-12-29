@@ -4563,6 +4563,7 @@
         });
 
         // Initialize: Load keywords first, then messages, then monitored routes
+        // Initialize: Load keywords first, then messages, then monitored routes
         async function initialize() {
             // Show initial date in summary
             updateTodaySummaryDisplay();
@@ -4576,7 +4577,21 @@
             // Refresh routes every 5 minutes
             setInterval(loadMonitoredRoutes, 5 * 60 * 1000);
         }
-        initialize();
+        // REMOVED: initialize(); - Now called after auth check
+
+        // Make socket globally available
+        window.socket = socket;
+
+        console.log('🎫 VisaD Notify initialized with database integration');
+        console.log('📡 Server:', window.location.origin);
+        console.log('🔌 Socket path:', socketPath);
+        console.log('🗄️ API path:', `${apiBasePath}/api/`);
+
+        // Start Auth Check on Load
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuthStatus();
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+        });
 
         // Make socket globally available
         window.socket = socket;
