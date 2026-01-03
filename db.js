@@ -123,6 +123,7 @@ export function getStats() {
     const oneWeekAgo = now - (7 * 24 * 60 * 60 * 1000);
 
     const total = db.prepare('SELECT COUNT(*) as count FROM notifications').get().count;
+    const totalMatching = db.prepare('SELECT COUNT(*) as count FROM notifications WHERE is_keyword_match = 1').get().count;
     const today = db.prepare('SELECT COUNT(*) as count FROM notifications WHERE timestamp > ?').get(oneDayAgo).count;
     const thisWeek = db.prepare('SELECT COUNT(*) as count FROM notifications WHERE timestamp > ?').get(oneWeekAgo).count;
 
@@ -146,6 +147,7 @@ export function getStats() {
 
     return {
         total,
+        totalMatching,
         today,
         thisWeek,
         byKeyword,

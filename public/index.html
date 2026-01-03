@@ -4034,6 +4034,9 @@
 
                 console.log(`✅ Loaded ${messages.length} messages from database`);
 
+                // Refresh stats to ensure badges are accurate
+                fetchAndDisplayStats();
+
             } catch (error) {
                 console.error('❌ Failed to load historical messages:', error);
             }
@@ -4564,11 +4567,45 @@
             }
         });
 
-        // Initialize: Load keywords first, then messages, then monitored routes
+        // Fetch and display total stats from DB explicitly
+        async function fetchAndDisplayStats() {
+            try {
+                const response = await fetch(`${apiBasePath}/api/stats`);
+                const stats = await response.json();
+
+                if (stats.total !== undefined) {
+                    const allBadge = document.getElementById('allMessagesBadge');
+                    const infoBadge = document.getElementById('totalMessagesInfo');
+                    if (allBadge) allBadge.textContent = stats.total;
+                    if (infoBadge) infoBadge.textContent = stats.total;
+                }
+
+                if (stats.totalMatching !== undefined) {
+                    const filteredBadge = document.getElementById('filteredBadge');
+                    if (filteredBadge) filteredBadge.textContent = stats.totalMatching;
+                }
+
+                if (stats.today !== undefined) {
+                    const todayBadge = document.getElementById('todayCount');
+                    if (todayBadge) todayBadge.textContent = stats.today;
+                }
+
+            } catch (error) {
+                console.error('❌ Failed to fetch stats:', error);
+            }
+        }
+
         // Initialize: Load keywords first, then messages, then monitored routes
         async function initialize() {
             // Show initial date in summary
             updateTodaySummaryDisplay();
+            updateTime();
+
+            // Initial stats fetch
+            await fetchAndDisplayStats();
+
+            // Setup periodic stats refresh (every 30s)
+            setInterval(fetchAndDisplayStats, 30000);
 
             await loadKeywordsFromDatabase();
             await loadHistoricalMessages();
