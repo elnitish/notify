@@ -90,7 +90,7 @@ app.get('/api/auth/status', (req, res) => {
 // Get all notifications with pagination
 app.get('/api/notifications', checkAuth, (req, res) => {
     try {
-        const limit = parseInt(req.query.limit) || 10000;
+        const limit = parseInt(req.query.limit) || 10000000;
         const offset = parseInt(req.query.offset) || 0;
 
         const notifications = getNotifications(limit, offset);
