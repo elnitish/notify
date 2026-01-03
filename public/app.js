@@ -39,6 +39,8 @@ let soundEnabled = true;
 let desktopNotificationsEnabled = false;
 let autoRefreshEnabled = true;
 let compactMode = false;
+let totalMessagesCount = 0;
+let todayMessagesCount = 0;
 
 // DOM Elements
 const connectionStatus = document.getElementById('connectionStatus');
@@ -108,17 +110,34 @@ async function loadHistoricalMessages() {
     try {
         console.log('📚 Loading historical messages from database...');
 
+        // Fetch stats first
+        try {
+            const statsResponse = await fetch(`${apiBasePath}/api/stats`);
+            const stats = await statsResponse.json();
+            totalMessagesCount = stats.total;
+            todayMessagesCount = stats.today;
+            updateStats();
+        } catch (e) {
+            console.error('Failed to fetch stats:', e);
+        }
+
         const response = await fetch(`${apiBasePath}/api/notifications?limit=100`);
         const data = await response.json();
 
         allMessages = data.notifications;
+        // Use total from notifications API if stats failed or as confirmation
+        if (data.total) totalMessagesCount = data.total;
+
         updateStats();
         renderAllMessages();
 
-        console.log(`✅ Loaded ${data.notifications.length} messages from database`);
+        console.log(`✅ Loaded ${data.notifications.length} messages from database (Total: ${data.total})`);
 
         if (data.hasMore) {
             showLoadMoreButton();
+            currentOffset = 100; // Reset offset when reloading
+        } else {
+            hideLoadMoreButton();
         }
     } catch (error) {
         console.error('❌ Failed to load historical messages:', error);
@@ -137,21 +156,35 @@ async function loadHistoricalMessages() {
 }
 
 // Load more messages (pagination)
+// Load more messages (pagination)
 let currentOffset = 100;
 async function loadMoreMessages() {
     try {
-        const response = await fetch(`${apiBasePath}/api/notifications?limit=50&offset=${currentOffset}`);
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        if (loadMoreBtn) loadMoreBtn.innerHTML = '<span>⏳</span> Loading...';
+
+        const response = await fetch(`${apiBasePath}/api/notifications?limit=100&offset=${currentOffset}`);
         const data = await response.json();
 
         allMessages.push(...data.notifications);
-        currentOffset += 50;
+        currentOffset += 100;
+
+        // Re-apply filters to newly loaded messages if needed
+        if (filterKeywords.length > 0) {
+            applyFilter();
+        }
+
         renderAllMessages();
 
         if (!data.hasMore) {
             hideLoadMoreButton();
         }
+
+        if (loadMoreBtn) loadMoreBtn.innerHTML = '<span>⬇️</span> Load More';
     } catch (error) {
         console.error('Failed to load more messages:', error);
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        if (loadMoreBtn) loadMoreBtn.innerHTML = '<span>❌</span> Error';
     }
 }
 
@@ -362,14 +395,20 @@ function applyFilter() {
 
 // Update statistics
 function updateStats() {
-    allMessagesBadge.textContent = allMessages.length;
-    totalMessagesInfo.textContent = allMessages.length;
+    // Start with known counts, fallback to array length if loading failed
+    const total = totalMessagesCount || allMessages.length;
 
-    const today = new Date().toDateString();
-    const todayMessages = allMessages.filter(m =>
-        new Date(m.timestamp).toDateString() === today
-    );
-    todayCount.textContent = todayMessages.length;
+    allMessagesBadge.textContent = total;
+    totalMessagesInfo.textContent = total;
+
+    // Use fetched today count or calculate from what we have
+    // Note: If we only have partial messages, local calculation might be lower than actual
+    const localTodayCount = allMessages.filter(m =>
+        new Date(m.timestamp).toDateString() === new Date().toDateString()
+    ).length;
+
+    // Prefer server-side today count if available and reasonable
+    todayCount.textContent = Math.max(todayMessagesCount, localTodayCount);
 
     if (allMessages.length > 0) {
         lastUpdate.textContent = formatTime(allMessages[0].timestamp);
