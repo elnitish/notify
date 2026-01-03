@@ -4416,66 +4416,28 @@
                         <div style="color: var(--text-secondary); font-size: 11px;">
                             📅 ${app.travelDate}
                         </div>
-                        ${(app.appUser || app.sysUser || app.email || app.appPass || app.sysPass || app.vfsPass || app.portalPass || app.loginPass || app.note || app.aptRemarks) ? `
-                            <div style="margin-top: 5px; padding-top: 5px; border-top: 1px solid var(--border-subtle); display: grid; gap: 3px; font-size: 10px;">
-                                ${app.appUser ? `
-                                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                                        <span style="color: var(--text-muted);">User:</span>
-                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.appUser}</span>
-                                    </div>
-                                ` : ''}
-                                ${(app.sysUser && app.sysUser !== app.appUser) ? `
-                                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                                        <span style="color: var(--text-muted);">Sys User:</span>
-                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.sysUser}</span>
-                                    </div>
-                                ` : ''}
-                                
-                                ${app.appPass ? `
-                                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                                        <span style="color: var(--text-muted);">Pass:</span>
-                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.appPass}</span>
-                                    </div>
-                                ` : ''}
-                                ${(app.sysPass && app.sysPass !== app.appPass) ? `
-                                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                                        <span style="color: var(--text-muted);">Sys Pass:</span>
-                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.sysPass}</span>
-                                    </div>
-                                ` : ''}
-                                ${app.vfsPass ? `
-                                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                                        <span style="color: var(--text-muted);">VFS Pass:</span>
-                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.vfsPass}</span>
-                                    </div>
-                                ` : ''}
-                                ${app.portalPass ? `
-                                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                                        <span style="color: var(--text-muted);">Portal Pass:</span>
-                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.portalPass}</span>
-                                    </div>
-                                ` : ''}
-                                ${app.loginPass ? `
-                                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                                        <span style="color: var(--text-muted);">Login Pass:</span>
-                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.loginPass}</span>
-                                    </div>
-                                ` : ''}
-                                ${app.note ? `
-                                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                                        <span style="color: var(--text-muted);">Pass:</span>
-                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.note}</span>
-                                    </div>
-                                ` : ''}
-                                ${app.aptRemarks ? `
-                                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                                        <span style="color: var(--text-muted);">Remarks:</span>
-                                        <span style="font-family: monospace; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; user-select: all;">${app.aptRemarks}</span>
-                                    </div>
-                                ` : ''}
-                            </div>
-                        ` : ''}
-                        <div style="color: var(--text-muted); font-size: 10px; margin-top: 2px;">
+                        
+                        <div style="margin-top: 5px; padding-top: 5px; border-top: 1px solid var(--border-subtle); display: grid; gap: 4px; font-size: 11px;">
+                            ${app.sysUser ? `
+                                <div style="color: var(--text-primary); font-family: monospace; background: rgba(0,0,0,0.03); padding: 2px 4px; border-radius: 3px; user-select: all;">
+                                    ${app.sysUser}
+                                </div>
+                            ` : ''}
+                            
+                            ${app.note ? `
+                                <div style="color: var(--text-primary); font-family: monospace; background: rgba(0,0,0,0.03); padding: 2px 4px; border-radius: 3px; user-select: all;">
+                                    ${app.note}
+                                </div>
+                            ` : ''}
+
+                            ${app.aptRemarks ? `
+                                <div style="color: var(--text-secondary); font-style: italic; padding: 2px 4px;">
+                                    ${app.aptRemarks}
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <div style="color: var(--text-muted); font-size: 10px; margin-top: 4px;">
                             ${app.type === 'main' ? '👤 Main' : '👥 Dependent'}
                         </div>
                     `;
