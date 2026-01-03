@@ -173,7 +173,37 @@ export function deleteOldNotifications(daysToKeep = 30) {
 
 // Initialize database
 export function initDatabase() {
-    console.log('💾 Database ready');
+    console.log('🔄 Checking database schema...');
+
+    try {
+        const columns = db.prepare('PRAGMA table_info(notifications)').all();
+        const columnNames = columns.map(c => c.name);
+
+        // Define expected columns and their types
+        const expectedColumns = {
+            'group_name': 'TEXT DEFAULT "Unknown"',
+            'sender': 'TEXT DEFAULT "Unknown"',
+            'chat_id': 'TEXT DEFAULT "manual"',
+            'is_keyword_match': 'INTEGER DEFAULT 0',
+            'created_at': 'TEXT DEFAULT CURRENT_TIMESTAMP'
+        };
+
+        for (const [col, type] of Object.entries(expectedColumns)) {
+            if (!columnNames.includes(col)) {
+                console.log(`⚠️ Column '${col}' missing. Adding it...`);
+                try {
+                    db.exec(`ALTER TABLE notifications ADD COLUMN ${col} ${type}`);
+                    console.log(`✅ Added column '${col}'`);
+                } catch (e) {
+                    console.error(`❌ Failed to add column '${col}':`, e.message);
+                }
+            }
+        }
+
+        console.log('💾 Database ready');
+    } catch (error) {
+        console.error('❌ Database initialization failed:', error);
+    }
 }
 
 export default db;
