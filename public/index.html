@@ -4076,9 +4076,6 @@
         socket.on('telegram-alert', (data) => {
             console.log('📩 telegram-alert:', data);
 
-            // Save to database
-            saveToDatabase(data);
-
             // Add to All Messages
             addToAllMessages(data);
 
