@@ -90,11 +90,24 @@ app.get('/api/auth/status', (req, res) => {
 });
 
 // API Endpoints - Protected
+// Cache for initial load
+let cachedNotifications = null;
+let lastCacheTime = 0;
+const NOTIFICATION_CACHE_DURATION = 2000; // 2 seconds (short cache for real-time feel)
+
 // API: Get notifications (with optional pagination and filtering)
 app.get('/api/notifications', (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 100;
         const offset = parseInt(req.query.offset) || 0;
+
+        // Check if this is a standard initial load (no filters, limit<=100, page 0)
+        const isStandardLoad = !req.query.country && !req.query.center && !req.query.keyword && !req.query.isPrime && offset === 0 && limit <= 100;
+
+        if (isStandardLoad && cachedNotifications && (Date.now() - lastCacheTime < NOTIFICATION_CACHE_DURATION)) {
+            res.json(cachedNotifications);
+            return;
+        }
 
         // Extract filters from query parameters
         const filters = {
@@ -105,14 +118,22 @@ app.get('/api/notifications', (req, res) => {
         };
 
         const notifications = getNotifications(limit, offset, filters);
-        const total = getTotalCount(); // Note: Total count ignores filters, ideally should filter too
+        const total = getTotalCount(); // Now partially cached in db.js
 
-        res.json({
+        const responseData = {
             notifications,
             total,
             limit,
             offset
-        });
+        };
+
+        // Update cache if this was a standard load
+        if (isStandardLoad) {
+            cachedNotifications = responseData;
+            lastCacheTime = Date.now();
+        }
+
+        res.json(responseData);
     } catch (error) {
         console.error('API error:', error);
         res.status(500).json({ error: error.message });
@@ -328,6 +349,9 @@ async function handleNewMessage(event) {
             console.error('❌ Database save failed:', error);
             // Continue anyway - real-time still works
         }
+
+        // Invalidate cache
+        cachedNotifications = null;
 
         // THEN broadcast ALL messages from monitored users to dashboard
         io.emit('telegram-alert', alertData);

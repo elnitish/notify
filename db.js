@@ -141,6 +141,23 @@ export function getNotifications(limit = 100, offset = 0, filters = {}) {
     return stmt.all(...params);
 }
 
+// Cached Total Count
+let cachedTotal = -1;
+let lastCountTime = 0;
+const CACHE_DURATION = 60000; // 60 seconds
+
+export function getTotalCount(forceRefresh = false) {
+    const now = Date.now();
+    if (!forceRefresh && cachedTotal !== -1 && (now - lastCountTime < CACHE_DURATION)) {
+        return cachedTotal;
+    }
+
+    const row = db.prepare('SELECT COUNT(*) as count FROM notifications').get();
+    cachedTotal = row.count;
+    lastCountTime = now;
+    return cachedTotal;
+}
+
 // Get notifications since timestamp
 export function getNotificationsSince(timestamp) {
     const stmt = db.prepare(`
