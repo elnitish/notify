@@ -4059,18 +4059,6 @@
             }
         }
 
-        // Apply filter to show matching in VisaD Notify
-        refilterMessages();
-
-        console.log(`✅ Loaded ${messages.length} messages from database`);
-
-        // Refresh stats to ensure badges are accurate
-        fetchAndDisplayStats();
-
-            } catch (error) {
-            console.error('❌ Failed to load historical messages:', error);
-        }
-        }
 
         // Save message to database
         async function saveToDatabase(message) {
