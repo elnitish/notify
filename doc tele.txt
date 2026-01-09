@@ -1,0 +1,136 @@
+📘 VISARD Visa Slots Monitor - Project Documentation
+1. Project Overview
+VISARD Visa Slots Monitor is a real-time monitoring system designed to track visa slot availability from Telegram messages and display them on a web-based dashboard. It is built for visa consulting agencies to efficiently monitor multiple routes and slot types.
+
+Key Features
+Real-time Monitoring: Captures messages from the VISARD Telegram bot instantly.
+Dual-View Dashboard:
+All Messages: A feed of all incoming alerts.
+VisaD Notify: A filtered view based on user-defined keywords.
+Smart Parsing: Automatically extracts country, city, date, and slot type (Prime/Regular).
+Alerts: Audio and desktop notifications for important slots.
+Persistent Storage: SQLite database stores all notifications for history and analytics.
+Multi-Deployment Support: Works on both Nginx (WebSocket) and Apache/cPanel (Polling).
+2. System Architecture
+The system follows a client-server architecture with a Telegram listener acting as the data source.
+
+Frontend
+Backend
+MTProto
+Save
+Socket.IO
+Telegram API
+Node.js Server
+SQLite Database
+Web Dashboards
+2.1 Backend (
+index.js
+, 
+db.js
+)
+Core Components:
+Telegram Client (
+index.js
+):
+Uses telegram (GramJS) library to connect as a user (MTProto).
+Listens for new messages using 
+NewMessage
+ event.
+Filters messages based on MONITORED_USERS (e.g., 'visard').
+Broadcasts parsed messages to connected clients via Socket.IO.
+Database Layer (
+db.js
+):
+Uses better-sqlite3 for high-performance synchronous I/O.
+WAL Mode: Enabled for concurrency and performance.
+Schema:
+notifications table: Stores keyword, message, sender, timestamp, etc.
+Indexes on timestamp and keyword for fast queries.
+API Server (
+index.js
+):
+Express.js handles REST endpoints (/api/notifications, /api/stats).
+Session-based authentication (express-session).
+Data Flow:
+Ingestion: 
+handleNewMessage
+ triggers on new Telegram events.
+Processing: Message text is normalized and checked against keywords.
+Persistence: Message is saved to SQLite using 
+saveNotification
+.
+Broadcast: payload is emitted via io.emit('telegram-alert', data).
+2.2 Frontend (
+public/index.html
+)
+The frontend is a Single Page Application (SPA) embedded directly in 
+index.html
+.
+
+Key Components:
+Socket.IO Client:
+connects to /noti/socket.io.
+Supports both websocket and polling transports for compatibility.
+UI Logic:
+Vanilla JS: No framework, DOM manipulation is direct.
+Sound Engine: Web Audio API for custom alerts (Oscillator).
+State Management: Local counters (allMessagesCount, filteredMessagesCount) and arrays (activeFilters).
+Styling:
+Custom CSS Variables for theming (Light/Dark mode).
+Responsive Grid layout for message cards.
+3. Deployment & Configuration
+The project supports two primary deployment environments, which was a source of previous issues.
+
+3.1 Environments
+Feature	Nginx Deployment (safebox.cfd)	Apache/cPanel Deployment (vault.visad.co.uk)
+Path	/botm/	/notify/
+Transport	WebSocket (Preferred)	Polling (Fallback)
+Proxy Config	Requires Upgrade headers	Works with standard HTTP proxy
+3.2 Configuration (
+.env
+)
+Required environment variables:
+
+API_ID=123456              # Telegram API ID
+API_HASH=abcdef...         # Telegram API Hash
+SESSION_STRING=...         # Auth session (Unique per server!)
+PORT=3000                  # Server port
+MONITORED_USERS=visard     # Comma-separated usernames to track
+4. Known Issues & Troubleshooting
+4.1 "Session ID" Conflicts
+Issue: Using the same SESSION_STRING on multiple servers causes AUTH_KEY_DUPLICATED errors.
+Fix: Generate a unique session for each deployment using node generate-session.js.
+4.2 Socket.IO Connection Failures (502/404)
+Issue Nginx: Missing location block for valid socket path.
+Fix: Check 
+502_FIX_SOCKET_IO.md
+ for Nginx config.
+Issue Apache: WebSocket not supported on shared hosting.
+Fix: Client configured to use transports: ['polling', 'websocket'].
+Issue Subdirectories: Hardcoded paths (e.g., /socket.io.js) fail in subfolders (/notify/).
+Fix: Use relative paths (noti/socket.io/...) and dynamic base path detection in JS.
+4.3 Database Locks
+Issue: SQLite can lock if unrelated processes access it simultaneously without WAL mode.
+Mitigation: WAL mode is enabled in 
+db.js
+. Ensure only one Node process writes to the DB.
+4.4 Frontend Performance
+Risk: Storing thousands of messages in the DOM can slow down the browser.
+Current State: The frontend appends messages indefinitely.
+Recommendation: Implement virtual scrolling or limit the DOM to the last 50-100 messages.
+5. Potential Future Issues
+Telegram Rate Limits: If the bot sends too many messages or login attempts occur frequently, the account may be flooded/banned.
+Memory Usage: The Node.js process keeps keywords in memory. If the extraction logic becomes complex, memory usage could spike.
+Storage Growth: 
+notifications.db
+ will grow indefinitely.
+Recommendation: Implement a cron job to call 
+deleteOldNotifications
+ periodically.
+6. Maintenance Commands
+Start Server: npm start
+Generate Session: node generate-session.js
+Check Logs: tail -f app.log (if using PM2/logging)
+Reset DB: Delete 
+notifications.db
+ and restart server.
