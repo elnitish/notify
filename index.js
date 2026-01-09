@@ -31,7 +31,10 @@ const io = new Server(server, {
     path: "/noti/socket.io"
 });
 
+import compression from "compression";
+
 // Express middleware
+app.use(compression());
 app.use(express.json());
 
 // Session Middleware
