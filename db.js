@@ -114,6 +114,35 @@ export function getNotifications(limit = 100, offset = 0) {
     return stmt.all(limit, offset);
 }
 
+// Get notifications since timestamp
+export function getNotificationsSince(timestamp) {
+    const stmt = db.prepare(`
+        SELECT 
+            n.id,
+            k.word as keyword,
+            n.message,
+            g.name as "group",
+            s.name as sender,
+            n.chat_id as chatId,
+            n.is_keyword_match as isKeywordMatch,
+            n.timestamp,
+            n.created_at as createdAt,
+            c.name as country,
+            cn.name as center,
+            n.is_prime as isPrime
+        FROM notifications n
+        LEFT JOIN keywords k ON n.keyword_id = k.id
+        LEFT JOIN groups g ON n.group_id = g.id
+        LEFT JOIN senders s ON n.sender_id = s.id
+        LEFT JOIN countries c ON n.country_id = c.id
+        LEFT JOIN centers cn ON n.center_id = cn.id
+        WHERE n.timestamp > ?
+        ORDER BY n.timestamp DESC
+    `);
+
+    return stmt.all(timestamp);
+}
+
 // Get statistics
 export function getStats() {
     const now = Date.now();
