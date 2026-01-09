@@ -229,9 +229,7 @@ export function getStats() {
     };
 }
 
-export function getTotalCount() {
-    return db.prepare('SELECT COUNT(*) as count FROM notifications').get().count;
-}
+
 
 export function clearAllNotifications() {
     db.prepare('DELETE FROM notifications').run();
