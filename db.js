@@ -1,65 +1,80 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { parseMessage } from './messageParser.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dbPath = path.join(__dirname, 'notifications.db');
+const dbPath = path.join(__dirname, 'notifications_v2.db'); // Use new DB
 
-// Create/open database
 const db = new Database(dbPath);
 
 // Enable WAL mode for better performance
 db.pragma('journal_mode = WAL');
-db.pragma('synchronous = NORMAL');  // Faster, still safe
-db.pragma('cache_size = 10000');    // 10MB cache
+db.pragma('synchronous = NORMAL');
+db.pragma('cache_size = 10000');
 
-console.log('✅ Database initialized with WAL mode');
-console.log('📁 Database location:', dbPath);
+console.log('✅ Database initialized (v2 Normalized)');
 
-// Create notifications table
-db.exec(`
-    CREATE TABLE IF NOT EXISTS notifications (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        keyword TEXT NOT NULL,
-        message TEXT NOT NULL,
-        group_name TEXT NOT NULL,
-        sender TEXT NOT NULL,
-        chat_id TEXT NOT NULL,
-        is_keyword_match INTEGER NOT NULL,
-        timestamp INTEGER NOT NULL,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    )
-`);
+// Helper: Get or Create ID (with cache for performance could be added later)
+function getOrCreateId(table, col, val, extraCols = {}) {
+    if (!val) val = 'Unknown';
+    const row = db.prepare(`SELECT id FROM ${table} WHERE ${col} = ?`).get(val);
+    if (row) return row.id;
 
-// Create indexes for performance
-db.exec(`
-    CREATE INDEX IF NOT EXISTS idx_timestamp ON notifications(timestamp DESC);
-    CREATE INDEX IF NOT EXISTS idx_keyword ON notifications(keyword);
-    CREATE INDEX IF NOT EXISTS idx_is_keyword_match ON notifications(is_keyword_match);
-    CREATE INDEX IF NOT EXISTS idx_created_at ON notifications(created_at DESC);
-`);
+    const cols = [col, ...Object.keys(extraCols)];
+    const vals = [val, ...Object.values(extraCols)];
+    const placeholders = cols.map(() => '?').join(',');
 
-console.log('✅ Database tables and indexes created');
+    const info = db.prepare(`INSERT INTO ${table} (${cols.join(',')}) VALUES (${placeholders})`).run(...vals);
+    return info.lastInsertRowid;
+}
 
-// Save notification
+// Get or create center securely
+function getOrCreateCenter(name, countryId) {
+    const row = db.prepare('SELECT id FROM centers WHERE name = ? AND country_id = ?').get(name, countryId);
+    if (row) return row.id;
+    const info = db.prepare('INSERT INTO centers (name, country_id) VALUES (?, ?)').run(name, countryId);
+    return info.lastInsertRowid;
+}
+
+
 export function saveNotification(data) {
     try {
+        const text = data.message || '';
+
+        // 1. Parse content
+        const parsed = parseMessage(text);
+
+        // 2. Get/Create IDs
+        const senderId = getOrCreateId('senders', 'name', data.sender || 'Unknown');
+        const groupId = getOrCreateId('groups', 'name', data.group || 'Unknown');
+        const keywordId = getOrCreateId('keywords', 'word', data.keyword || 'Unknown');
+
+        const countryId = getOrCreateId('countries', 'name', parsed.country);
+        const centerId = getOrCreateCenter(parsed.center, countryId);
+
+        // 3. Insert
         const stmt = db.prepare(`
             INSERT INTO notifications 
-            (keyword, message, group_name, sender, chat_id, is_keyword_match, timestamp)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            (message, sender_id, group_id, keyword_id, country_id, center_id, chat_id, is_keyword_match, is_prime, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `);
 
-        // Ensure all values are defined or safe defaults
         const result = stmt.run(
-            data.keyword || 'Unknown',
-            data.message || '',
-            data.group || 'Unknown',
-            data.sender || 'Unknown',
+            text,
+            senderId,
+            groupId,
+            keywordId,
+            countryId,
+            centerId,
             data.chatId || 'manual',
             data.isKeywordMatch ? 1 : 0,
+            parsed.isPrime ? 1 : 0,
             data.timestamp || Date.now()
         );
+
+        // 4. Update FTS
+        db.prepare('INSERT INTO notifications_fts (rowid, message) VALUES (?, ?)').run(result.lastInsertRowid, text);
 
         return result.lastInsertRowid;
     } catch (error) {
@@ -68,52 +83,35 @@ export function saveNotification(data) {
     }
 }
 
-// Get notifications with pagination
+// Optimized Get Notifications (No Join for List View)
+// Use JOINs only when necessary, or use Views. 
+// For now, we replicate the old output format using JOINs.
 export function getNotifications(limit = 100, offset = 0) {
     const stmt = db.prepare(`
         SELECT 
-            id,
-            keyword,
-            message,
-            group_name as "group",
-            sender,
-            chat_id as chatId,
-            is_keyword_match as isKeywordMatch,
-            timestamp,
-            created_at as createdAt
-        FROM notifications
-        ORDER BY timestamp DESC
+            n.id,
+            k.word as keyword,
+            n.message,
+            g.name as "group",
+            s.name as sender,
+            n.chat_id as chatId,
+            n.is_keyword_match as isKeywordMatch,
+            n.timestamp,
+            n.created_at as createdAt,
+            c.name as country,
+            cn.name as center,
+            n.is_prime as isPrime
+        FROM notifications n
+        LEFT JOIN keywords k ON n.keyword_id = k.id
+        LEFT JOIN groups g ON n.group_id = g.id
+        LEFT JOIN senders s ON n.sender_id = s.id
+        LEFT JOIN countries c ON n.country_id = c.id
+        LEFT JOIN centers cn ON n.center_id = cn.id
+        ORDER BY n.timestamp DESC
         LIMIT ? OFFSET ?
     `);
 
     return stmt.all(limit, offset);
-}
-
-// Get total count
-export function getTotalCount() {
-    const stmt = db.prepare('SELECT COUNT(*) as count FROM notifications');
-    return stmt.get().count;
-}
-
-// Get notifications since timestamp
-export function getNotificationsSince(timestamp) {
-    const stmt = db.prepare(`
-        SELECT 
-            id,
-            keyword,
-            message,
-            group_name as "group",
-            sender,
-            chat_id as chatId,
-            is_keyword_match as isKeywordMatch,
-            timestamp,
-            created_at as createdAt
-        FROM notifications
-        WHERE timestamp > ?
-        ORDER BY timestamp DESC
-    `);
-
-    return stmt.all(timestamp);
 }
 
 // Get statistics
@@ -128,17 +126,19 @@ export function getStats() {
     const thisWeek = db.prepare('SELECT COUNT(*) as count FROM notifications WHERE timestamp > ?').get(oneWeekAgo).count;
 
     const byKeyword = db.prepare(`
-        SELECT keyword, COUNT(*) as count 
-        FROM notifications 
-        GROUP BY keyword 
+        SELECT k.word as keyword, COUNT(*) as count 
+        FROM notifications n
+        JOIN keywords k ON n.keyword_id = k.id
+        GROUP BY k.word
         ORDER BY count DESC 
         LIMIT 10
     `).all();
 
     const topSenders = db.prepare(`
-        SELECT sender, COUNT(*) as count 
-        FROM notifications 
-        GROUP BY sender 
+        SELECT s.name as sender, COUNT(*) as count 
+        FROM notifications n
+        JOIN senders s ON n.sender_id = s.id
+        GROUP BY s.name
         ORDER BY count DESC 
         LIMIT 10
     `).all();
@@ -156,54 +156,23 @@ export function getStats() {
     };
 }
 
-// Clear all notifications
-export function clearAllNotifications() {
-    const stmt = db.prepare('DELETE FROM notifications');
-    const result = stmt.run();
-    return result.changes;
+export function getTotalCount() {
+    return db.prepare('SELECT COUNT(*) as count FROM notifications').get().count;
 }
 
-// Delete old notifications
+export function clearAllNotifications() {
+    db.prepare('DELETE FROM notifications').run();
+    db.prepare('DELETE FROM notifications_fts').run();
+}
+
 export function deleteOldNotifications(daysToKeep = 30) {
     const cutoffTime = Date.now() - (daysToKeep * 24 * 60 * 60 * 1000);
     const stmt = db.prepare('DELETE FROM notifications WHERE timestamp < ?');
-    const result = stmt.run(cutoffTime);
-    return result.changes;
+    return stmt.run(cutoffTime).changes;
 }
 
-// Initialize database
 export function initDatabase() {
-    console.log('🔄 Checking database schema...');
-
-    try {
-        const columns = db.prepare('PRAGMA table_info(notifications)').all();
-        const columnNames = columns.map(c => c.name);
-
-        // Define expected columns and their types
-        const expectedColumns = {
-            'group_name': 'TEXT DEFAULT "Unknown"',
-            'sender': 'TEXT DEFAULT "Unknown"',
-            'chat_id': 'TEXT DEFAULT "manual"',
-            'is_keyword_match': 'INTEGER DEFAULT 0',
-            'created_at': 'TEXT DEFAULT CURRENT_TIMESTAMP'
-        };
-
-        for (const [col, type] of Object.entries(expectedColumns)) {
-            if (!columnNames.includes(col)) {
-                console.log(`⚠️ Column '${col}' missing. Adding it...`);
-                try {
-                    db.exec(`ALTER TABLE notifications ADD COLUMN ${col} ${type}`);
-                    console.log(`✅ Added column '${col}'`);
-                } catch (e) {
-                    console.error(`❌ Failed to add column '${col}':`, e.message);
-                }
-            }
-        }
-
-        console.log('💾 Database ready');
-    } catch (error) {
-        console.error('❌ Database initialization failed:', error);
-    }
+    console.log('✅ DB v2 is pre-initialized via migration.');
 }
 
 export default db;
