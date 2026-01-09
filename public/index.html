@@ -2939,31 +2939,17 @@
         }
 
         // Load more messages
+        // Load more messages
         function loadMoreMessages() {
             const container = document.getElementById('allMessagesList');
             const loadMoreBtn = container.querySelector('.load-more-btn');
 
-            const start = displayedCount;
-            const end = Math.min(start + LOAD_MORE_COUNT, allStoredMessages.length);
+            // Show loading state
+            if (loadMoreBtn) loadMoreBtn.textContent = 'Loading...';
 
-            // Remove load more button
-            if (loadMoreBtn) loadMoreBtn.remove();
-
-            // Add more messages
-            for (let i = start; i < end; i++) {
-                container.insertAdjacentHTML('beforeend', createMessageHTML(allStoredMessages[i]));
-            }
-            displayedCount = end;
-
-            // Add load more button if more messages exist
-            if (displayedCount < allStoredMessages.length) {
-                const remaining = allStoredMessages.length - displayedCount;
-                container.insertAdjacentHTML('beforeend', `
-                    <div class="load-more-btn">
-                        Load More (${remaining} remaining)
-                    </div>
-                `);
-            }
+            // Increase offset and fetch
+            currentBackendOffset += INITIAL_FETCH_LIMIT;
+            loadHistoricalMessages(true);
         }
 
         // Add message to VisaD Notify (filtered) - only called for new incoming messages
@@ -3959,87 +3945,131 @@
         // DATABASE INTEGRATION
         // ============================================
 
-        // Load historical messages from database on page load
-        async function loadHistoricalMessages() {
-            try {
-                console.log('📥 Loading historical messages from database...');
+        // Global pagination state
+        let currentBackendOffset = 0;
+        const INITIAL_FETCH_LIMIT = 500;
 
-                const response = await fetch(`${apiBasePath}/api/notifications`);
+        // Load historical messages from database
+        async function loadHistoricalMessages(isLoadMore = false) {
+            try {
+                console.log(`📥 Loading messages (Offset: ${currentBackendOffset})...`);
+
+                const response = await fetch(`${apiBasePath}/api/notifications?limit=${INITIAL_FETCH_LIMIT}&offset=${currentBackendOffset}`);
                 const data = await response.json();
 
-                // Get all messages
+                // Get messages and total count
                 const messages = data.notifications || [];
+                const totalAvailable = data.total || 0;
 
-                // Deduplicate messages based on timestamp + content
-                const seenMessages = new Map();
-                const uniqueMessages = [];
+                // Deduplicate against existing if loading more, or just fresh batch
+                // For simplicity, we just process the new batch.
+                // In a perfect world we map deduplication, but DB should handle offset correctly.
+
+                // If initial load, reset storage
+                if (!isLoadMore) {
+                    allStoredMessages = [];
+                    messagesByCountry = {};
+                    todayCount = 0;
+                    todaySummaryData = {};
+                    document.getElementById('allMessagesList').innerHTML = ''; // Clear container
+                }
+
+                // Process new messages
+                const uniqueNewMessages = [];
+                const seenKeys = new Set(allStoredMessages.map(m => `${m.timestamp}-${(m.message || '').substring(0, 20)}`));
 
                 messages.forEach(msg => {
                     const msgText = msg.message || msg.content || msg.text || '';
-                    const msgKey = `${msg.timestamp || ''}-${msgText.substring(0, 100)}`;
+                    const key = `${msg.timestamp}-${msgText.substring(0, 20)}`;
 
-                    if (!seenMessages.has(msgKey)) {
-                        seenMessages.set(msgKey, true);
-                        uniqueMessages.push(msg);
+                    if (!seenKeys.has(key)) {
+                        uniqueNewMessages.push(msg);
+                        allStoredMessages.push(msg);
                     }
                 });
 
-                console.log(`📊 Deduplication: ${messages.length} total → ${uniqueMessages.length} unique messages`);
+                // Update counts
+                allMessagesCount = totalAvailable; // Use server total
 
-                // Store all messages
-                allStoredMessages = uniqueMessages;
-                allMessagesCount = uniqueMessages.length;
-
-                // Reset today's tracking
-                todaySummaryData = {};
-                todayCount = 0;
-
-                // Process today's summary for all messages
-                uniqueMessages.forEach(msg => {
+                // Process for statistics (Today Summary)
+                uniqueNewMessages.forEach(msg => {
                     const timestamp = msg.timestamp || Date.now();
                     if (isToday(timestamp)) {
-                        todayCount++;
+                        if (!isLoadMore) todayCount++; // Only increment global day count on initial load logic? 
+                        // Actually, todayCount is fetched via getStats() separately usually. 
+                        // But here it does manual counting. 
+                        // Let's rely on getStats() for the number, but populate summary from loaded messages.
                         addToTodaySummary(msg);
                     }
+                    // Add to country view
+                    addToCountryMessages(msg);
                 });
-                document.getElementById('todayCount').textContent = todayCount;
+
                 updateTodaySummaryDisplay();
 
-                // Render All Messages view (initial batch)
+                // Render Messages
                 const allContainer = document.getElementById('allMessagesList');
-                if (uniqueMessages.length > 0) {
-                    const initialBatch = uniqueMessages.slice(0, INITIAL_LOAD);
-                    allContainer.innerHTML = initialBatch.map(msg => createMessageHTML(msg)).join('');
-                    displayedCount = initialBatch.length;
+                const fragment = document.createDocumentFragment();
 
-                    document.getElementById('allMessagesBadge').textContent = allMessagesCount;
-                    document.getElementById('totalMessagesInfo').textContent = allMessagesCount;
+                uniqueNewMessages.forEach(msg => {
+                    const div = document.createElement('div');
+                    div.innerHTML = createMessageHTML(msg);
+                    fragment.appendChild(div.firstElementChild);
+                });
 
-                    // Add load more if needed
-                    if (displayedCount < allStoredMessages.length) {
-                        const remaining = allStoredMessages.length - displayedCount;
-                        allContainer.insertAdjacentHTML('beforeend', `
-                            <div class="load-more-btn">
-                                Load More (${remaining} remaining)
-                            </div>
-                        `);
-                    }
+                allContainer.appendChild(fragment);
 
-                    // Also add to country messages
-                    uniqueMessages.forEach(msg => addToCountryMessages(msg));
+                // Update badges
+                document.getElementById('allMessagesBadge').textContent = allMessagesCount;
+                document.getElementById('totalMessagesInfo').textContent = allMessagesCount;
+
+                // Handle "Load More" Button
+                // Remove existing button first
+                const existingBtn = allContainer.querySelector('.load-more-btn');
+                if (existingBtn) existingBtn.remove();
+
+                // Check if we need a load more button
+                // If we fetched a full batch, assume there might be more, OR check total
+                if (allStoredMessages.length < totalAvailable) {
+                    const remaining = totalAvailable - allStoredMessages.length;
+                    allContainer.insertAdjacentHTML('beforeend', `
+                        <div class="load-more-btn">
+                            Load More (${remaining} remaining)
+                        </div>
+                    `);
                 }
 
-                // Apply filter to show matching in VisaD Notify
-                refilterMessages();
+                // Apply filter to show matching in VisaD Notify (if any filters active)
+                if (!isLoadMore) refilterMessages();
+                else {
+                    // If loading more, we might need to update filtered view if it depends on allStored
+                    // refilterMessages() re-runs filter on allStoredMessages.
+                    // Ideally we call refilterMessages() but optimized?
+                    // For now, let's just run it to be safe.
+                    refilterMessages();
+                }
 
-                console.log(`✅ Loaded ${messages.length} messages from database`);
+                console.log(`✅ Loaded ${messages.length} messages (Total stored: ${allStoredMessages.length}/${totalAvailable})`);
 
-                // Refresh stats to ensure badges are accurate
-                fetchAndDisplayStats();
+                // Refresh stats
+                if (!isLoadMore) fetchAndDisplayStats();
 
             } catch (error) {
-                console.error('❌ Failed to load historical messages:', error);
+                console.error('❌ Failed to load messages:', error);
             }
+        }
+
+        // Apply filter to show matching in VisaD Notify
+        refilterMessages();
+
+        console.log(`✅ Loaded ${messages.length} messages from database`);
+
+        // Refresh stats to ensure badges are accurate
+        fetchAndDisplayStats();
+
+            } catch (error) {
+            console.error('❌ Failed to load historical messages:', error);
+        }
         }
 
         // Save message to database

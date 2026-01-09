@@ -83,11 +83,11 @@ export function saveNotification(data) {
     }
 }
 
-// Optimized Get Notifications (No Join for List View)
-// Use JOINs only when necessary, or use Views. 
-// For now, we replicate the old output format using JOINs.
-export function getNotifications(limit = 100, offset = 0) {
-    const stmt = db.prepare(`
+
+
+// Optimized Get Notifications with Filtering support
+export function getNotifications(limit = 100, offset = 0, filters = {}) {
+    let query = `
         SELECT 
             n.id,
             k.word as keyword,
@@ -107,11 +107,38 @@ export function getNotifications(limit = 100, offset = 0) {
         LEFT JOIN senders s ON n.sender_id = s.id
         LEFT JOIN countries c ON n.country_id = c.id
         LEFT JOIN centers cn ON n.center_id = cn.id
-        ORDER BY n.timestamp DESC
-        LIMIT ? OFFSET ?
-    `);
+        WHERE 1=1
+    `;
 
-    return stmt.all(limit, offset);
+    const params = [];
+
+    // Add filters dynamically
+    if (filters.country) {
+        query += ` AND c.name LIKE ?`;
+        params.push(`%${filters.country}%`);
+    }
+
+    if (filters.center) {
+        query += ` AND cn.name LIKE ?`;
+        params.push(`%${filters.center}%`);
+    }
+
+    if (filters.keyword) {
+        query += ` AND k.word LIKE ?`;
+        params.push(`%${filters.keyword}%`);
+    }
+
+    // Is Prime filter (if explicitly requested)
+    if (filters.isPrime !== undefined && filters.isPrime !== null) {
+        query += ` AND n.is_prime = ?`;
+        params.push(filters.isPrime ? 1 : 0);
+    }
+
+    query += ` ORDER BY n.timestamp DESC LIMIT ? OFFSET ?`;
+    params.push(limit, offset);
+
+    const stmt = db.prepare(query);
+    return stmt.all(...params);
 }
 
 // Get notifications since timestamp

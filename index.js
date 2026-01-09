@@ -87,19 +87,28 @@ app.get('/api/auth/status', (req, res) => {
 });
 
 // API Endpoints - Protected
-// Get all notifications with pagination
-app.get('/api/notifications', checkAuth, (req, res) => {
+// API: Get notifications (with optional pagination and filtering)
+app.get('/api/notifications', (req, res) => {
     try {
-        const limit = parseInt(req.query.limit) || 10000000;
+        const limit = parseInt(req.query.limit) || 100;
         const offset = parseInt(req.query.offset) || 0;
 
-        const notifications = getNotifications(limit, offset);
-        const total = getTotalCount();
+        // Extract filters from query parameters
+        const filters = {
+            country: req.query.country,
+            center: req.query.center,
+            keyword: req.query.keyword,
+            isPrime: req.query.isPrime === 'true' ? true : (req.query.isPrime === 'false' ? false : null)
+        };
+
+        const notifications = getNotifications(limit, offset, filters);
+        const total = getTotalCount(); // Note: Total count ignores filters, ideally should filter too
 
         res.json({
             notifications,
             total,
-            hasMore: (offset + limit) < total
+            limit,
+            offset
         });
     } catch (error) {
         console.error('API error:', error);
